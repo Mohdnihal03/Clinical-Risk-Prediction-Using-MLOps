@@ -49,8 +49,6 @@ P047,76,Male,CKD,116,95,55,39.9,30,14.8,3.7,"Hypotensive and confused, possible 
 P048,42,Female,None,87,131,79,37.3,18,8.3,0.9,"No signs of infection, discharged.",0
 P049,61,Male,Diabetes,107,149,91,38.6,25,13.0,2.1,"High blood sugar, adjusted insulin regimen.",1
 P050,32,Female,None,78,120,72,36.8,16,7.5,0.8,"Healthy, routine check-up.",0
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P051,62,Male,Hypertension,112,155,88,38.2,24,12.5,1.8,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P052,35,Female,None,95,120,70,36.9,16,8.2,0.9,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P053,78,Male,Diabetes,128,95,55,39.5,28,14.1,3.2,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -101,7 +99,6 @@ P097,28,Male,None,79,112,70,36.9,15,7.2,0.8,"Patient with minor cold symptoms, a
 P098,62,Female,None,93,125,80,37.2,17,8.5,1.0,"Healthy individual, no current medical conditions.",0
 P099,44,Male,Diabetes,118,170,100,39.7,29,14.9,3.5,"Patient with diabetes, experiencing confusion and rapid breathing. Suspected sepsis.",1
 P100,74,Female,COPD,125,90,52,39.6,30,13.8,2.6,"Patient with COPD, experiencing severe respiratory distress and low blood pressure. Suspected sepsis.",1
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P101,65,Male,Hypertension,120,150,85,37.5,20,7.5,1.2,"Patient presented with mild fever and hypertension. Monitoring for infection.",0
 P102,32,Female,None,80,120,70,36.8,16,5.8,0.8,"Stable vitals, no signs of infection.",0
 P103,78,Male,Diabetes,130,95,60,39.2,28,13.2,3.1,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
@@ -134,8 +131,7 @@ P129,57,Male,CKD,118,135,80,37.8,22,8.6,1.5,"Mild fever and elevated heart rate.
 P130,31,Female,None,80,125,75,36.8,16,5.7,0.8,"Stable vitals, no signs of infection.",0
 P131,74,Male,Diabetes,125,100,65,39.6,28,14.1,3.2,"Hypotension, high fever, and elevated lactate. Suspected sepsis.",1
 P132,50,Female,None,95,130,80,37.0,18,6.3,0.9,"No fever, normal vitals, discharged.",0
-P133,2
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
+P133,22,Male,None,72,118,72,37.0,15,6.5,0.6,"No signs of infection, vital signs stable.",0
 P151,62,Male,Hypertension,112,155,88,38.2,24,12.5,1.8,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P152,45,Female,None,78,120,70,36.8,16,7.8,1.1,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P153,78,Male,Diabetes,128,92,55,39.5,28,14.2,3.5,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -186,7 +182,6 @@ P197,65,Male,COPD,124,95,60,39.3,27,13.6,3.3,"Suspected sepsis, started on broad
 P198,51,Female,None,94,127,78,37.8,21,10.2,1.6,"Fever and tachycardia, monitoring for sepsis.",1
 P199,73,Male,Hypertension,101,152,87,37.5,19,8.8,1.0,"Hypertension managed, no signs of infection.",0
 P200,29,Female,None,70,110,65,36.7,14,6.3,0.6,"Healthy patient, discharged with follow-up instructions.",0
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P201,65,Male,Hypertension,120,160,90,37.5,18,8.5,1.2,"Patient presented with elevated blood pressure, no signs of infection.",0
 P202,32,Female,None,95,120,75,36.8,16,7.2,0.8,"Stable vitals, no signs of infection. Routine check-up.",0
 P203,78,Male,Diabetes,110,170,95,38.2,22,12.1,2.5,"High fever, elevated WBC count, and tachycardia. Suspected sepsis.",1
@@ -237,8 +232,6 @@ P247,49,Male,Hypertension,95,145,80,37.6,19,8.8,1.4,"Mild fever, started on anti
 P248,71,Female,COPD,110,105,60,39.2,28,11.3,1.9,"Fever, difficulty breathing, and elevated heart rate. Possible sepsis.",1
 P249,39,Male,CKD,85,130,80,37.1,17,6.7,0.8,"Stable, no signs of infection. Monitoring kidney function.",0
 P250,64,Female,Diabetes,100,150,90,37.8,20,11.9,2.1,"High fever and chills. Blood cultures taken.",1
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P251,62,Male,Hypertension,112,155,85,38.2,24,12.5,1.8,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P252,35,Female,None,90,120,70,36.8,16,7.8,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P253,78,Male,Diabetes,130,95,55,39.5,28,14.2,3.5,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -289,7 +282,6 @@ P297,27,Male,None,75,112,68,36.7,15,6.3,0.6,"Healthy individual, routine blood w
 P298,76,Female,COPD,128,175,100,39.7,30,13.6,3.1,"Severe respiratory distress, suspect septic shock.",1
 P299,42,Male,None,90,130,80,37.3,19,7.7,0.9,"Minor surgical procedure, recovering well.",0
 P300,61,Female,Hypertension,110,152,85,38.0,22,10.0,1.4,"Elevated blood pressure and temperature, monitoring for infection.",0
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P301,65,Male,Hypertension,110,150,85,37.2,18,7.5,1.2,"Patient presented with mild fever and elevated BP. Monitoring for changes.",0
 P302,32,Female,None,95,120,70,36.8,16,6.2,0.8,"Stable vitals, no signs of infection.",0
 P303,78,Male,Diabetes,125,95,60,39.5,24,13.8,3.5,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
@@ -340,8 +332,6 @@ P347,63,Male,CKD,77,130,85,37.1,16,5.8,0.8,"Stable, no signs of infection.",0
 P348,22,Female,None,85,110,65,36.9,15,6.5,0.7,"No fever, normal vitals.",0
 P349,75,Male,Hypertension,114,150,90,37.6,18,8.6,1.4,"Mild fever and elevated BP, monitoring for infection.",0
 P350,51,Female,Diabetes,106,85,55,38.8,26,10.5,2.4,"Fever, hypotension, and elevated lactate. Suspected sepsis.",1
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P351,62,Male,Hypertension,102,155,88,37.5,20,8.2,1.2,"Patient presented with elevated blood pressure, no signs of infection.",0
 P352,35,Female,None,78,120,70,36.8,16,6.5,0.8,"Normal vitals, discharged with follow-up instructions.",0
 P353,78,Male,Diabetes,115,95,55,39.2,28,13.5,3.1,"Severe hypotension and high fever. Suspected sepsis. Starting IV fluids and antibiotics.",1
@@ -392,9 +382,6 @@ P397,53,Male,None,98,145,88,37.4,21,8.6,1.3,"Mild headache, prescribed pain medi
 P398,36,Female,Diabetes,80,135,85,36.9,17,6.9,0.9,"Stable diabetes, routine check-up.",0
 P399,61,Male,Hypertension,105,165,98,37.6,22,9.4,1.4,"Elevated blood pressure, medication adjusted.",0
 P400,45,Female,None,89,128,75,36.8,18,7.3,1.1,"Normal vitals, no complaints.",0
-
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P401,62,Male,Hypertension,102,155,88,37.5,18,10.2,1.2,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P402,45,Female,None,78,120,72,36.8,14,7.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P403,78,Male,Diabetes,115,95,55,39.2,24,13.5,3.1,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -445,9 +432,6 @@ P447,61,Male,CKD,90,158,92,37.9,17,8.6,1.0,"Monitoring for infection, elevated W
 P448,50,Female,Hypertension,78,132,85,36.9,13,7.4,0.8,"Patient discharged, follow-up appointment scheduled. Vitals stable.",0
 P449,72,Male,Diabetes,115,100,62,39.4,23,14.1,3.0,"Hypotension, tachycardia, and fever. Sepsis suspected.",1
 P450,30,Female,None,80,110,70,36.5,12,6.3,0.6,"Healthy patient, discharged with instructions. No concerns.",0
-
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P451,62,Male,Hypertension,112,155,88,38.2,24,12.5,1.8,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P452,35,Female,None,95,120,70,36.8,16,7.2,0.9,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P453,78,Male,Diabetes,128,95,55,39.5,28,14.1,3.2,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -498,7 +482,6 @@ P497,67,Male,Diabetes,105,152,92,38.1,21,10.5,1.4,"Elevated heart rate and fever
 P498,46,Female,None,88,125,75,37.2,17,7.5,0.9,"Post-surgical patient, stable vitals, no signs of infection.",0
 P499,73,Male,CKD,98,145,90,37.3,18,8.1,1.0,"Stable kidney function, no signs of infection.",0
 P500,59,Female,Hypertension,112,170,100,38.5,24,12.2,2.2,"High fever, confusion, and low blood pressure. Sepsis suspected.",1
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P501,62,Male,Hypertension,102,155,88,37.5,18,7.8,1.2,"Patient presented with elevated blood pressure and mild tachycardia. Monitoring for changes.",0
 P502,35,Female,None,78,120,72,36.8,14,5.5,0.8,"Stable vitals, no signs of infection.",0
 P503,78,Male,Diabetes,115,95,55,39.2,24,12.1,3.8,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
@@ -549,8 +532,6 @@ P547,26,Male,None,65,110,70,36.5,15,5.7,0.7,"Healthy patient, no signs of infect
 P548,76,Female,Diabetes,125,90,50,40.5,30,14.0,4.5,"Severe hypotension, high fever, extremely elevated lactate. Sepsis suspected.",1
 P549,54,Male,COPD,98,135,85,38.3,20,9.1,1.6,"Fever and elevated respiratory rate. Possible infection. Starting antibiotics.",1
 P550,47,Female,None,75,125,75,36.8,16,6.6,0.8,"No fever, normal vitals.",0
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P551,62,Male,Hypertension,115,155,85,37.8,20,10.2,1.2,"Patient presented with elevated blood pressure and mild tachycardia. Monitoring for changes.",0
 P552,35,Female,None,95,120,70,36.5,16,7.5,0.8,"Normal vitals, no signs of infection.",0
 P553,78,Male,Diabetes,128,95,55,39.2,28,13.5,3.1,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
@@ -601,8 +582,6 @@ P597,69,Male,Hypertension,110,155,92,37.6,20,9.9,1.4,"Monitoring blood pressure,
 P598,54,Female,COPD,103,125,78,37.8,21,11.5,1.8,"COPD exacerbation, mild fever. Observe for infection.",0
 P599,45,Male,None,98,140,85,37.2,17,8.1,0.9,"Stable vitals, no signs of infection.",0
 P600,60,Female,CKD,121,160,90,38.5,24,12.7,2.6,"Elevated temperature and heart rate, possible infection.  Further workup needed.",1
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P601,65,Male,Hypertension,120,150,80,37.5,18,10.2,1.2,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P602,32,Female,None,85,110,70,36.8,14,6.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P603,78,Male,COPD,135,95,55,39.2,28,13.5,3.8,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -653,7 +632,6 @@ P647,75,Male,Hypertension,115,155,85,38.2,18,9.7,1.6,"Elevated blood pressure, s
 P648,52,Female,COPD,125,140,80,39.1,24,12.6,2.8,"Increased respiratory effort and elevated heart rate, possible infection.",1
 P649,66,Male,Diabetes,105,105,65,37.9,17,8.5,1.2,"Stable diabetic patient, monitoring blood glucose levels.",0
 P650,43,Female,None,95,110,65,37.3,16,7.0,0.8,"Normal vitals, no signs of infection.",0
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P651,62,Male,Hypertension,112,155,88,37.8,22,12.2,1.2,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P652,45,Female,None,78,120,72,36.5,16,7.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P653,78,Male,Diabetes,128,85,48,39.2,28,14.5,3.8,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -704,8 +682,6 @@ P697,29,Male,None,92,115,72,36.9,16,7.8,0.6,"Healthy, no current complaints.",0
 P698,74,Female,Diabetes,131,90,52,39.5,27,14.4,3.3,"Hypotension and tachycardia, suggestive of sepsis.",1
 P699,47,Male,COPD,88,135,82,37.3,19,9.1,1.1,"COPD stable, continuing current treatment.",0
 P700,60,Female,None,102,125,78,37.6,20,9.9,1.0,"Mild fever, awaiting lab results.",0
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P701,62,Male,Hypertension,102,155,88,37.8,18,10.2,1.2,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P702,35,Female,None,78,120,72,36.5,14,7.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P703,78,Male,COPD,115,95,55,39.2,28,13.8,3.5,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -756,8 +732,6 @@ P747,42,Male,None,79,125,80,37.1,16,7.3,0.8,"Normal post-operative recovery.",0
 P748,66,Female,Diabetes,105,160,92,38.6,22,12.5,2.1,"Fever and elevated WBC count.  Starting antibiotics.",1
 P749,38,Male,None,76,118,72,36.8,14,6.9,0.7,"Discharged with instructions.",0
 P750,71,Female,COPD,118,100,60,39.3,28,15.0,3.8,"Respiratory distress and hypotension.  Sepsis suspected.",1
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P751,62,Male,Hypertension,102,155,88,37.5,18,7.8,1.2,"Patient presented with elevated blood pressure and mild fever. Monitoring for infection.",0
 P752,35,Female,None,95,120,70,36.8,16,5.5,0.8,"Stable vitals, no signs of infection. Routine check-up.",0
 P753,78,Male,Diabetes,115,95,55,39.2,28,13.5,3.1,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
@@ -808,7 +782,6 @@ P797,42,Female,CKD,93,131,80,37.4,17,6.8,1.0,"Post-surgical, stable vitals. Moni
 P798,66,Male,None,113,154,88,37.6,18,8.1,1.3,"Elevated blood pressure and low-grade fever. Observe for changes.",0
 P799,34,Female,None,85,121,75,36.9,15,5.7,0.8,"Healthy patient, routine check-up. No current complaints.",0
 P800,53,Male,Hypertension,101,138,82,37.3,17,7.3,1.1,"Mild headache, no fever. Advised rest and hydration.",0
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P801,62,Male,Hypertension,102,155,88,37.2,18,7.8,1.2,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P802,35,Female,None,78,120,75,36.8,14,5.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P803,78,Male,Diabetes,115,95,55,39.5,28,13.2,3.8,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -859,7 +832,6 @@ P847,77,Male,COPD,110,125,75,38.5,23,10.8,2.3,"COPD patient with increased respi
 P848,56,Female,CKD,90,140,88,37.2,17,6.5,1.0,"Patient with stable CKD, routine follow-up.",0
 P849,23,Male,None,70,115,72,36.6,13,4.8,0.7,"Healthy individual, no medical complaints.",0
 P850,67,Female,Diabetes,108,158,92,38.6,20,11.5,2.6,"Patient with high fever, tachycardia, and altered mental status. Suspected sepsis.",1
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P851,62,Male,Hypertension,112,155,88,38.2,24,12.5,1.8,"Patient presented with fever and tachycardia. Possible infection noted.",1
 P852,35,Female,None,95,120,75,36.9,16,7.8,1.1,"Stable vitals, no signs of infection. Monitoring for any changes.",0
 P853,78,Female,Diabetes,128,95,55,39.5,28,14.2,3.5,"Severe hypotension and high lactate levels. Suspected sepsis.",1
@@ -897,8 +869,7 @@ P884,77,Female,CKD,102,145,90,37.8,19,8.3,1.3,"Monitoring kidney function, stabl
 P885,56,Male,Diabetes,115,160,98,38.6,23,11.9,2.2,"High fever, chills, and rapid heart rate. Suspected sepsis.",1
 P886,34,Female,None,75,118,72,36.4,15,5.8,0.6,"Healthy, no current medical issues.",0
 P887,63,Male,Hypertension,108,152,92,38.3,21,10.4,1.7,"Slightly elevated blood pressure, monitoring closely.",0
-P888,27,Female,None,80,105,65,36.5,1
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
+P888,27,Female,None,75,118,72,36.4,15,5.8,0.6,"Healthy, no current medical issues.",0
 P901,65,Male,Hypertension,120,160,90,37.2,18,8.5,1.2,"Patient presented with fever and mild cough. Monitoring for infection.",0
 P902,78,Female,Diabetes,105,150,80,38.5,22,12.1,1.8,"Fever, elevated WBC count, and confusion. Suspected sepsis.",1
 P903,32,Male,None,90,120,70,36.8,16,7.0,0.8,"Stable vitals, no signs of infection.",0
@@ -949,8 +920,6 @@ P947,67,Male,Diabetes,132,160,85,39.5,28,14.1,3.3,"Diabetes patient with fever, 
 P948,45,Female,CKD,102,125,75,38.1,22,11.7,2.0,"CKD patient with fever and elevated WBC and lactate. Sepsis suspected.",1
 P949,24,Male,None,75,110,70,36.5,15,6.5,0.7,"Healthy individual, no concerns.",0
 P950,70,Female,None,90,140,80,37.0,18,8.0,1.0,"Post-surgical patient with stable vitals.",0
-
-Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
 P951,62,Male,Hypertension,102,155,88,37.2,18,7.5,1.2,"Patient presented with elevated heart rate and mild fever. Monitoring for changes.",0
 P952,35,Female,None,95,120,78,36.8,16,6.2,0.8,"Stable vitals, no apparent infection. Discharge planned.",0
 P953,78,Male,Diabetes,115,95,55,39.5,24,12.8,3.1,"Hypotension, high fever, and elevated lactate. Suspected sepsis.",1
