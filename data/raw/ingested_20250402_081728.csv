@@ -1,0 +1,972 @@
+Patient_ID,Age,Gender,Comorbidities,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Clinical_Notes,Sepsis_Label
+P001,62,Male,Hypertension,105,155,85,38.2,22,12.5,1.2,Patient presented with fever and tachycardia. Possible infection noted.,1
+P002,35,Female,,80,120,70,36.5,16,7.8,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P003,78,Female,Diabetes,115,95,55,39.5,28,14.2,3.1,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P004,48,Male,COPD,92,138,82,37.8,20,9.5,1.0,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P005,55,Male,,75,115,75,37.0,14,6.5,0.7,Post-surgical patient with stable vitals. No signs of infection.,0
+P006,28,Female,,98,130,80,38.5,24,11.0,1.5,"Mild fever and cough, rule out pneumonia.",0
+P007,42,Male,CKD,88,140,90,36.8,18,8.2,0.9,"No fever, normal vitals, discharged with follow-up.",0
+P008,69,Female,COPD,120,100,60,39.0,26,13.8,2.8,"Patient with COPD exacerbation, increased respiratory effort.",1
+P009,50,Male,Hypertension,102,160,90,38.0,20,10.1,1.1,"Unstable BP, high fever, urgent blood culture ordered.",1
+P010,31,Female,,72,110,65,36.7,15,7.0,0.6,"Minor wound infection, prescribed antibiotics.",0
+P011,75,Male,Diabetes,118,92,52,39.8,30,14.9,3.8,"Hypotensive, tachycardic, and febrile.  Sepsis suspected.",1
+P012,25,Female,,85,125,75,36.9,17,7.5,0.9,"Normal vitals, no signs of infection.",0
+P013,59,Male,Hypertension,95,145,88,37.5,19,8.9,0.8,"Post-op day 1, stable.  Monitoring for infection.",0
+P014,40,Female,,108,135,85,38.7,23,12.1,1.7,"Fever and elevated WBC, started on antibiotics.",1
+P015,67,Male,CKD,110,105,65,39.2,25,13.5,2.5,"Decreased urine output, elevated creatinine.  Possible sepsis.",1
+P016,33,Female,,78,118,72,37.1,16,7.2,0.7,"Healthy, discharged home.",0
+P017,80,Male,COPD,125,108,68,39.6,29,14.7,3.5,"Respiratory distress, altered mental status. Septic shock suspected.",1
+P018,45,Female,,90,132,78,37.3,18,8.5,1.0,"Mild abdominal pain, no signs of infection.",0
+P019,52,Male,Diabetes,100,150,92,37.9,21,11.8,1.3,"Elevated blood sugar, started on insulin.",0
+P020,29,Female,,82,121,70,36.6,15,7.1,0.8,Normal post-partum recovery.,0
+P021,71,Male,Hypertension,112,98,58,39.4,27,14.0,3.0,"Hypotensive, needs fluid resuscitation. Possible urosepsis.",1
+P022,37,Female,,87,128,77,37.2,17,8.0,0.9,"Viral URI, symptomatic treatment.",0
+P023,63,Male,CKD,98,142,85,38.1,22,10.5,1.4,"Elevated creatinine, monitoring closely for infection.",0
+P024,49,Female,,105,139,80,38.9,25,12.8,2.0,"Fever, chills, and rigors. Blood cultures pending.",1
+P025,56,Male,COPD,117,110,70,39.1,26,13.2,2.3,"COPD exacerbation, treated with antibiotics.",1
+P026,27,Female,,76,115,68,36.8,16,7.4,0.7,"Healthy, no concerns.",0
+P027,79,Male,Diabetes,122,102,62,39.7,28,14.5,3.2,"Confused, febrile, and hypotensive.  Sepsis likely.",1
+P028,43,Female,,92,135,82,37.6,19,8.8,1.1,"Post-fall, no signs of infection.",0
+P029,58,Male,Hypertension,101,152,95,38.0,21,11.9,1.2,"Elevated BP, started on antihypertensive medication.",0
+P030,30,Female,,79,120,75,37.0,15,7.7,0.8,Normal pregnancy check-up.,0
+P031,65,Male,CKD,108,148,90,38.3,23,12.2,1.6,"Fatigue and malaise, possible infection.",0
+P032,39,Female,,85,130,78,37.4,18,8.1,0.9,"Healthy, no complaints.",0
+P033,72,Male,Diabetes,115,105,65,39.3,27,13.9,2.9,"Diabetic ketoacidosis, treated with insulin.",1
+P034,46,Female,,95,140,85,37.7,20,9.2,1.0,"Mild cough, no fever.",0
+P035,51,Male,COPD,102,155,92,38.1,22,11.5,1.5,"COPD exacerbation, admitted for observation.",0
+P036,34,Female,,80,125,72,36.9,17,7.6,0.7,"Healthy, discharged.",0
+P037,77,Male,Hypertension,119,98,60,39.6,29,14.3,3.4,"Altered mental status, hypotensive.  Septic shock.",1
+P038,41,Female,,88,132,80,37.5,19,8.4,0.8,"Minor laceration, repaired and discharged.",0
+P039,60,Male,CKD,99,145,88,37.9,21,10.8,1.3,"Elevated creatinine, monitoring for infection.",0
+P040,28,Female,,77,118,70,36.7,16,7.3,0.6,"Healthy, no current medical issues.",0
+P041,68,Male,Diabetes,111,101,61,39.1,26,13.6,2.7,"Febrile, tachycardic, and hypotensive.  Sepsis suspected.",1
+P042,36,Female,,82,128,75,37.2,17,7.9,0.9,"Normal vitals, no concerns.",0
+P043,74,Male,COPD,124,107,67,39.5,28,14.1,3.1,"Respiratory distress, altered mental status.  Sepsis likely.",1
+P044,50,Female,,90,135,85,37.8,20,9.5,1.0,"Post-operative, recovering well.",0
+P045,53,Male,Hypertension,104,158,98,38.4,24,12.7,1.8,"High blood pressure, started on medication.",0
+P046,25,Female,,75,112,70,36.5,15,6.8,0.7,"Healthy, no medical problems.",0
+P047,76,Male,CKD,116,95,55,39.9,30,14.8,3.7,"Hypotensive and confused, possible UTI. Sepsis suspected.",1
+P048,42,Female,,87,131,79,37.3,18,8.3,0.9,"No signs of infection, discharged.",0
+P049,61,Male,Diabetes,107,149,91,38.6,25,13.0,2.1,"High blood sugar, adjusted insulin regimen.",1
+P050,32,Female,,78,120,72,36.8,16,7.5,0.8,"Healthy, routine check-up.",0
+P051,62,Male,Hypertension,112,155,88,38.2,24,12.5,1.8,Patient presented with fever and tachycardia. Possible infection noted.,1
+P052,35,Female,,95,120,70,36.9,16,8.2,0.9,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P053,78,Male,Diabetes,128,95,55,39.5,28,14.1,3.2,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P054,48,Female,COPD,105,130,80,37.8,20,9.7,1.2,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P055,55,Male,,72,110,75,37.0,14,6.5,0.7,Post-surgical patient with stable vitals. No signs of infection.,0
+P056,28,Female,,88,115,72,37.5,18,7.8,0.8,"Mild fever and cough, rule out pneumonia.",0
+P057,60,Male,CKD,90,140,90,36.5,14,7.0,1.0,"No fever, normal vitals, discharged with follow-up.",0
+P058,70,Female,COPD,115,100,60,38.8,26,13.0,2.5,"Patient with COPD exacerbation, increased respiratory effort.",1
+P059,42,Male,Hypertension,130,85,50,39.9,30,14.8,4.0,"Unstable BP, high fever, urgent blood culture ordered.",1
+P060,31,Female,,85,125,78,36.7,16,5.9,0.6,"Minor wound infection, prescribed antibiotics.",0
+P061,75,Male,Diabetes,102,160,92,37.1,18,8.5,1.1,"Patient with diabetes, monitoring blood glucose and vital signs.",0
+P062,25,Female,,92,118,75,36.8,15,7.2,0.8,"Healthy patient, no concerns.",0
+P063,58,Male,Hypertension,125,170,95,38.5,22,11.8,1.5,"Patient with hypertension, experiencing dizziness and fatigue.",0
+P064,45,Female,,110,135,85,39.0,25,13.2,2.0,"Patient with suspected sepsis, started on IV antibiotics.",1
+P065,68,Male,CKD,98,150,80,37.3,17,9.0,1.3,"Patient with CKD, stable condition.",0
+P066,39,Female,,80,120,70,36.6,14,6.8,0.7,"Normal vital signs, patient discharged.",0
+P067,79,Male,Diabetes,118,105,65,39.2,27,14.5,2.8,"Patient with diabetes and suspected sepsis, receiving aggressive treatment.",1
+P068,52,Female,COPD,108,140,82,37.9,21,10.5,1.4,"Patient with COPD, experiencing shortness of breath and fever.",1
+P069,29,Male,,75,115,70,37.2,15,7.5,0.9,"Healthy individual, routine check-up.",0
+P070,63,Female,Hypertension,95,155,90,36.8,16,8.0,1.0,"Patient with hypertension, stable condition.",0
+P071,80,Male,CKD,100,145,75,37.5,19,9.2,1.2,"Patient with CKD, monitoring kidney function.",0
+P072,37,Female,,88,122,78,37.0,17,7.7,0.8,"Patient presented with mild abdominal pain, no fever.",0
+P073,59,Male,Diabetes,115,165,98,38.7,23,12.0,1.7,"Patient with diabetes, experiencing increased thirst and urination.",0
+P074,46,Female,,105,138,88,39.3,26,13.9,2.2,"Patient with suspected sepsis, admitted to ICU.",1
+P075,71,Male,COPD,120,110,60,38.9,28,14.2,3.0,"Patient with COPD, experiencing severe respiratory distress.",1
+P076,32,Female,,82,117,72,36.9,15,7.1,0.7,"Patient with minor laceration, treated and discharged.",0
+P077,65,Male,Hypertension,97,150,85,37.4,18,8.8,1.1,"Patient with hypertension, stable blood pressure.",0
+P078,40,Female,,90,125,75,37.2,16,7.9,0.9,"Healthy patient, no medical concerns.",0
+P079,73,Male,CKD,108,135,70,37.7,20,9.5,1.3,"Patient with CKD, regular follow-up appointment.",0
+P080,50,Female,Diabetes,112,160,90,38.1,22,11.2,1.6,"Patient with diabetes, experiencing fatigue and weakness.",0
+P081,27,Male,,78,110,65,36.8,14,6.9,0.8,"Patient with sprained ankle, treated and discharged.",0
+P082,61,Female,Hypertension,92,145,80,37.0,15,7.6,0.9,"Patient with hypertension, monitoring blood pressure.",0
+P083,43,Male,,100,130,80,37.6,18,8.3,1.0,"Patient with headache and nausea, no fever.",0
+P084,77,Female,COPD,118,105,60,39.1,29,14.7,2.7,"Patient with COPD, experiencing severe shortness of breath.",1
+P085,36,Male,,85,120,75,37.3,17,7.4,0.8,"Healthy individual, no current medical issues.",0
+P086,57,Female,Diabetes,105,155,85,38.4,21,10.8,1.5,"Patient with diabetes, experiencing frequent urination.",0
+P087,69,Male,CKD,99,140,75,37.5,19,9.1,1.2,"Patient with CKD, monitoring kidney function.",0
+P088,23,Female,,80,115,70,36.7,15,7.0,0.7,"Healthy individual, routine health check.",0
+P089,54,Male,Hypertension,110,160,95,38.6,23,11.5,1.7,"Patient with hypertension, experiencing chest pain.",0
+P090,47,Female,,102,132,82,39.4,27,14.0,2.3,Patient admitted to ICU with suspected sepsis.,1
+P091,72,Male,COPD,122,115,65,38.8,28,14.3,2.9,"Patient with COPD, experiencing difficulty breathing.",1
+P092,33,Female,,87,120,78,37.1,16,7.3,0.8,"Patient with minor burn, treated and discharged.",0
+P093,66,Male,Diabetes,96,150,90,37.6,19,8.9,1.1,"Patient with diabetes, stable blood glucose levels.",0
+P094,41,Female,,95,128,77,37.4,18,8.1,0.9,"Healthy individual, no medical complaints.",0
+P095,80,Male,CKD,107,142,80,37.9,21,9.8,1.4,"Patient with CKD, regular check-up appointment.",0
+P096,51,Female,Hypertension,109,158,92,38.3,20,10.6,1.5,"Patient with hypertension, experiencing headaches.",0
+P097,28,Male,,79,112,70,36.9,15,7.2,0.8,"Patient with minor cold symptoms, advised rest.",0
+P098,62,Female,,93,125,80,37.2,17,8.5,1.0,"Healthy individual, no current medical conditions.",0
+P099,44,Male,Diabetes,118,170,100,39.7,29,14.9,3.5,"Patient with diabetes, experiencing confusion and rapid breathing. Suspected sepsis.",1
+P100,74,Female,COPD,125,90,52,39.6,30,13.8,2.6,"Patient with COPD, experiencing severe respiratory distress and low blood pressure. Suspected sepsis.",1
+P101,65,Male,Hypertension,120,150,85,37.5,20,7.5,1.2,Patient presented with mild fever and hypertension. Monitoring for infection.,0
+P102,32,Female,,80,120,70,36.8,16,5.8,0.8,"Stable vitals, no signs of infection.",0
+P103,78,Male,Diabetes,130,95,60,39.2,28,13.2,3.1,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
+P104,45,Female,COPD,110,110,75,38.0,24,10.5,1.5,"Fever, elevated WBC count, and respiratory distress. Suspected pneumonia.",0
+P105,58,Male,CKD,100,130,80,37.2,18,6.2,0.9,"Post-surgical patient, monitoring kidney function. Stable vitals.",0
+P106,25,Female,,75,115,75,36.5,14,4.5,0.7,"No fever, normal vitals, discharged with follow-up.",0
+P107,70,Male,Hypertension,125,160,90,37.8,22,8.9,1.1,"Mild fever and cough, rule out pneumonia.",0
+P108,49,Female,Diabetes,95,100,65,39.5,26,12.1,2.5,"High fever, tachycardia, and low BP.  Suspected sepsis.",1
+P109,62,Male,,115,140,80,37.0,19,7.0,1.0,"Patient with stable vitals, no signs of infection.",0
+P110,38,Female,,85,125,75,36.9,17,5.5,0.6,"No fever, normal vitals, discharged.",0
+P111,75,Male,COPD,135,105,65,38.7,29,14.5,3.8,"Respiratory distress, high fever, and elevated lactate. Sepsis suspected.",1
+P112,52,Female,Hypertension,105,155,90,37.3,21,8.2,1.3,Patient presented with fever. Possible infection noted.,0
+P113,28,Male,,70,110,65,36.7,15,5.0,0.7,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P114,68,Female,Diabetes,128,90,55,39.8,30,11.8,2.9,"Hypotension, high fever, and elevated lactate. Sepsis suspected.",1
+P115,41,Male,CKD,90,120,70,37.1,17,6.8,0.9,"Monitoring kidney function, stable vitals.",0
+P116,55,Female,,100,135,85,37.6,20,7.7,1.0,"Mild fever and cough, consider antibiotics.",0
+P117,30,Male,,78,118,72,36.6,16,4.8,0.8,"No fever, normal vitals, discharged.",0
+P118,72,Female,Hypertension,122,165,95,37.9,23,9.1,1.4,Patient presented with fever and elevated BP. Monitoring.,0
+P119,47,Male,Diabetes,112,105,70,38.5,25,10.9,1.8,Elevated WBC count and fever.  Possible infection.,0
+P120,59,Female,COPD,98,130,82,37.4,21,6.5,0.9,"Patient with COPD exacerbation, increased respiratory effort.",0
+P121,23,Male,,72,115,68,36.5,14,5.2,0.7,"No fever, normal vitals.",0
+P122,66,Female,CKD,105,140,90,38.2,24,9.5,1.6,Elevated heart rate and temperature.  Monitor for infection.,0
+P123,39,Male,,88,128,78,36.9,18,6.0,0.8,"No fever, normal vitals, will discharge.",0
+P124,79,Female,Hypertension,138,170,98,39.0,27,12.5,2.7,"High fever, elevated heart rate. Suspect infection.",1
+P125,53,Male,Diabetes,102,95,60,38.9,26,11.2,2.3,"Hypotension, fever, and elevated WBC.  Sepsis suspected.",1
+P126,26,Female,,75,120,70,36.7,15,4.9,0.7,"Normal vitals, no fever.",0
+P127,69,Male,COPD,130,110,75,39.3,29,13.8,3.5,"Severe respiratory distress, high fever, and lactate. Sepsis suspected.",1
+P128,44,Female,Hypertension,92,145,85,37.2,19,7.3,1.1,Patient presented with mild fever.  Monitoring for infection.,0
+P129,57,Male,CKD,118,135,80,37.8,22,8.6,1.5,Mild fever and elevated heart rate. Possible infection.,0
+P130,31,Female,,80,125,75,36.8,16,5.7,0.8,"Stable vitals, no signs of infection.",0
+P131,74,Male,Diabetes,125,100,65,39.6,28,14.1,3.2,"Hypotension, high fever, and elevated lactate. Suspected sepsis.",1
+P132,50,Female,,95,130,80,37.0,18,6.3,0.9,"No fever, normal vitals, discharged.",0
+P133,22,Male,,72,118,72,37.0,15,6.5,0.6,"No signs of infection, vital signs stable.",0
+P151,62,Male,Hypertension,112,155,88,38.2,24,12.5,1.8,Patient presented with fever and tachycardia. Possible infection noted.,1
+P152,45,Female,,78,120,70,36.8,16,7.8,1.1,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P153,78,Male,Diabetes,128,92,55,39.5,28,14.2,3.5,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P154,31,Female,,95,115,75,37.9,20,10.1,1.5,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P155,55,Male,COPD,105,138,80,37.2,22,8.5,1.2,Post-surgical patient with stable vitals. No signs of infection.,0
+P156,28,Female,,85,110,65,37.5,18,6.9,0.8,"Mild fever and cough, rule out pneumonia.",0
+P157,60,Male,CKD,90,140,90,36.5,14,7.2,0.9,"No fever, normal vitals, discharged with follow-up.",0
+P158,71,Female,Hypertension,115,160,95,38.0,26,9.5,1.4,"Patient with COPD exacerbation, increased respiratory effort.",0
+P159,48,Male,Diabetes,135,85,50,39.8,30,13.8,4.1,"Unstable BP, high fever, urgent blood culture ordered.",1
+P160,35,Female,,82,125,75,37.1,17,5.5,0.7,"Minor wound infection, prescribed antibiotics.",0
+P161,58,Male,Hypertension,108,150,85,38.5,25,11.9,1.7,"Fever and elevated heart rate, suspecting infection.",1
+P162,75,Female,COPD,95,135,82,36.9,20,8.2,1.0,"Stable COPD patient, monitoring for any changes.",0
+P163,24,Male,,72,118,72,37.0,15,6.5,0.6,"No signs of infection, vital signs stable.",0
+P164,67,Female,Diabetes,125,95,60,39.2,27,13.5,3.2,"Hypotension and tachycardia, concerning for sepsis.",1
+P165,41,Male,CKD,88,145,92,37.3,19,7.9,0.9,"Stable CKD patient, no signs of infection.",0
+P166,52,Female,,102,130,78,38.1,23,11.2,1.6,"Elevated temperature and heart rate, possible infection.",1
+P167,79,Male,Hypertension,118,165,90,37.7,21,9.8,1.3,"Patient admitted with chest pain, ruling out cardiac event.",0
+P168,39,Female,,75,122,73,36.6,16,7.1,0.8,"Normal vitals, patient discharged.",0
+P169,63,Male,Diabetes,130,88,52,39.6,29,15.0,3.8,"Severe sepsis suspected, started on vasopressors.",1
+P170,47,Female,COPD,92,132,81,37.4,18,8.9,1.1,"COPD exacerbation, responding to treatment.",0
+P171,27,Male,,65,105,68,36.9,14,6.2,0.7,"Healthy patient, no concerns.",0
+P172,59,Female,CKD,110,148,87,38.3,24,12.1,1.9,"Fever and chills, suspecting infection. Blood cultures drawn.",1
+P173,72,Male,Hypertension,100,158,92,37.8,20,9.0,1.0,"Hypertensive urgency, stabilized with medication.",0
+P174,33,Female,,80,117,69,37.2,17,7.5,0.9,"Patient recovering well after surgery, no signs of infection.",0
+P175,66,Male,Diabetes,122,90,58,39.1,26,13.2,3.1,"Septic shock suspected, aggressive fluid resuscitation initiated.",1
+P176,50,Female,,98,125,76,38.0,22,10.8,1.5,"Fever and mild hypotension, monitoring closely for sepsis.",1
+P177,80,Male,COPD,107,142,85,37.5,23,8.7,1.2,"COPD patient with stable vital signs, no infection suspected.",0
+P178,42,Female,,77,119,71,36.7,15,6.8,0.7,"Normal vitals, patient discharged with instructions.",0
+P179,56,Male,CKD,115,155,90,38.6,25,12.7,2.0,"Elevated temperature and WBC count, possible infection.",1
+P180,69,Female,Hypertension,97,138,83,37.9,19,9.3,1.4,"Hypertension controlled, no other concerns.",0
+P181,30,Male,,68,112,66,36.8,13,5.9,0.6,"Healthy patient, no signs of infection.",0
+P182,61,Female,Diabetes,127,85,55,39.4,28,14.5,3.6,"Patient in septic shock, intubated and started on vasopressors.",1
+P183,46,Male,,91,128,79,37.6,21,10.5,1.3,"Mild abdominal pain, rule out appendicitis.",0
+P184,74,Female,COPD,103,135,78,37.1,18,8.4,0.9,"Stable COPD, no acute concerns.",0
+P185,37,Male,,73,115,72,37.0,16,7.0,0.8,"No fever, normal vitals, patient discharged.",0
+P186,57,Female,CKD,112,150,86,38.7,24,12.2,2.1,"Fever, tachycardia, and elevated WBC, possible infection.",1
+P187,70,Male,Hypertension,99,145,89,38.1,22,9.9,1.5,"Hypertension managed, no signs of infection.",0
+P188,25,Female,,69,108,63,36.5,12,6.1,0.5,"Healthy individual, no medical concerns.",0
+P189,64,Male,Diabetes,132,80,50,39.7,30,14.8,3.9,"Suspected septic shock, started on antibiotics and vasopressors.",1
+P190,49,Female,,89,121,74,37.3,19,8.6,1.1,"Post-operative patient, stable vital signs.",0
+P191,77,Male,COPD,106,140,82,37.6,23,9.1,1.3,"COPD managed with medications, no current infection.",0
+P192,32,Female,,71,113,67,36.9,15,6.6,0.7,"No signs of infection, vital signs stable.",0
+P193,68,Male,CKD,119,158,92,38.8,26,12.9,2.2,"Fever, elevated WBC count, and tachycardia, suspecting infection.",1
+P194,53,Female,Hypertension,96,132,77,37.7,20,9.7,1.4,"Hypertension controlled, no signs of infection.",0
+P195,80,Male,Diabetes,109,160,95,38.4,25,11.6,1.8,"High blood sugar, started on insulin drip. No signs of infection.",0
+P196,40,Female,,76,120,70,37.1,17,7.3,0.9,"Recovered from minor illness, vital signs stable.",0
+P197,65,Male,COPD,124,95,60,39.3,27,13.6,3.3,"Suspected sepsis, started on broad-spectrum antibiotics.",1
+P198,51,Female,,94,127,78,37.8,21,10.2,1.6,"Fever and tachycardia, monitoring for sepsis.",1
+P199,73,Male,Hypertension,101,152,87,37.5,19,8.8,1.0,"Hypertension managed, no signs of infection.",0
+P200,29,Female,,70,110,65,36.7,14,6.3,0.6,"Healthy patient, discharged with follow-up instructions.",0
+P201,65,Male,Hypertension,120,160,90,37.5,18,8.5,1.2,"Patient presented with elevated blood pressure, no signs of infection.",0
+P202,32,Female,,95,120,75,36.8,16,7.2,0.8,"Stable vitals, no signs of infection. Routine check-up.",0
+P203,78,Male,Diabetes,110,170,95,38.2,22,12.1,2.5,"High fever, elevated WBC count, and tachycardia. Suspected sepsis.",1
+P204,45,Female,COPD,105,110,65,39.1,28,9.8,1.5,"Fever, elevated WBC count, and respiratory distress. Initiating antibiotics.",1
+P205,59,Male,CKD,85,130,80,37.0,14,6.5,0.9,Post-surgical patient with stable vitals. Monitoring kidney function.,0
+P206,25,Female,,75,115,70,36.5,12,5.2,0.7,"No fever, normal vitals, discharged with follow-up instructions.",0
+P207,70,Male,Hypertension,130,180,100,38.8,24,13.5,3.1,"Unstable BP, high fever, and altered mental status. Sepsis suspected.",1
+P208,48,Female,Diabetes,100,150,85,37.9,20,10.2,1.8,Patient presented with fever and elevated heart rate. Possible infection.,0
+P209,62,Male,,90,140,80,36.9,15,7.9,1.0,"Mild fever and cough, rule out pneumonia. Started on antibiotics.",0
+P210,39,Female,COPD,115,105,60,39.5,30,11.5,2.2,"COPD exacerbation, increased respiratory effort, and high fever. Sepsis alert.",1
+P211,55,Male,CKD,80,125,75,37.2,17,6.0,0.6,Stable vital signs. Monitoring for any changes in kidney function.,0
+P212,28,Female,,70,110,65,36.7,14,5.8,0.8,"No fever, normal vitals, discharged home.",0
+P213,75,Male,Diabetes,125,175,95,38.5,25,14.2,2.8,Severe hypotension and high lactate levels. Suspected septic shock.,1
+P214,42,Female,Hypertension,95,135,80,37.1,19,8.2,1.1,"Fever, elevated WBC count, and chills. Started on broad-spectrum antibiotics.",0
+P215,68,Male,,105,165,90,37.7,21,9.5,1.4,"Post-surgical patient, monitoring for signs of infection.",0
+P216,35,Female,COPD,110,100,60,39.2,29,10.8,1.9,"Fever, difficulty breathing, and elevated heart rate. Possible sepsis.",1
+P217,50,Male,CKD,85,130,80,37.3,16,7.1,0.7,"Stable, monitoring for changes. No signs of infection.",0
+P218,72,Female,Diabetes,120,155,85,38.0,23,11.9,2.3,High fever and confusion. Blood cultures taken.,1
+P219,47,Male,,90,145,85,36.6,18,7.5,0.9,"Minor wound infection, prescribed antibiotics. Stable vitals.",0
+P220,60,Female,Hypertension,100,160,90,37.4,20,8.9,1.3,"Elevated blood pressure, no signs of infection.",0
+P221,30,Male,,75,120,70,36.9,15,6.2,0.6,"Healthy individual, routine check-up. All vitals normal.",0
+P222,79,Female,COPD,115,115,70,39.0,27,10.5,1.7,"COPD exacerbation, increased respiratory effort and fever. Admitted for observation.",1
+P223,53,Male,CKD,80,140,85,37.6,18,7.8,1.0,"Stable, monitoring for changes in kidney function.",0
+P224,26,Female,,70,105,65,36.5,13,5.5,0.7,"No fever, normal vitals, discharged.",0
+P225,67,Male,Diabetes,125,165,95,38.3,24,13.2,2.6,"High fever, tachycardia, and confusion. Suspected sepsis.",1
+P226,38,Female,Hypertension,90,130,75,37.0,17,8.0,1.1,"Mild fever, started on antibiotics. Monitoring closely.",0
+P227,56,Male,,100,150,80,37.8,19,9.1,1.2,"Post-surgical patient, recovering well. No signs of infection.",0
+P228,74,Female,COPD,110,105,60,39.3,28,11.1,2.0,"Difficulty breathing, high fever, and elevated heart rate. Sepsis protocol initiated.",1
+P229,41,Male,CKD,85,135,80,37.2,15,6.8,0.8,"Stable, no signs of infection. Monitoring kidney function.",0
+P230,63,Female,Diabetes,115,150,90,38.1,22,12.5,2.4,"High fever, chills, and confusion. Blood cultures drawn.",1
+P231,29,Male,,75,115,70,36.8,16,6.0,0.7,"No fever, normal vitals. Discharged with follow-up instructions.",0
+P232,58,Female,Hypertension,95,140,85,37.5,18,8.7,1.3,"Elevated blood pressure, no signs of infection.",0
+P233,77,Male,COPD,105,120,70,38.9,26,9.9,1.6,"COPD exacerbation, increased respiratory effort and fever. Admitted.",1
+P234,44,Female,CKD,80,125,75,37.1,14,7.3,0.9,"Stable, monitoring for changes in kidney function. No signs of infection.",0
+P235,69,Male,Diabetes,120,170,95,38.4,23,13.8,2.9,"High fever, tachycardia, and altered mental status. Sepsis suspected.",1
+P236,31,Female,,70,110,65,36.6,15,5.7,0.6,"No fever, normal vitals. Discharged.",0
+P237,51,Male,Hypertension,90,145,80,37.3,17,8.3,1.0,"Mild fever, started on antibiotics. Monitoring closely.",0
+P238,73,Female,COPD,115,110,65,39.1,27,10.7,1.8,"Fever, difficulty breathing, and elevated heart rate. Possible sepsis.",1
+P239,40,Male,CKD,85,130,80,37.0,16,6.9,0.8,"Stable, no signs of infection. Monitoring kidney function.",0
+P240,61,Female,Diabetes,105,155,90,37.9,21,12.2,2.2,High fever and chills. Blood cultures taken.,1
+P241,27,Male,,75,120,70,36.7,14,6.1,0.7,"Healthy individual, routine check-up. All vitals normal.",0
+P242,57,Female,Hypertension,90,140,85,37.4,18,8.4,1.2,"Elevated blood pressure, no signs of infection.",0
+P243,76,Male,COPD,110,115,70,38.8,25,9.6,1.5,"COPD exacerbation, increased respiratory effort and fever. Admitted for observation.",1
+P244,43,Female,CKD,80,125,75,37.2,15,7.0,0.9,"Stable, monitoring for changes in kidney function.",0
+P245,66,Male,Diabetes,125,165,95,38.2,24,13.0,2.5,"High fever, tachycardia, and confusion. Suspected sepsis.",1
+P246,34,Female,,70,110,65,36.5,13,5.9,0.6,"No fever, normal vitals. Discharged.",0
+P247,49,Male,Hypertension,95,145,80,37.6,19,8.8,1.4,"Mild fever, started on antibiotics. Monitoring closely.",0
+P248,71,Female,COPD,110,105,60,39.2,28,11.3,1.9,"Fever, difficulty breathing, and elevated heart rate. Possible sepsis.",1
+P249,39,Male,CKD,85,130,80,37.1,17,6.7,0.8,"Stable, no signs of infection. Monitoring kidney function.",0
+P250,64,Female,Diabetes,100,150,90,37.8,20,11.9,2.1,High fever and chills. Blood cultures taken.,1
+P251,62,Male,Hypertension,112,155,85,38.2,24,12.5,1.8,Patient presented with fever and tachycardia. Possible infection noted.,1
+P252,35,Female,,90,120,70,36.8,16,7.8,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P253,78,Male,Diabetes,130,95,55,39.5,28,14.2,3.5,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P254,48,Female,COPD,105,135,75,37.9,22,10.9,1.2,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P255,55,Male,,85,115,65,37.0,18,6.5,0.7,Post-surgical patient with stable vitals. No signs of infection.,0
+P256,28,Female,,75,110,70,36.5,14,5.2,0.6,"Mild fever and cough, rule out pneumonia.",0
+P257,42,Male,CKD,100,140,90,37.5,20,8.9,0.9,"No fever, normal vitals, discharged with follow-up.",0
+P258,68,Female,COPD,120,160,95,38.8,26,13.1,2.1,"Patient with COPD exacerbation, increased respiratory effort.",1
+P259,50,Male,Hypertension,115,150,80,39.0,25,11.8,1.5,"Unstable BP, high fever, urgent blood culture ordered.",1
+P260,31,Female,,82,125,75,37.2,15,7.1,0.7,"Minor wound infection, prescribed antibiotics.",0
+P261,72,Male,Diabetes,125,90,50,39.8,30,14.9,4.0,"Hypotensive, tachycardic, and febrile. Suspect septic shock.",1
+P262,25,Female,,70,105,65,36.6,12,4.5,0.5,"Healthy patient, no concerns.",0
+P263,59,Male,Hypertension,108,145,82,38.0,21,9.7,1.1,"Elevated heart rate and temperature, monitoring for infection.",0
+P264,45,Female,,95,130,78,37.6,19,8.2,0.9,"Post-operative, stable, no signs of infection.",0
+P265,80,Male,CKD,135,100,60,40.1,29,13.8,3.2,"Critically ill, suspected sepsis, started on vasopressors.",1
+P266,39,Female,,88,118,72,36.9,17,6.8,0.6,"Normal vital signs, no complaints.",0
+P267,65,Male,Diabetes,118,162,90,38.5,23,11.5,1.7,"High fever and elevated heart rate, blood cultures drawn.",1
+P268,52,Female,COPD,102,138,80,37.7,20,9.4,1.0,"COPD exacerbation, started on antibiotics.",0
+P269,29,Male,,78,112,68,36.7,15,5.9,0.7,"Healthy individual, routine check-up.",0
+P270,75,Female,Hypertension,128,170,98,39.2,27,12.9,2.5,"Elevated blood pressure and temperature, monitoring closely.",1
+P271,41,Male,,92,125,75,37.3,18,7.5,0.8,"Minor laceration, treated and discharged.",0
+P272,69,Female,CKD,115,155,88,38.1,22,10.6,1.4,"Fatigue and malaise, further investigation needed.",0
+P273,33,Male,Diabetes,85,110,65,37.0,16,7.2,0.8,"Well-controlled diabetes, no acute concerns.",0
+P274,70,Female,,105,130,70,37.8,18,8.5,1.2,"Patient presented with dizziness, suspect dehydration.",0
+P275,47,Male,Hypertension,98,142,85,37.5,21,9.2,1.0,"Elevated blood pressure, prescribed medication.",0
+P276,58,Female,COPD,110,165,95,38.7,25,11.9,1.9,"COPD flare-up, experiencing shortness of breath.",1
+P277,22,Male,,72,108,72,36.8,14,6.1,0.6,"Healthy young adult, no medical issues.",0
+P278,79,Female,Diabetes,132,95,58,40.0,28,14.5,3.8,"Septic shock, admitted to ICU.",1
+P279,37,Male,,89,122,78,37.1,17,7.9,0.9,"Post-viral syndrome, recovering well.",0
+P280,63,Female,Hypertension,120,175,100,39.4,26,13.3,2.7,"Elevated blood pressure and temperature, monitoring for infection.",1
+P281,51,Male,CKD,108,150,90,37.9,23,10.2,1.3,"CKD patient with stable vitals, routine follow-up.",0
+P282,26,Female,,75,115,70,36.9,15,5.5,0.6,"Healthy individual, no current medical concerns.",0
+P283,74,Male,COPD,125,160,92,39.1,28,12.7,2.2,"COPD exacerbation with fever, started on antibiotics.",1
+P284,40,Female,,92,135,80,37.4,19,8.0,0.8,"Recent surgery, recovering well, no signs of infection.",0
+P285,67,Male,Diabetes,115,168,98,38.6,24,11.2,1.6,"High fever and elevated blood pressure, suspect infection.",1
+P286,54,Female,Hypertension,100,145,85,37.6,20,9.5,1.1,"Hypertension well-controlled, no other issues.",0
+P287,30,Male,,80,120,75,37.0,16,6.7,0.7,"Healthy individual, no medical complaints.",0
+P288,77,Female,CKD,130,105,62,39.9,29,14.0,3.4,"Sepsis suspected, started on IV fluids and antibiotics.",1
+P289,43,Male,,95,138,82,37.5,21,8.8,1.0,"Minor injury, treated and discharged.",0
+P290,60,Female,Diabetes,112,158,90,38.3,22,10.5,1.5,"Elevated blood sugar and temperature, monitoring closely.",1
+P291,49,Male,COPD,102,140,85,37.7,23,9.9,1.2,"COPD patient with stable vitals, routine check-up.",0
+P292,24,Female,,78,118,72,36.9,14,5.8,0.6,"Healthy individual, no medical concerns.",0
+P293,73,Male,Hypertension,122,170,95,39.0,27,12.1,2.0,"High blood pressure and temperature, started on antibiotics.",1
+P294,38,Female,,87,125,78,37.2,18,7.3,0.7,"Minor infection, prescribed antibiotics.",0
+P295,66,Male,CKD,118,162,92,38.9,25,11.7,1.8,"Fever and elevated heart rate, suspect infection.",1
+P296,53,Female,Diabetes,98,148,88,37.8,21,9.0,1.1,"Diabetes well-managed, no acute concerns.",0
+P297,27,Male,,75,112,68,36.7,15,6.3,0.6,"Healthy individual, routine blood work.",0
+P298,76,Female,COPD,128,175,100,39.7,30,13.6,3.1,"Severe respiratory distress, suspect septic shock.",1
+P299,42,Male,,90,130,80,37.3,19,7.7,0.9,"Minor surgical procedure, recovering well.",0
+P300,61,Female,Hypertension,110,152,85,38.0,22,10.0,1.4,"Elevated blood pressure and temperature, monitoring for infection.",0
+P301,65,Male,Hypertension,110,150,85,37.2,18,7.5,1.2,Patient presented with mild fever and elevated BP. Monitoring for changes.,0
+P302,32,Female,,95,120,70,36.8,16,6.2,0.8,"Stable vitals, no signs of infection.",0
+P303,78,Male,Diabetes,125,95,60,39.5,24,13.8,3.5,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
+P304,45,Female,COPD,105,110,75,38.0,22,9.1,1.5,"Fever, elevated WBC count, and respiratory distress. Starting antibiotics.",1
+P305,58,Male,CKD,80,130,80,37.0,14,5.5,0.7,"Post-surgical, stable vitals, no signs of infection.",0
+P306,25,Female,,75,115,75,36.5,12,4.8,0.6,"No fever, normal vitals, discharged.",0
+P307,70,Male,Hypertension,130,160,90,38.5,20,10.2,2.1,"Mild fever and cough, rule out pneumonia.",0
+P308,41,Female,,90,125,80,36.9,16,7.0,0.9,"No fever, normal vitals, follow-up scheduled.",0
+P309,62,Male,Diabetes,115,90,55,39.8,28,14.5,4.0,"Unstable BP, high fever, urgent blood culture ordered. Suspected sepsis.",1
+P310,50,Female,COPD,100,105,65,37.5,25,8.5,1.0,"COPD exacerbation, increased respiratory effort.",0
+P311,38,Male,,85,120,75,36.7,14,6.8,0.7,"Minor wound infection, prescribed antibiotics.",0
+P312,74,Female,Hypertension,120,170,95,37.9,19,9.9,1.8,Elevated BP and mild fever. Monitoring for changes.,0
+P313,29,Male,,92,118,72,36.6,15,5.2,0.6,"Healthy, no signs of infection.",0
+P314,68,Female,Diabetes,135,100,65,40.1,26,15.0,3.2,"High fever, hypotension, and elevated lactate. Sepsis suspected.",1
+P315,53,Male,CKD,78,135,85,37.1,17,6.0,0.8,"Stable post-op, no signs of infection.",0
+P316,42,Female,,98,122,78,37.3,19,7.8,1.1,"Mild fever, monitoring for infection.",0
+P317,80,Male,COPD,118,105,70,38.7,23,10.5,2.3,"COPD exacerbation, increased respiratory effort and fever.",1
+P318,35,Female,,88,115,70,36.9,15,6.5,0.8,"No concerns, discharged.",0
+P319,60,Male,Hypertension,105,145,90,37.4,17,8.2,1.3,"Elevated BP, monitoring for changes.",0
+P320,47,Female,Diabetes,122,95,60,39.2,25,12.1,2.8,"High fever, low BP, and high lactate. Sepsis suspected.",1
+P321,71,Male,CKD,75,125,75,36.8,13,5.8,0.7,"Stable, no signs of infection.",0
+P322,28,Female,,82,110,65,36.5,12,4.5,0.5,"Healthy, no concerns.",0
+P323,56,Male,Hypertension,112,160,95,38.1,21,9.5,1.9,"High BP and mild fever, monitoring.",0
+P324,39,Female,COPD,95,100,70,37.6,22,8.0,1.4,Mild fever and respiratory distress. Starting antibiotics.,1
+P325,67,Male,Diabetes,128,85,55,39.9,29,13.2,3.8,"Hypotension, high fever, and high lactate. Sepsis suspected.",1
+P326,46,Female,,89,118,75,37.0,16,7.2,0.9,"No fever, vital signs stable.",0
+P327,79,Male,CKD,72,130,80,37.2,15,6.1,0.8,"Stable, no signs of infection.",0
+P328,34,Female,Hypertension,97,125,85,37.5,18,8.5,1.2,"Mild fever, monitoring for infection.",0
+P329,59,Male,COPD,108,110,75,38.3,24,9.8,1.7,Fever and respiratory distress. Starting antibiotics.,1
+P330,52,Female,Diabetes,119,90,50,39.0,27,11.5,2.5,"High fever, low BP, and elevated lactate. Sepsis suspected.",1
+P331,23,Male,,80,115,70,36.7,14,6.0,0.7,"Healthy, no concerns.",0
+P332,64,Female,,99,130,80,37.8,19,8.9,1.5,"Mild fever, monitoring for infection.",0
+P333,48,Male,Hypertension,102,155,90,37.1,16,7.5,1.0,"Elevated BP, monitoring for changes.",0
+P334,73,Female,COPD,115,105,65,38.9,26,10.9,2.2,"Fever and respiratory distress, starting antibiotics.",1
+P335,40,Male,CKD,87,120,75,36.9,15,6.8,0.8,"Stable, no signs of infection.",0
+P336,61,Female,Diabetes,126,80,50,40.2,30,14.1,3.9,"Severely hypotensive, high fever, high lactate. Sepsis suspected.",1
+P337,31,Male,,93,112,72,36.8,16,5.5,0.6,"Healthy, no concerns.",0
+P338,69,Female,Hypertension,107,140,85,37.3,18,7.9,1.2,"Mild fever, monitoring for infection.",0
+P339,54,Male,,84,135,80,37.0,14,6.2,0.7,"Stable, no signs of infection.",0
+P340,27,Female,COPD,101,100,60,37.7,23,8.3,1.6,"Mild fever and respiratory distress, starting antibiotics.",1
+P341,76,Male,CKD,70,125,70,36.6,13,5.0,0.6,"Stable, no signs of infection.",0
+P342,43,Female,Diabetes,117,95,60,39.4,28,12.8,3.1,"High fever, hypotension, and high lactate. Sepsis suspected.",1
+P343,36,Male,,91,120,75,37.2,17,7.0,0.9,"Mild fever, monitoring for infection.",0
+P344,57,Female,Hypertension,109,165,95,38.0,20,9.2,1.8,"Elevated BP and mild fever, monitoring for infection.",0
+P345,80,Male,COPD,123,115,70,39.1,25,11.2,2.7,"Fever, increased respiratory effort and high lactate. Suspected sepsis.",1
+P346,49,Female,,96,128,82,37.4,19,7.7,1.1,"Mild fever, monitoring for infection.",0
+P347,63,Male,CKD,77,130,85,37.1,16,5.8,0.8,"Stable, no signs of infection.",0
+P348,22,Female,,85,110,65,36.9,15,6.5,0.7,"No fever, normal vitals.",0
+P349,75,Male,Hypertension,114,150,90,37.6,18,8.6,1.4,"Mild fever and elevated BP, monitoring for infection.",0
+P350,51,Female,Diabetes,106,85,55,38.8,26,10.5,2.4,"Fever, hypotension, and elevated lactate. Suspected sepsis.",1
+P351,62,Male,Hypertension,102,155,88,37.5,20,8.2,1.2,"Patient presented with elevated blood pressure, no signs of infection.",0
+P352,35,Female,,78,120,70,36.8,16,6.5,0.8,"Normal vitals, discharged with follow-up instructions.",0
+P353,78,Male,Diabetes,115,95,55,39.2,28,13.5,3.1,Severe hypotension and high fever. Suspected sepsis. Starting IV fluids and antibiotics.,1
+P354,48,Female,COPD,95,130,80,37.9,24,9.8,1.5,"COPD exacerbation, increased respiratory effort.  Monitoring for infection.",0
+P355,25,Male,,65,115,75,36.5,14,5.2,0.7,"Minor laceration, treated and discharged.",0
+P356,55,Female,Hypertension,125,170,95,38.8,22,11.1,2.0,High fever and elevated heart rate.  Blood cultures ordered.,1
+P357,70,Male,CKD,105,140,75,37.2,18,7.9,1.0,"Stable CKD patient, routine check-up.",0
+P358,28,Female,,80,118,72,37.0,16,6.0,0.9,"Normal vitals, no concerns.",0
+P359,42,Male,Diabetes,130,160,90,39.5,26,14.2,2.8,"High fever, tachycardia, and elevated WBC. Suspected infection, starting antibiotics.",1
+P360,60,Female,,90,135,85,38.0,18,7.5,1.1,"Mild fever, rule out UTI. ",0
+P361,75,Male,COPD,118,90,60,38.5,25,10.5,1.8,"Hypotension and tachypnea.  Suspected sepsis, initiating treatment.",1
+P362,31,Female,,75,125,75,36.7,15,5.8,0.6,"Healthy patient, routine physical.",0
+P363,58,Male,Hypertension,108,165,92,37.7,21,8.9,1.3,"Elevated blood pressure, prescribed medication. No signs of infection.",0
+P364,45,Female,,85,110,65,36.9,17,6.2,0.7,"Normal vitals, no complaints.",0
+P365,68,Male,Diabetes,122,150,85,39.0,24,12.8,2.5,"Fever and elevated WBC count.  Concerned for infection, starting antibiotics.",1
+P366,29,Female,,72,112,70,36.6,14,5.5,0.8,"Healthy patient, no concerns.",0
+P367,52,Male,CKD,98,145,80,37.3,19,7.0,0.9,"Stable CKD patient, follow-up appointment.",0
+P368,38,Female,,88,130,78,37.1,17,6.8,1.0,"Mild headache, prescribed pain medication.",0
+P369,65,Male,Hypertension,115,175,100,38.6,23,10.2,1.6,High fever and elevated blood pressure. Monitoring for infection.,0
+P370,41,Female,COPD,92,120,75,37.8,22,9.5,1.4,"COPD exacerbation, started on steroids.",0
+P371,71,Male,Diabetes,135,95,60,40.1,30,15.0,4.0,"Hypotension, high fever, and altered mental status. Septic shock, transfer to ICU.",1
+P372,34,Female,,82,115,72,36.8,16,6.1,0.7,"Normal vitals, no current medical issues.",0
+P373,57,Male,,100,150,85,37.4,20,7.8,1.2,"Mild abdominal pain, rule out appendicitis.",0
+P374,49,Female,Hypertension,90,140,90,37.2,18,7.2,0.9,"Stable hypertension, medication refill.",0
+P375,63,Male,CKD,105,135,70,37.0,17,8.5,1.1,"Stable CKD, routine labs.",0
+P376,27,Female,,75,120,75,36.5,15,5.9,0.8,"Healthy individual, no complaints.",0
+P377,50,Male,Diabetes,118,160,95,38.9,25,12.0,2.2,"High fever, elevated heart rate, and high blood pressure.  Suspected infection, initiating treatment.",1
+P378,39,Female,,85,125,80,36.9,17,6.4,0.9,Normal vitals and physical exam.,0
+P379,66,Male,COPD,110,145,85,37.6,22,9.1,1.5,"COPD exacerbation, increased shortness of breath.  Monitoring for infection.",0
+P380,43,Female,,78,118,70,36.7,16,5.7,0.7,"Healthy patient, routine check-up.",0
+P381,72,Male,Hypertension,125,180,100,39.1,26,13.3,2.7,"High fever, tachycardia, and elevated blood pressure.  Suspected sepsis, blood cultures drawn.",1
+P382,30,Female,,70,110,65,36.4,14,5.0,0.6,"Healthy individual, no medical concerns.",0
+P383,55,Male,CKD,102,130,75,37.2,19,7.5,1.0,"Stable CKD, routine follow-up.",0
+P384,46,Female,,82,125,78,36.8,17,6.3,0.8,"Normal vitals, no complaints.",0
+P385,69,Male,Diabetes,120,170,92,38.7,24,11.5,1.9,High fever and elevated heart rate.  Admitting for observation and further workup.,0
+P386,26,Female,,73,115,72,36.6,15,5.6,0.7,"Healthy individual, no medical issues.",0
+P387,51,Male,Hypertension,95,160,95,37.5,21,8.0,1.2,"Elevated blood pressure, medication adjusted.",0
+P388,40,Female,COPD,90,120,70,37.9,23,9.2,1.3,"COPD exacerbation, treating with nebulizers.",0
+P389,74,Male,,112,155,90,38.3,20,9.9,1.7,"Fever and chills, rule out pneumonia.",0
+P390,33,Female,,77,118,75,36.7,16,6.7,0.9,"Normal vitals, healthy patient.",0
+P391,59,Male,Diabetes,130,100,60,39.8,28,14.5,3.5,"Hypotension, high fever, and tachycardia.  Septic shock, intubation and ICU admission.",1
+P392,47,Female,,87,130,82,37.0,18,7.1,1.0,"Mild cough, prescribed cough suppressant.",0
+P393,64,Male,CKD,108,140,80,37.3,20,8.3,1.1,"Stable CKD, monitoring kidney function.",0
+P394,42,Female,Hypertension,92,150,92,37.1,19,7.6,0.8,"Elevated blood pressure, medication refill.",0
+P395,77,Male,COPD,115,105,65,39.4,27,12.7,2.9,"Hypotension, high fever, and respiratory distress.  Suspected sepsis, started on broad-spectrum antibiotics.",1
+P396,28,Female,,75,122,70,36.5,15,5.3,0.7,"Healthy patient, no medical concerns.",0
+P397,53,Male,,98,145,88,37.4,21,8.6,1.3,"Mild headache, prescribed pain medication.",0
+P398,36,Female,Diabetes,80,135,85,36.9,17,6.9,0.9,"Stable diabetes, routine check-up.",0
+P399,61,Male,Hypertension,105,165,98,37.6,22,9.4,1.4,"Elevated blood pressure, medication adjusted.",0
+P400,45,Female,,89,128,75,36.8,18,7.3,1.1,"Normal vitals, no complaints.",0
+P401,62,Male,Hypertension,102,155,88,37.5,18,10.2,1.2,Patient presented with fever and tachycardia. Possible infection noted.,1
+P402,45,Female,,78,120,72,36.8,14,7.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P403,78,Male,Diabetes,115,95,55,39.2,24,13.5,3.1,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P404,28,Female,,95,112,68,38.9,20,12.1,1.8,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P405,55,Male,COPD,105,140,80,37.2,22,8.9,1.0,Post-surgical patient with stable vitals. No signs of infection.,0
+P406,32,Female,,85,115,75,37.0,16,6.8,0.7,"Mild fever and cough, rule out pneumonia.",0
+P407,70,Male,CKD,90,160,90,36.5,15,7.2,0.9,"No fever, normal vitals, discharged with follow-up.",0
+P408,58,Female,Hypertension,110,170,95,38.1,19,9.5,1.5,"Patient with COPD exacerbation, increased respiratory effort.",0
+P409,49,Male,,125,85,50,39.8,28,14.8,3.8,"Unstable BP, high fever, urgent blood culture ordered.",1
+P410,25,Female,,80,125,80,36.9,14,5.5,0.6,"Minor wound infection, prescribed antibiotics.",0
+P411,75,Male,Diabetes,118,165,92,38.7,21,11.9,2.0,"Patient admitted with altered mental status, hypotension, and tachycardia.  Possible sepsis.",1
+P412,39,Female,,92,130,78,37.1,17,8.3,0.9,"Post-operative day 1, stable vital signs.  No signs of infection.",0
+P413,68,Male,Hypertension,108,150,85,37.9,19,9.7,1.3,"Elevated heart rate and temperature, monitoring for infection.",0
+P414,52,Female,,75,118,70,36.7,13,7.1,0.7,"Patient presented with abdominal pain.  No fever, WBC count within normal limits.",0
+P415,80,Male,COPD,122,90,60,40.1,26,14.2,2.9,"Respiratory distress, high fever, and hypotension.  Suspected sepsis.",1
+P416,30,Female,,88,122,75,37.3,15,8.0,0.8,Patient reports mild cough and sore throat.  Vital signs stable.,0
+P417,65,Male,CKD,100,145,82,37.6,18,9.2,1.1,"Monitoring for infection, elevated WBC count. Blood cultures drawn.",0
+P418,47,Female,Hypertension,82,135,80,36.9,14,7.7,0.9,"Patient discharged, follow-up scheduled.  Vital signs stable.",0
+P419,71,Male,Diabetes,115,100,65,39.5,23,13.8,2.5,"Hypotension, tachycardia, and fever.  Concerned for sepsis.",1
+P420,29,Female,,79,110,70,36.6,12,6.5,0.6,"Healthy patient, discharged with instructions.  No concerns.",0
+P421,60,Male,,105,150,85,38.2,20,10.5,1.4,Patient presented with chills and fever.  Monitoring for infection.,0
+P422,42,Female,Diabetes,90,125,78,37.8,17,9.0,1.0,Elevated heart rate and temperature.  Blood cultures pending.,0
+P423,77,Male,Hypertension,120,95,58,39.9,25,15.0,3.5,Severe hypotension and high fever.  Sepsis protocol initiated.,1
+P424,35,Female,,85,118,72,37.0,15,7.2,0.8,"Post-partum patient, stable vital signs.  No signs of infection.",0
+P425,56,Male,COPD,112,140,80,37.4,21,9.8,1.2,"COPD exacerbation, patient on oxygen therapy.  Monitoring for infection.",0
+P426,27,Female,,78,120,75,36.8,14,6.9,0.7,Patient presented with headache and fatigue.  Vitals stable.,0
+P427,63,Male,CKD,95,160,90,37.7,16,8.5,1.0,"Monitoring for infection, elevated WBC count and temperature.",0
+P428,48,Female,Hypertension,80,130,82,36.9,13,7.3,0.9,"Patient discharged, follow-up appointment scheduled.  Vitals stable.",0
+P429,74,Male,Diabetes,118,105,68,39.6,24,14.5,3.2,"Hypotension, tachycardia, and fever.  Sepsis suspected.",1
+P430,31,Female,,82,115,70,36.7,13,6.7,0.7,Patient presented with nausea and vomiting.  Vitals stable.,0
+P431,59,Male,,100,145,85,38.0,19,9.5,1.3,"Patient admitted for observation, elevated heart rate and temperature.",0
+P432,40,Female,Diabetes,88,122,75,37.2,16,8.2,0.9,Monitoring blood glucose levels.  No signs of infection.,0
+P433,76,Male,Hypertension,115,98,60,39.3,22,13.2,2.7,"Hypotension, tachycardia, and fever.  Concerned for sepsis.",1
+P434,33,Female,,85,120,78,36.9,15,7.0,0.8,"Patient discharged, follow-up appointment scheduled.  Vitals stable.",0
+P435,57,Male,COPD,108,135,75,37.5,20,10.1,1.5,"COPD exacerbation, patient on oxygen therapy.  Monitoring for infection.",0
+P436,26,Female,,75,112,72,36.6,13,6.2,0.6,"Healthy patient, discharged with instructions.  No concerns.",0
+P437,64,Male,CKD,92,155,88,37.8,17,8.8,1.1,"Monitoring for infection, elevated WBC count and temperature.",0
+P438,49,Female,Hypertension,80,128,80,36.8,14,7.5,0.9,"Patient discharged, follow-up appointment scheduled.  Vitals stable.",0
+P439,73,Male,Diabetes,112,102,65,39.0,21,12.8,2.3,"Hypotension, tachycardia, and fever.  Sepsis suspected.",1
+P440,32,Female,,84,118,75,36.9,14,6.9,0.7,Patient presented with headache and fatigue.  Vitals stable.,0
+P441,58,Male,,98,142,82,38.3,18,10.8,1.7,Patient presented with fever and chills. Possible infection.,1
+P442,41,Female,Diabetes,85,125,78,37.1,16,7.9,0.9,Monitoring blood glucose levels. No signs of infection.,0
+P443,79,Male,Hypertension,118,95,60,40.0,25,14.5,3.3,"Hypotension, tachycardia, and fever.  Sepsis protocol initiated.",1
+P444,34,Female,,82,115,72,36.8,14,7.1,0.8,"Post-surgical patient, stable vital signs. No signs of infection.",0
+P445,55,Male,COPD,105,138,78,37.6,22,9.6,1.3,"COPD exacerbation, patient on oxygen therapy. Monitoring for infection.",0
+P446,28,Female,,77,122,75,36.7,13,6.5,0.7,Patient presented with mild cough. Vitals stable.,0
+P447,61,Male,CKD,90,158,92,37.9,17,8.6,1.0,"Monitoring for infection, elevated WBC count and temperature.",0
+P448,50,Female,Hypertension,78,132,85,36.9,13,7.4,0.8,"Patient discharged, follow-up appointment scheduled. Vitals stable.",0
+P449,72,Male,Diabetes,115,100,62,39.4,23,14.1,3.0,"Hypotension, tachycardia, and fever. Sepsis suspected.",1
+P450,30,Female,,80,110,70,36.5,12,6.3,0.6,"Healthy patient, discharged with instructions. No concerns.",0
+P451,62,Male,Hypertension,112,155,88,38.2,24,12.5,1.8,Patient presented with fever and tachycardia. Possible infection noted.,1
+P452,35,Female,,95,120,70,36.8,16,7.2,0.9,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P453,78,Male,Diabetes,128,95,55,39.5,28,14.1,3.2,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P454,48,Female,COPD,105,130,80,37.9,20,9.8,1.2,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P455,55,Male,CKD,88,145,92,37.0,18,6.5,0.7,Post-surgical patient with stable vitals. No signs of infection.,0
+P456,28,Female,,75,115,75,36.5,14,5.1,0.6,"Mild fever and cough, rule out pneumonia.",0
+P457,70,Male,Hypertension,100,160,90,37.2,18,8.0,1.0,"No fever, normal vitals, discharged with follow-up.",0
+P458,60,Female,COPD,115,125,75,38.5,22,10.9,1.5,"Patient with COPD exacerbation, increased respiratory effort.",0
+P459,42,Male,,135,85,50,39.8,30,13.2,2.9,"Unstable BP, high fever, urgent blood culture ordered.",1
+P460,31,Female,Diabetes,80,110,65,36.9,15,7.8,0.8,"Minor wound infection, prescribed antibiotics.",0
+P461,75,Male,Hypertension,120,170,95,38.0,22,11.7,1.6,Patient exhibiting signs of confusion and elevated heart rate. Possible infection.,1
+P462,50,Female,,90,135,85,37.5,17,8.5,1.1,"Post-operative fever, monitoring for infection.",0
+P463,68,Male,COPD,108,140,82,37.7,19,9.2,1.3,Elevated respiratory rate and mild fever. Observing for further symptoms.,0
+P464,25,Female,,72,105,60,36.6,12,6.1,0.7,"Normal vitals, no concerns at this time.",0
+P465,80,Male,CKD,98,150,90,37.3,18,7.9,0.9,"Stable post-dialysis, no signs of infection.",0
+P466,39,Female,Diabetes,102,125,78,38.1,21,10.5,1.4,"Fever and chills, suspecting urinary tract infection.",1
+P467,58,Male,Hypertension,118,165,98,37.8,20,11.2,1.7,"Elevated heart rate and BP, monitoring for infection.",0
+P468,45,Female,,85,118,72,36.7,15,6.8,0.8,"Normal post-operative recovery, no signs of infection.",0
+P469,72,Male,COPD,125,138,78,39.1,26,13.8,2.5,Increased shortness of breath and fever. Suspect pneumonia.,1
+P470,33,Female,,78,112,68,36.9,14,5.9,0.6,"Healthy individual, no current medical issues.",0
+P471,65,Male,Diabetes,105,155,95,38.4,23,12.1,2.0,"High fever, rapid heart rate, and low blood pressure. Sepsis suspected.",1
+P472,41,Female,Hypertension,92,130,80,37.2,17,7.5,0.9,"Mild fever, observing for any changes.",0
+P473,79,Male,CKD,89,142,88,37.1,16,6.7,0.7,"Stable condition, no signs of infection.",0
+P474,29,Female,,70,108,65,36.5,13,5.2,0.6,"Healthy patient, discharged with instructions.",0
+P475,57,Male,,110,160,92,38.6,25,13.5,2.7,"Rapid breathing, high fever, altered mental status. Sepsis suspected.",1
+P476,47,Female,COPD,98,125,75,37.8,21,10.1,1.4,"Increased cough and sputum production, possible infection.",0
+P477,69,Male,Hypertension,115,175,100,37.9,20,10.8,1.5,"Elevated blood pressure, monitoring for other symptoms.",0
+P478,22,Female,,65,100,60,36.7,12,5.5,0.7,"Healthy young adult, no medical concerns.",0
+P479,80,Male,Diabetes,100,148,90,38.3,22,11.9,1.9,"High fever and chills, suspecting infection.",1
+P480,36,Female,,82,115,70,37.1,15,6.9,0.8,"Normal vitals, no signs of infection.",0
+P481,54,Male,CKD,95,135,85,37.4,18,8.3,1.1,"Stable kidney function, no signs of infection.",0
+P482,71,Female,Hypertension,122,168,98,38.8,27,14.0,3.0,"High fever, low blood pressure, and confusion. Sepsis suspected.",1
+P483,27,Male,,75,110,68,36.8,14,5.7,0.6,"Healthy individual, no reported medical problems.",0
+P484,63,Female,Diabetes,108,150,90,38.0,20,9.6,1.2,"Mild fever, monitoring for any changes.",0
+P485,49,Male,,90,128,78,37.3,17,7.1,0.8,"Post-surgical patient, stable vitals.",0
+P486,77,Female,COPD,118,145,85,39.2,28,13.7,2.8,"Difficulty breathing, high fever, and altered mental status. Sepsis suspected.",1
+P487,30,Male,,68,105,62,36.6,13,5.3,0.7,"Healthy patient, discharged with follow-up.",0
+P488,56,Female,Hypertension,102,162,95,37.6,19,8.9,1.1,"Elevated blood pressure, monitoring for other symptoms.",0
+P489,43,Male,,87,122,75,37.0,16,6.2,0.7,"Normal vitals, no current medical issues.",0
+P490,74,Female,CKD,96,138,88,37.2,17,7.7,0.9,"Stable condition, no signs of infection.",0
+P491,38,Male,Diabetes,115,158,92,38.9,26,13.3,2.6,"Fever, chills, and abdominal pain. Possible infection.",1
+P492,61,Female,,92,130,82,37.5,18,8.5,1.0,"Mild fever, observing for any changes.",0
+P493,52,Male,Hypertension,108,165,98,37.7,19,9.2,1.3,"Elevated blood pressure, monitoring for other symptoms.",0
+P494,26,Female,,72,108,65,36.9,14,5.9,0.6,"Healthy individual, no current complaints.",0
+P495,80,Male,COPD,120,140,80,39.0,27,13.9,2.9,Shortness of breath and fever. Suspecting pneumonia.,1
+P496,34,Female,,80,112,70,37.0,15,6.0,0.7,"Normal vitals, no signs of infection.",0
+P497,67,Male,Diabetes,105,152,92,38.1,21,10.5,1.4,Elevated heart rate and fever. Possible infection.,0
+P498,46,Female,,88,125,75,37.2,17,7.5,0.9,"Post-surgical patient, stable vitals, no signs of infection.",0
+P499,73,Male,CKD,98,145,90,37.3,18,8.1,1.0,"Stable kidney function, no signs of infection.",0
+P500,59,Female,Hypertension,112,170,100,38.5,24,12.2,2.2,"High fever, confusion, and low blood pressure. Sepsis suspected.",1
+P501,62,Male,Hypertension,102,155,88,37.5,18,7.8,1.2,Patient presented with elevated blood pressure and mild tachycardia. Monitoring for changes.,0
+P502,35,Female,,78,120,72,36.8,14,5.5,0.8,"Stable vitals, no signs of infection.",0
+P503,78,Male,Diabetes,115,95,55,39.2,24,12.1,3.8,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
+P504,50,Female,COPD,95,130,80,37.9,20,9.2,1.5,Patient with COPD exacerbation and fever.  Increased respiratory effort.  Monitoring for infection.,0
+P505,28,Male,,65,115,75,36.5,16,6.0,0.7,"No fever, normal vitals, discharged with follow-up.",0
+P506,42,Female,Hypertension,128,160,92,38.8,22,10.5,2.1,Elevated heart rate and temperature.  Possible infection. Starting antibiotics.,1
+P507,68,Male,CKD,105,145,78,37.2,19,8.5,1.0,Patient with CKD and mild fever. Monitoring closely.,0
+P508,55,Female,Diabetes,88,135,85,36.9,15,7.2,0.9,"Stable vitals, no signs of infection.",0
+P509,71,Male,Hypertension,135,90,50,39.5,28,13.8,3.2,"Unstable BP, high fever, and elevated WBC.  Suspected sepsis.",1
+P510,48,Female,,72,125,78,36.7,17,6.7,0.6,Post-surgical patient with stable vitals.,0
+P511,39,Male,,98,140,82,38.1,19,8.9,1.3,Elevated heart rate and temperature.  Blood cultures ordered.,0
+P512,60,Female,Diabetes,110,150,90,38.5,21,10.2,1.8,Fever and elevated WBC. Possible infection.,0
+P513,25,Male,,70,110,68,36.6,14,5.8,0.7,"No fever, normal vitals.",0
+P514,75,Female,COPD,125,100,60,39.7,26,11.5,2.9,"Hypotension, high fever, and elevated lactate levels. Sepsis suspected.",1
+P515,52,Male,Hypertension,85,138,87,37.0,16,7.5,1.1,Mild fever and cough.  Rule out pneumonia.,0
+P516,45,Female,CKD,100,142,85,37.8,20,9.0,1.4,"Fever, elevated WBC, and mild tachycardia. Starting antibiotics.",0
+P517,63,Male,Diabetes,118,98,58,39.0,23,12.8,2.5,"Hypotension, high fever, and elevated lactate.  Sepsis suspected.",1
+P518,31,Female,,75,122,75,36.9,15,6.2,0.8,Stable vitals.  No signs of infection.,0
+P519,80,Male,Hypertension,108,165,95,37.3,18,8.1,1.2,Elevated blood pressure and mild tachycardia.  Monitoring closely.,0
+P520,58,Female,,92,130,82,37.6,17,7.9,1.0,Mild fever.  Monitoring for any changes.,0
+P521,41,Male,COPD,112,148,90,38.4,22,9.8,1.7,Fever and elevated respiratory rate.  Possible infection.,0
+P522,67,Female,Diabetes,96,152,92,37.1,18,7.3,0.9,Stable vitals.  No signs of infection.,0
+P523,37,Male,,80,118,70,36.8,15,6.5,0.7,"No fever, normal vitals.",0
+P524,72,Female,Hypertension,120,160,98,38.9,25,11.2,2.3,"High fever, elevated heart rate, and elevated WBC.  Suspected sepsis.",1
+P525,49,Male,CKD,90,135,80,37.4,19,8.3,1.3,Mild fever.  Monitoring for any changes.,0
+P526,56,Female,,78,128,75,36.5,16,6.9,0.8,"No fever, normal vitals.",0
+P527,29,Male,,68,115,72,36.7,14,5.6,0.6,Healthy patient. Discharged with follow-up.,0
+P528,65,Female,COPD,105,140,85,38.2,21,9.5,1.6,Elevated heart rate and temperature. Possible infection.,0
+P529,34,Male,Diabetes,82,125,80,37.0,17,7.1,0.9,Stable vitals. No signs of infection.,0
+P530,79,Female,Hypertension,115,155,90,38.7,24,10.8,2.0,Elevated heart rate and temperature. Possible infection. Starting antibiotics.,1
+P531,53,Male,,95,138,88,37.5,20,8.7,1.4,Mild fever. Monitoring for changes.,0
+P532,40,Female,CKD,75,120,78,36.9,15,6.4,0.7,"No fever, normal vitals.",0
+P533,69,Male,Diabetes,122,95,55,39.8,27,13.2,3.5,"Hypotension, high fever, and elevated lactate.  Sepsis suspected.",1
+P534,27,Female,,72,112,70,36.6,14,5.9,0.8,Stable vitals. No signs of infection.,0
+P535,74,Male,Hypertension,100,145,82,37.3,18,7.6,1.0,Mild tachycardia. Monitoring for changes.,0
+P536,51,Female,,88,130,75,37.1,16,6.8,0.9,"No fever, normal vitals.",0
+P537,46,Male,COPD,118,105,62,39.1,25,11.9,2.7,"Hypotension, high fever, and elevated lactate. Sepsis suspected.",1
+P538,61,Female,Diabetes,92,150,88,37.7,19,8.2,1.2,Mild fever. Monitoring for changes.,0
+P539,32,Male,,70,118,75,36.8,15,6.1,0.7,"No fever, normal vitals.",0
+P540,77,Female,CKD,130,92,52,40.1,29,14.5,4.1,"Hypotension, high fever, significantly elevated lactate. Sepsis suspected.",1
+P541,57,Male,Hypertension,85,135,80,37.0,16,7.3,0.9,"No fever, normal vitals.",0
+P542,43,Female,,98,122,72,38.0,19,8.8,1.5,Fever and mild tachycardia. Possible infection. Blood cultures ordered.,0
+P543,70,Male,COPD,112,142,85,37.9,22,9.6,1.8,Fever and elevated respiratory rate.  Possible infection.,0
+P544,38,Female,Diabetes,78,128,82,36.7,17,6.3,0.8,"No fever, normal vitals.",0
+P545,64,Male,Hypertension,105,158,95,37.4,19,7.7,1.1,Mild tachycardia.  Monitoring for changes.,0
+P546,50,Female,CKD,92,130,78,37.2,18,7.0,0.9,"No fever, normal vitals.",0
+P547,26,Male,,65,110,70,36.5,15,5.7,0.7,"Healthy patient, no signs of infection.",0
+P548,76,Female,Diabetes,125,90,50,40.5,30,14.0,4.5,"Severe hypotension, high fever, extremely elevated lactate. Sepsis suspected.",1
+P549,54,Male,COPD,98,135,85,38.3,20,9.1,1.6,Fever and elevated respiratory rate. Possible infection. Starting antibiotics.,1
+P550,47,Female,,75,125,75,36.8,16,6.6,0.8,"No fever, normal vitals.",0
+P551,62,Male,Hypertension,115,155,85,37.8,20,10.2,1.2,Patient presented with elevated blood pressure and mild tachycardia. Monitoring for changes.,0
+P552,35,Female,,95,120,70,36.5,16,7.5,0.8,"Normal vitals, no signs of infection.",0
+P553,78,Male,Diabetes,128,95,55,39.2,28,13.5,3.1,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
+P554,48,Female,COPD,105,110,75,37.0,24,9.1,1.0,"COPD exacerbation, increased respiratory effort. Monitoring for infection.",0
+P555,55,Male,CKD,130,160,90,38.5,22,11.8,2.5,"Elevated heart rate and temperature. Possible infection, further investigation needed.",1
+P556,28,Female,,80,115,75,36.7,14,6.8,0.7,"Healthy patient, no concerns.",0
+P557,70,Male,Hypertension,110,170,95,37.2,18,8.5,1.1,"Monitoring blood pressure, otherwise stable.",0
+P558,42,Female,Diabetes,100,130,80,38.1,20,12.2,1.8,Fever and elevated WBC count. Possible infection.,0
+P559,65,Male,,125,90,60,39.5,26,14.0,3.8,"Hypotension, high fever, and high lactate. Sepsis suspected.",1
+P560,25,Female,,75,125,80,36.9,12,7.2,0.6,"No signs of infection, normal vitals.",0
+P561,80,Male,COPD,118,145,90,37.5,25,9.9,1.5,"COPD exacerbation, monitoring for infection.",0
+P562,39,Female,,92,118,72,36.8,17,7.9,0.9,"Stable vitals, no signs of infection.",0
+P563,58,Male,Diabetes,135,175,100,39.0,24,12.5,2.2,"Elevated vitals, possible infection.",1
+P564,45,Female,Hypertension,108,150,88,37.4,19,8.7,1.3,"Mildly elevated heart rate, monitoring.",0
+P565,72,Male,CKD,122,165,95,38.7,21,11.0,2.0,Elevated temperature and heart rate. Evaluate for infection.,1
+P566,31,Female,,85,120,75,36.6,15,7.0,0.7,"No signs of infection, normal vitals.",0
+P567,67,Male,COPD,115,140,85,37.9,23,9.5,1.4,"COPD exacerbation, monitoring respiratory status.",0
+P568,50,Female,Diabetes,98,135,82,37.3,18,10.8,1.6,"Mild fever, monitoring for infection.",0
+P569,59,Male,Hypertension,128,160,92,38.8,22,13.1,2.8,"High fever, elevated heart rate, and lactate.  Sepsis alert.",1
+P570,29,Female,,78,110,70,36.5,13,6.5,0.6,"Healthy patient, no concerns.",0
+P571,75,Male,CKD,119,155,90,38.2,20,10.5,1.7,Monitoring renal function and vital signs.,0
+P572,43,Female,,95,125,78,37.1,16,8.2,0.9,"Stable patient, no acute concerns.",0
+P573,61,Male,Diabetes,132,170,98,39.1,25,14.5,3.5,"High fever, tachycardia, and high lactate. Sepsis suspected.",1
+P574,37,Female,COPD,102,115,72,37.6,22,8.9,1.2,"COPD exacerbation, observe for signs of infection.",0
+P575,68,Male,Hypertension,117,160,95,38.0,19,10.1,1.5,"Elevated blood pressure, monitor vital signs.",0
+P576,52,Female,,88,130,80,36.9,15,7.7,0.8,No current signs of infection.,0
+P577,79,Male,CKD,125,150,85,38.9,23,11.7,2.3,"Fever and elevated heart rate, evaluate for infection.",1
+P578,33,Female,Diabetes,90,120,75,36.7,17,9.3,1.0,"Monitoring blood glucose, vital signs stable.",0
+P579,64,Male,,112,145,88,37.5,18,8.5,1.1,"Stable vitals, no signs of infection.",0
+P580,46,Female,Hypertension,105,155,90,37.2,20,9.8,1.4,"Mildly elevated blood pressure, monitoring.",0
+P581,71,Male,COPD,120,135,80,38.4,24,12.9,2.1,"COPD exacerbation, slight fever.  Monitor for infection.",0
+P582,40,Female,,82,118,75,36.8,14,7.1,0.7,"Healthy patient, no concerns.",0
+P583,57,Male,Diabetes,138,175,100,39.3,26,14.2,3.2,"High fever, tachycardia, and elevated lactate.  Sepsis suspected.",1
+P584,27,Female,CKD,97,125,82,37.0,19,8.0,0.9,"Monitoring renal function, vital signs stable.",0
+P585,76,Male,,115,140,85,37.7,21,9.2,1.3,"Stable vitals, no signs of infection.",0
+P586,49,Female,Hypertension,100,150,92,37.5,17,10.5,1.6,"Mildly elevated blood pressure, monitoring.",0
+P587,63,Male,COPD,123,165,95,38.6,25,13.7,2.9,"High fever, tachycardia, suspect infection. Initiate broad-spectrum antibiotics.",1
+P588,36,Female,,87,115,70,36.6,16,7.4,0.8,"Normal vitals, no concerns.",0
+P589,70,Male,CKD,118,150,88,38.1,22,11.2,1.9,"Monitoring renal function, observe for infection.",0
+P590,53,Female,Diabetes,95,135,85,37.4,19,9.6,1.5,"Mild fever, evaluate for infection.",0
+P591,56,Male,Hypertension,107,160,98,37.9,16,8.8,1.2,"Monitoring blood pressure, vital signs otherwise stable.",0
+P592,41,Female,,79,120,72,36.7,15,7.3,0.7,"Healthy patient, no concerns.",0
+P593,66,Male,COPD,114,145,90,38.3,23,12.0,2.4,"COPD exacerbation, increased respiratory effort, possible infection.",1
+P594,47,Female,CKD,92,130,80,37.1,18,8.6,1.0,"Monitoring renal function, vital signs stable.",0
+P595,75,Male,Diabetes,127,165,95,39.0,26,13.3,3.0,"High fever, tachycardia, and elevated lactate. Sepsis protocol initiated.",1
+P596,32,Female,,85,115,75,36.5,14,6.9,0.6,"Normal vitals, no signs of infection.",0
+P597,69,Male,Hypertension,110,155,92,37.6,20,9.9,1.4,"Monitoring blood pressure, otherwise stable.",0
+P598,54,Female,COPD,103,125,78,37.8,21,11.5,1.8,"COPD exacerbation, mild fever. Observe for infection.",0
+P599,45,Male,,98,140,85,37.2,17,8.1,0.9,"Stable vitals, no signs of infection.",0
+P600,60,Female,CKD,121,160,90,38.5,24,12.7,2.6,"Elevated temperature and heart rate, possible infection.  Further workup needed.",1
+P601,65,Male,Hypertension,120,150,80,37.5,18,10.2,1.2,Patient presented with fever and tachycardia. Possible infection noted.,1
+P602,32,Female,,85,110,70,36.8,14,6.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P603,78,Male,COPD,135,95,55,39.2,28,13.5,3.8,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P604,45,Female,Diabetes,110,130,85,38.9,22,12.1,2.5,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P605,58,Male,CKD,90,100,60,37.2,16,7.8,1.0,Post-surgical patient with stable vitals. No signs of infection.,0
+P606,28,Female,,75,120,75,37.0,12,5.2,0.7,"Mild fever and cough, rule out pneumonia.",0
+P607,70,Male,Hypertension,105,160,90,36.5,15,8.5,0.9,"No fever, normal vitals, discharged with follow-up.",0
+P608,50,Female,COPD,115,140,80,38.0,20,9.9,1.5,"Patient with COPD exacerbation, increased respiratory effort.",0
+P609,62,Male,Diabetes,125,105,65,39.5,25,14.0,3.2,"Unstable BP, high fever, urgent blood culture ordered.",1
+P610,41,Female,,95,115,75,37.1,17,7.2,0.6,"Minor wound infection, prescribed antibiotics.",0
+P611,74,Male,Hypertension,130,170,95,38.7,24,11.8,2.1,"Elevated heart rate and BP, possible infection.",1
+P612,25,Female,,80,105,65,36.9,13,5.9,0.9,"Normal vitals, no concerns.",0
+P613,68,Male,COPD,120,90,50,39.8,26,12.9,3.5,"Low BP, high temperature, and difficulty breathing. Sepsis suspected.",1
+P614,39,Female,Diabetes,100,125,80,38.2,19,10.5,1.8,"Fever and increased WBC, started on antibiotics.",1
+P615,55,Male,CKD,85,110,70,37.4,15,8.1,1.1,"Stable post-op, monitoring for infection.",0
+P616,30,Female,,70,115,70,36.7,12,6.2,0.7,"Healthy, discharged.",0
+P617,72,Male,Hypertension,110,155,90,37.9,18,9.2,1.3,"High blood pressure, monitoring.",0
+P618,48,Female,COPD,105,135,85,38.5,21,11.2,2.0,"COPD flare-up, increased respiratory rate.",0
+P619,60,Male,Diabetes,115,100,60,39.1,23,13.1,2.8,"Hypotension and fever, concerning for sepsis.",1
+P620,37,Female,,90,120,75,37.3,16,7.5,0.8,"Normal vital signs, no signs of infection.",0
+P621,79,Male,Hypertension,125,165,95,38.6,22,10.9,1.7,"Elevated heart rate and temperature, rule out infection.",1
+P622,29,Female,,75,110,65,36.6,14,5.5,0.6,"Healthy, no concerns.",0
+P623,64,Male,COPD,135,85,50,40.1,29,14.5,4.2,"Critically low BP, high fever, and respiratory distress. Septic shock.",1
+P624,42,Female,Diabetes,105,130,80,39.0,20,11.8,2.4,"High fever and elevated lactate, started on IV fluids and antibiotics.",1
+P625,57,Male,CKD,95,105,70,37.8,17,8.7,1.2,"Stable post-procedure, monitoring closely.",0
+P626,35,Female,,80,125,75,37.2,13,6.8,0.9,"No signs of infection, discharged with instructions.",0
+P627,76,Male,Hypertension,115,160,90,38.1,19,9.5,1.4,"Elevated blood pressure, started on medication.",0
+P628,51,Female,COPD,120,145,90,38.8,23,12.4,2.2,"Increased respiratory effort and elevated heart rate, possible infection.",1
+P629,63,Male,Diabetes,100,110,75,37.7,16,7.9,1.0,"Stable diabetic patient, monitoring blood sugar.",0
+P630,40,Female,,85,115,70,36.9,15,6.1,0.7,"No signs of infection, discharged.",0
+P631,80,Male,Hypertension,130,175,100,39.4,25,13.7,3.0,"High fever and elevated blood pressure, possible sepsis.",1
+P632,27,Female,,70,100,60,36.5,12,5.3,0.5,"Healthy, no concerns.",0
+P633,67,Male,COPD,125,95,60,39.9,27,14.2,3.7,"Low BP, high fever, and respiratory distress. Sepsis suspected.",1
+P634,36,Female,Diabetes,95,120,80,38.3,18,10.7,1.9,"Fever and elevated WBC, started on antibiotics.",1
+P635,54,Male,CKD,80,100,65,37.6,14,8.3,1.1,"Post-surgical patient, stable vitals.",0
+P636,31,Female,,75,125,80,37.1,13,6.5,0.8,"Healthy, discharged with follow-up.",0
+P637,73,Male,Hypertension,110,150,85,37.5,17,9.0,1.3,"Mildly elevated BP, monitoring.",0
+P638,49,Female,COPD,105,140,90,38.0,20,11.5,1.6,"COPD exacerbation, prescribed steroids.",0
+P639,61,Male,Diabetes,120,115,70,39.3,24,13.3,2.9,"High fever and hypotension, concerning for sepsis.",1
+P640,38,Female,,90,120,75,37.0,16,7.1,0.7,"Normal vital signs, no signs of infection.",0
+P641,77,Male,Hypertension,125,160,90,38.5,21,10.1,1.5,"Elevated heart rate and temperature, rule out infection.",0
+P642,26,Female,,75,105,60,36.8,12,5.8,0.6,"Healthy, no concerns.",0
+P643,69,Male,COPD,130,90,55,40.0,28,14.8,4.0,"Critically low BP and high fever, septic shock.",1
+P644,44,Female,Diabetes,100,135,85,38.9,22,12.0,2.6,"Fever, elevated lactate, started on IV fluids and antibiotics.",1
+P645,59,Male,CKD,90,110,70,37.4,15,8.9,1.3,"Stable post-op, monitoring closely for infection.",0
+P646,33,Female,,85,120,70,36.7,14,6.3,0.9,"No signs of infection, discharged with instructions.",0
+P647,75,Male,Hypertension,115,155,85,38.2,18,9.7,1.6,"Elevated blood pressure, started on new medication.",0
+P648,52,Female,COPD,125,140,80,39.1,24,12.6,2.8,"Increased respiratory effort and elevated heart rate, possible infection.",1
+P649,66,Male,Diabetes,105,105,65,37.9,17,8.5,1.2,"Stable diabetic patient, monitoring blood glucose levels.",0
+P650,43,Female,,95,110,65,37.3,16,7.0,0.8,"Normal vitals, no signs of infection.",0
+P651,62,Male,Hypertension,112,155,88,37.8,22,12.2,1.2,Patient presented with fever and tachycardia. Possible infection noted.,1
+P652,45,Female,,78,120,72,36.5,16,7.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P653,78,Male,Diabetes,128,85,48,39.2,28,14.5,3.8,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P654,31,Female,,95,115,75,38.1,20,10.1,1.5,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P655,55,Male,COPD,82,130,80,36.9,18,8.9,0.9,Post-surgical patient with stable vitals. No signs of infection.,0
+P656,28,Female,,105,100,60,38.5,24,11.8,2.1,"Mild fever and cough, rule out pneumonia.",0
+P657,67,Male,CKD,75,140,90,36.7,17,7.2,0.7,"No fever, normal vitals, discharged with follow-up.",0
+P658,50,Female,Hypertension,118,160,95,38.9,25,13.5,2.5,"Patient with COPD exacerbation, increased respiratory effort.",0
+P659,71,Male,Diabetes,135,90,55,39.5,30,15.0,4.1,"Unstable BP, high fever, urgent blood culture ordered.",1
+P660,39,Female,,88,125,80,37.2,19,9.5,1.0,"Minor wound infection, prescribed antibiotics.",0
+P661,25,Male,,92,110,70,36.8,15,7.8,0.6,"No signs of infection, stable condition.",0
+P662,75,Female,Hypertension,125,170,98,38.0,21,11.5,1.3,"Elevated heart rate, monitoring blood pressure.",0
+P663,48,Male,Diabetes,108,145,85,37.5,18,9.2,0.9,"Post-operative, stable vitals.",0
+P664,61,Female,COPD,98,135,82,37.1,23,8.5,0.7,"COPD exacerbation, receiving treatment.",0
+P665,33,Male,,115,105,65,39.0,26,13.0,2.8,"Hypotension and tachycardia, possible sepsis.",1
+P666,59,Female,CKD,85,150,92,36.6,17,7.0,0.8,"Stable renal function, monitoring vitals.",0
+P667,29,Male,,102,120,78,37.3,19,9.8,1.1,"Mild fever, suspect viral infection.",0
+P668,72,Female,Diabetes,130,95,50,39.7,29,14.2,3.5,"Septic shock, aggressive treatment initiated.",1
+P669,42,Male,Hypertension,110,165,90,37.9,22,11.9,1.4,"High blood pressure, monitoring for changes.",0
+P670,56,Female,,79,115,75,36.2,16,7.7,0.6,"Normal vitals, discharged home.",0
+P671,65,Male,COPD,90,125,80,37.0,20,8.2,0.8,"COPD stable, routine follow-up.",0
+P672,37,Female,,107,100,62,38.7,25,12.5,2.3,"Fever and chills, suspect bacterial infection.",1
+P673,80,Male,CKD,77,140,90,36.8,18,7.4,0.9,"Stable CKD, monitoring electrolytes.",0
+P674,52,Female,Hypertension,119,155,92,38.2,21,10.8,1.6,"Elevated heart rate and blood pressure, monitoring.",0
+P675,22,Male,,95,110,70,36.9,15,8.1,0.7,"Healthy, no signs of infection.",0
+P676,70,Female,Diabetes,127,80,52,39.4,27,13.9,3.2,"Hypotension and altered mental status, suspected sepsis.",1
+P677,46,Male,COPD,87,130,85,37.4,19,9.0,1.0,"COPD exacerbation, responding to treatment.",0
+P678,63,Female,,100,120,78,37.6,20,9.6,1.2,"Mild fever, awaiting blood culture results.",0
+P679,30,Male,,112,105,65,38.8,26,13.3,2.6,"Tachycardia and hypotension, concerning for sepsis.",1
+P680,77,Female,CKD,80,145,95,36.5,17,7.1,0.8,"Stable CKD, no acute concerns.",0
+P681,49,Male,Diabetes,105,150,88,37.7,18,9.4,0.9,"Post-prandial blood sugar elevated, otherwise stable.",0
+P682,58,Female,Hypertension,122,160,90,38.3,22,11.2,1.7,"High blood pressure, starting antihypertensive medication.",0
+P683,26,Male,,98,115,75,36.7,16,7.9,0.6,"Healthy, routine check-up.",0
+P684,73,Female,COPD,132,90,55,39.6,28,14.7,3.9,"Severe respiratory distress, suspected septic shock.",1
+P685,40,Male,,108,135,80,37.5,20,10.5,1.3,"Mild fever and cough, suspect bronchitis.",0
+P686,66,Female,Diabetes,92,125,82,37.1,18,8.3,0.7,"Stable diabetes, monitoring blood glucose.",0
+P687,34,Male,,115,100,60,39.1,27,13.6,2.9,"Hypotension and tachycardia, concerning for sepsis.",1
+P688,79,Female,CKD,78,140,92,36.9,17,7.6,0.9,"Stable CKD, no signs of infection.",0
+P689,53,Male,Hypertension,120,155,85,38.0,21,10.9,1.5,"Elevated blood pressure, adjusting medication.",0
+P690,27,Female,,95,110,70,36.8,15,8.0,0.7,"Healthy, no medical concerns.",0
+P691,71,Male,COPD,129,85,50,39.3,29,14.1,3.7,"Respiratory distress and hypotension, suggestive of sepsis.",1
+P692,44,Female,,110,120,75,37.9,22,11.7,1.4,"Mild fever and body aches, suspect viral illness.",0
+P693,68,Male,Diabetes,90,130,85,37.0,18,8.4,0.8,"Stable diabetes, routine follow-up.",0
+P694,36,Female,,107,105,62,38.6,25,12.8,2.4,"Fever and chills, started on antibiotics.",1
+P695,80,Male,CKD,79,145,90,36.7,18,7.3,0.9,"Stable CKD, monitoring kidney function.",0
+P696,55,Female,Hypertension,117,165,95,38.1,21,10.6,1.2,"High blood pressure, adjusting medication.",0
+P697,29,Male,,92,115,72,36.9,16,7.8,0.6,"Healthy, no current complaints.",0
+P698,74,Female,Diabetes,131,90,52,39.5,27,14.4,3.3,"Hypotension and tachycardia, suggestive of sepsis.",1
+P699,47,Male,COPD,88,135,82,37.3,19,9.1,1.1,"COPD stable, continuing current treatment.",0
+P700,60,Female,,102,125,78,37.6,20,9.9,1.0,"Mild fever, awaiting lab results.",0
+P701,62,Male,Hypertension,102,155,88,37.8,18,10.2,1.2,Patient presented with fever and tachycardia. Possible infection noted.,1
+P702,35,Female,,78,120,72,36.5,14,7.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P703,78,Male,COPD,115,95,55,39.2,28,13.8,3.5,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P704,45,Female,Diabetes,95,130,80,38.5,22,12.1,2.1,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P705,58,Male,,65,110,70,37.0,16,8.9,0.9,Post-surgical patient with stable vitals. No signs of infection.,0
+P706,28,Female,,82,115,75,37.2,15,6.8,0.7,"Mild fever and cough, rule out pneumonia.",0
+P707,70,Male,CKD,105,160,90,36.8,17,9.5,1.0,"No fever, normal vitals, discharged with follow-up.",0
+P708,50,Female,Hypertension,90,140,85,38.0,20,11.0,1.5,"Patient with COPD exacerbation, increased respiratory effort.",0
+P709,65,Male,Diabetes,125,90,50,39.5,25,14.5,4.0,"Unstable BP, high fever, urgent blood culture ordered.",1
+P710,32,Female,,75,125,80,36.9,12,5.5,0.6,"Minor wound infection, prescribed antibiotics.",0
+P711,75,Male,COPD,110,100,60,38.7,24,12.5,2.8,Respiratory distress and altered mental status. Possible sepsis.,1
+P712,48,Female,Hypertension,88,135,82,37.5,19,9.8,1.3,Elevated heart rate and fever. Monitoring for infection.,0
+P713,25,Male,,70,118,78,36.2,15,7.2,0.7,"Normal vitals, no concerns.",0
+P714,68,Female,Diabetes,108,150,92,38.1,21,11.9,1.8,High fever and chills. Blood cultures drawn.,1
+P715,55,Male,CKD,92,145,85,37.3,17,8.5,0.9,"Stable condition, monitoring kidney function.",0
+P716,41,Female,,85,122,75,37.6,16,7.9,0.8,"Post-operative, vitals stable.",0
+P717,80,Male,Hypertension,118,170,95,38.9,23,13.2,2.5,Confusion and hypotension. Sepsis suspected.,1
+P718,39,Female,,72,115,70,36.7,14,6.5,0.6,"Healthy, no complaints.",0
+P719,60,Male,Diabetes,98,160,90,37.9,19,10.8,1.4,Elevated blood glucose and fever.  Infection possible.,0
+P720,52,Female,COPD,105,130,78,38.3,20,11.5,1.7,Increased shortness of breath and cough. Starting antibiotics.,1
+P721,29,Male,,80,120,75,36.8,15,7.0,0.7,Discharged with instructions.,0
+P722,73,Female,CKD,95,155,85,37.1,16,9.2,1.1,"Monitoring renal function, stable.",0
+P723,46,Male,Hypertension,100,145,90,37.9,18,10.5,1.3,"Mild fever, no other symptoms.",0
+P724,64,Female,Diabetes,112,165,95,39.0,22,12.8,2.0,Fever and rapid breathing. Sepsis suspected.,1
+P725,37,Male,,78,110,70,36.5,14,7.5,0.8,No signs of infection.,0
+P726,79,Female,COPD,120,105,65,38.6,25,13.5,2.7,Shortness of breath and elevated heart rate.  Starting oxygen.,1
+P727,51,Male,CKD,90,140,80,37.2,17,8.2,0.9,"Stable, monitoring closely.",0
+P728,43,Female,,82,125,75,37.4,15,7.7,0.8,Normal post-surgical recovery.,0
+P729,67,Male,Hypertension,107,150,88,38.2,20,11.7,1.6,Elevated blood pressure and mild fever.  Monitoring for infection.,0
+P730,33,Female,Diabetes,87,135,80,37.7,18,9.1,1.0,"High blood sugar, started on insulin.",0
+P731,76,Male,,115,175,98,39.1,24,14.0,3.0,Hypotensive and tachycardic.  Sepsis protocol initiated.,1
+P732,49,Female,COPD,98,120,72,38.0,19,10.9,1.5,Increased cough and sputum production.  Starting antibiotics.,1
+P733,61,Male,CKD,95,160,92,37.4,18,8.8,1.2,Stable renal function.  Discharged with follow-up.,0
+P734,27,Female,,75,115,75,36.6,13,6.2,0.7,"No complaints, healthy.",0
+P735,72,Male,Hypertension,102,155,90,38.5,21,12.2,1.9,Mild fever and elevated heart rate.  Monitoring for infection.,0
+P736,57,Female,Diabetes,89,140,85,37.8,16,9.5,1.1,"Stable blood glucose, discharged with instructions.",0
+P737,40,Male,,80,120,70,36.9,15,7.8,0.9,No concerns.,0
+P738,63,Female,COPD,109,135,82,38.7,23,13.0,2.3,Shortness of breath and fever.  Starting antibiotics and oxygen.,1
+P739,36,Male,CKD,77,118,78,37.0,14,7.1,0.7,"Stable renal function, follow-up scheduled.",0
+P740,77,Female,,92,160,90,37.5,17,8.6,1.0,Discharged with instructions.,0
+P741,53,Male,Hypertension,95,145,88,37.9,19,10.1,1.4,"Mildly elevated blood pressure, monitoring.",0
+P742,45,Female,Diabetes,101,130,80,38.4,20,11.4,1.7,"Fever and chills, blood cultures pending.",1
+P743,69,Male,COPD,112,110,65,39.1,26,14.2,3.2,"Hypotensive, tachycardic and febrile.  Sepsis suspected.",1
+P744,30,Female,,72,122,75,36.7,13,6.7,0.6,"Healthy, no complaints.",0
+P745,74,Male,CKD,98,150,85,37.3,18,9.0,1.1,"Stable renal function, monitoring.",0
+P746,59,Female,Hypertension,85,140,82,37.6,15,8.1,0.9,No signs of infection.,0
+P747,42,Male,,79,125,80,37.1,16,7.3,0.8,Normal post-operative recovery.,0
+P748,66,Female,Diabetes,105,160,92,38.6,22,12.5,2.1,Fever and elevated WBC count.  Starting antibiotics.,1
+P749,38,Male,,76,118,72,36.8,14,6.9,0.7,Discharged with instructions.,0
+P750,71,Female,COPD,118,100,60,39.3,28,15.0,3.8,Respiratory distress and hypotension.  Sepsis suspected.,1
+P751,62,Male,Hypertension,102,155,88,37.5,18,7.8,1.2,Patient presented with elevated blood pressure and mild fever. Monitoring for infection.,0
+P752,35,Female,,95,120,70,36.8,16,5.5,0.8,"Stable vitals, no signs of infection. Routine check-up.",0
+P753,78,Male,Diabetes,115,95,55,39.2,28,13.5,3.1,"Severe hypotension, high fever, and elevated lactate. Suspected sepsis.",1
+P754,48,Female,COPD,125,110,60,38.8,24,11.2,2.0,"Fever, elevated WBC count, and respiratory distress. Started antibiotics.",1
+P755,55,Male,CKD,88,135,80,37.0,14,6.2,0.9,"Post-surgical patient, stable vitals. Monitoring kidney function.",0
+P756,28,Female,,75,115,75,36.5,12,4.5,0.7,"No fever, normal vitals. Discharged.",0
+P757,69,Male,Hypertension,130,170,95,38.1,20,9.1,1.5,"Elevated blood pressure, mild fever. Rule out infection.",0
+P758,41,Female,,105,125,75,39.5,22,12.8,2.5,High fever and tachycardia. Blood cultures taken.,1
+P759,72,Male,Diabetes,118,90,50,38.9,26,14.1,3.8,"Hypotension, high fever, and altered mental status. Septic shock.",1
+P760,39,Female,,85,118,72,37.2,17,6.9,1.0,Mild fever and cough. Prescribed antibiotics for possible pneumonia.,0
+P761,58,Male,COPD,108,140,85,37.7,21,8.5,1.3,"COPD exacerbation, increased shortness of breath. Started on steroids.",0
+P762,25,Female,,92,122,78,36.9,15,5.2,0.6,"Normal vitals, no concerns. Follow-up appointment scheduled.",0
+P763,75,Male,Hypertension,122,165,92,38.3,19,9.9,1.7,Elevated blood pressure and fever. Monitoring closely.,0
+P764,45,Female,CKD,98,130,82,37.9,18,7.5,1.1,"Post-op, stable vitals. Monitoring for any complications.",0
+P765,61,Male,Diabetes,112,150,87,39.0,23,12.2,2.8,"High fever, elevated WBC, and tachycardia. Suspect infection.",1
+P766,32,Female,,82,115,70,36.7,14,5.9,0.8,"Healthy patient, routine check-up. No concerns.",0
+P767,79,Male,COPD,128,105,58,39.4,27,13.8,3.5,"Hypotension, high fever, and respiratory distress. Sepsis suspected.",1
+P768,50,Female,,100,135,85,37.6,19,8.2,1.4,Mild fever and chills. Monitoring for infection.,0
+P769,67,Male,Hypertension,117,160,90,38.2,20,9.5,1.6,Elevated blood pressure and low-grade fever. Observe for changes.,0
+P770,38,Female,CKD,89,128,79,37.1,16,6.7,0.9,"Stable, monitoring kidney function. No signs of infection.",0
+P771,57,Male,Diabetes,107,145,86,38.7,22,11.9,2.3,"Fever, elevated WBC, and mild tachycardia. Possible infection.",1
+P772,29,Female,,78,120,72,36.6,13,4.8,0.7,"No fever, normal vitals. Discharged with instructions.",0
+P773,73,Male,Hypertension,124,175,98,39.1,25,13.1,3.0,"High fever, elevated blood pressure, and confusion. Sepsis likely.",1
+P774,43,Female,,96,132,80,37.8,17,7.1,1.0,"Mild abdominal pain, no fever. Monitoring for any changes.",0
+P775,60,Male,COPD,111,152,89,38.0,21,8.8,1.5,"COPD exacerbation, increased respiratory effort.  Started nebulizer treatments.",0
+P776,31,Female,,84,117,74,36.9,15,5.6,0.8,"Healthy, no complaints. Routine follow-up.",0
+P777,77,Male,CKD,127,100,55,39.3,26,14.4,3.7,"Hypotension, high fever, and altered mental status. Septic shock suspected.",1
+P778,47,Female,Diabetes,99,140,83,38.5,20,10.5,1.9,"Fever, elevated WBC count, and mild tachycardia.  Started antibiotics.",1
+P779,54,Male,,91,125,75,37.2,16,6.4,0.9,"Minor laceration, treated and discharged. No signs of infection.",0
+P780,26,Female,COPD,76,112,68,36.8,14,5.1,0.7,"No fever, normal vitals. Scheduled for follow-up pulmonary function tests.",0
+P781,68,Male,Hypertension,120,168,95,38.9,24,11.7,2.6,"High fever, elevated blood pressure, and shortness of breath. Possible sepsis.",1
+P782,40,Female,,87,127,77,37.0,15,6.0,0.8,"Normal vitals, no fever. Discharged with instructions.",0
+P783,59,Male,Diabetes,109,147,90,38.6,23,11.0,2.1,"Fever, elevated WBC count, and mild tachycardia.  Monitoring closely.",1
+P784,30,Female,,80,114,72,36.7,14,5.3,0.7,"Healthy patient, routine check-up. No concerns noted.",0
+P785,74,Male,CKD,123,95,52,39.5,28,14.2,3.9,"Severe hypotension, high fever, and altered mental status. Septic shock highly suspected.",1
+P786,46,Female,,97,134,81,37.9,18,7.7,1.2,Mild fever and chills. Blood cultures ordered.,0
+P787,63,Male,Hypertension,116,158,91,38.4,22,10.2,1.8,Elevated blood pressure and fever. Monitoring for infection.,0
+P788,33,Female,,83,119,76,36.9,15,5.8,0.8,"No fever, normal vitals. Follow-up scheduled.",0
+P789,71,Male,COPD,126,108,60,39.2,25,13.6,3.3,"Hypotension, high fever, and respiratory distress. Suspected sepsis.",1
+P790,52,Female,Diabetes,104,142,84,38.1,19,9.4,1.7,"Mild fever, elevated WBC count, and tachycardia. Started antibiotics.",1
+P791,24,Female,,75,110,70,36.5,12,4.9,0.6,"Healthy individual, no complaints. Routine check-up.",0
+P792,65,Male,Hypertension,119,162,93,38.7,23,10.8,2.2,"Fever, elevated blood pressure. Monitoring for infection.",1
+P793,37,Female,,88,124,78,37.1,16,6.3,0.9,"Minor cough, no fever. Prescribed cough suppressant.",0
+P794,56,Male,Diabetes,106,149,87,39.0,24,12.5,2.9,"High fever, tachycardia, and confusion. Sepsis suspected.",1
+P795,27,Female,,79,116,73,36.8,14,5.4,0.7,"Normal vitals, no fever. Discharged with follow-up instructions.",0
+P796,70,Male,COPD,121,102,57,39.4,27,13.9,3.6,"Severe hypotension, high fever, and respiratory distress. Septic shock likely.",1
+P797,42,Female,CKD,93,131,80,37.4,17,6.8,1.0,"Post-surgical, stable vitals. Monitoring kidney function.",0
+P798,66,Male,,113,154,88,37.6,18,8.1,1.3,Elevated blood pressure and low-grade fever. Observe for changes.,0
+P799,34,Female,,85,121,75,36.9,15,5.7,0.8,"Healthy patient, routine check-up. No current complaints.",0
+P800,53,Male,Hypertension,101,138,82,37.3,17,7.3,1.1,"Mild headache, no fever. Advised rest and hydration.",0
+P801,62,Male,Hypertension,102,155,88,37.2,18,7.8,1.2,Patient presented with fever and tachycardia. Possible infection noted.,1
+P802,35,Female,,78,120,75,36.8,14,5.5,0.8,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P803,78,Male,Diabetes,115,95,55,39.5,28,13.2,3.8,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P804,48,Female,COPD,95,138,82,38.5,22,10.5,1.5,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P805,55,Male,CKD,85,142,90,37.0,16,6.2,0.9,Post-surgical patient with stable vitals. No signs of infection.,0
+P806,28,Female,,72,115,70,36.5,12,4.8,0.7,"Mild fever and cough, rule out pneumonia.",0
+P807,70,Male,Hypertension,80,160,95,36.9,15,5.9,0.6,"No fever, normal vitals, discharged with follow-up.",0
+P808,60,Female,COPD,105,130,78,38.0,24,8.9,1.1,"Patient with COPD exacerbation, increased respiratory effort.",0
+P809,42,Male,,125,85,50,39.8,26,14.5,4.0,"Unstable BP, high fever, urgent blood culture ordered.",1
+P810,31,Female,,65,125,80,36.7,13,4.5,0.7,"Minor wound infection, prescribed antibiotics.",0
+P811,75,Male,Diabetes,118,170,92,38.8,20,11.2,2.5,Patient exhibiting signs of confusion and rapid breathing.,1
+P812,50,Female,Hypertension,90,145,85,37.1,17,6.7,1.0,Patient complaining of chills and body aches. Monitoring for infection.,0
+P813,25,Male,,75,118,72,36.6,14,5.2,0.8,"Healthy individual, no signs of illness.",0
+P814,80,Female,COPD,100,135,80,37.5,20,7.5,0.9,"COPD patient with stable vitals, regular check-up.",0
+P815,68,Male,CKD,98,150,90,37.9,19,8.0,1.3,"Elevated heart rate and temperature, suspecting infection.",1
+P816,40,Female,,82,122,78,36.9,15,6.0,0.7,"Patient with mild headache and fatigue, no fever.",0
+P817,33,Male,Diabetes,110,160,95,39.2,25,12.8,3.2,"Patient with high fever, altered mental status, and hypotension.",1
+P818,58,Female,Hypertension,95,138,82,37.4,18,7.2,1.1,"Patient with elevated heart rate and temperature, monitoring closely.",0
+P819,29,Male,,70,110,65,36.5,13,4.9,0.6,"Healthy individual, presented for routine check-up.",0
+P820,72,Female,COPD,108,125,75,38.3,22,9.5,1.8,COPD patient with increased shortness of breath and fever.,1
+P821,53,Male,CKD,88,140,88,37.0,16,6.5,0.8,"Post-operative patient, stable vital signs.",0
+P822,65,Female,Diabetes,105,155,90,38.1,19,8.8,1.4,Patient with fluctuating blood pressure and mild fever.,0
+P823,45,Male,,78,125,80,36.8,15,5.6,0.7,"Patient complaining of mild abdominal pain, no fever.",0
+P824,39,Female,Hypertension,92,135,85,37.3,17,6.9,1.0,"Patient with controlled hypertension, stable vitals.",0
+P825,79,Male,COPD,112,130,70,38.7,23,10.2,2.1,"COPD exacerbation with signs of infection, starting antibiotics.",1
+P826,57,Female,CKD,85,142,92,37.0,16,6.2,0.9,"Patient with stable CKD, no signs of infection.",0
+P827,22,Male,,72,118,75,36.6,14,5.0,0.7,"Healthy individual, no complaints.",0
+P828,73,Female,Diabetes,115,165,95,38.9,21,11.8,2.8,"Patient with high fever, tachycardia, and altered mental status, suspect sepsis.",1
+P829,47,Male,Hypertension,90,140,80,37.1,17,6.5,0.9,"Patient with controlled hypertension, no signs of infection.",0
+P830,30,Female,,68,120,70,36.5,13,4.7,0.6,"Healthy individual, presented for routine blood work.",0
+P831,69,Male,COPD,102,132,78,37.8,20,8.5,1.2,"COPD patient with stable vitals, regular follow-up.",0
+P832,54,Female,CKD,87,145,90,37.0,16,6.0,0.8,"Patient with stable CKD, no new complaints.",0
+P833,41,Male,Diabetes,108,158,92,38.4,18,9.9,1.9,"Patient with high fever, increased heart rate, suspect infection.",1
+P834,61,Female,,80,128,82,36.9,15,5.8,0.7,"Patient with mild headache, no fever.",0
+P835,27,Male,Hypertension,75,115,70,36.6,14,5.2,0.8,"Healthy individual, no medical concerns.",0
+P836,76,Female,COPD,98,135,80,37.6,19,7.9,1.1,"COPD patient with stable vitals, routine check-up.",0
+P837,59,Male,CKD,92,148,95,37.2,17,6.7,1.0,"Patient with stable CKD, monitoring for any changes.",0
+P838,34,Female,,70,122,75,36.7,14,4.9,0.7,"Healthy individual, no current medical issues.",0
+P839,66,Male,Diabetes,112,162,98,39.0,22,12.5,3.0,"Patient with high fever, tachycardia, and hypotension. Suspected sepsis.",1
+P840,49,Female,Hypertension,95,142,88,37.5,18,7.5,1.2,"Patient with elevated heart rate and temperature, monitoring for infection.",0
+P841,38,Male,,78,120,75,36.8,15,5.5,0.8,"Patient with mild cough, no fever.",0
+P842,71,Female,COPD,105,130,78,38.2,21,9.2,1.6,COPD patient with increased shortness of breath and low-grade fever.,1
+P843,52,Male,CKD,88,145,92,37.1,16,6.3,0.9,"Post-surgical patient, stable vital signs.",0
+P844,64,Female,Diabetes,100,150,85,37.9,18,8.2,1.3,Patient with mild fever and elevated heart rate. Monitoring for infection.,0
+P845,43,Male,,75,125,80,36.7,14,5.1,0.7,"Healthy individual, presented for annual check-up.",0
+P846,32,Female,Hypertension,85,130,82,37.0,16,6.0,0.8,"Patient with controlled hypertension, no signs of infection.",0
+P847,77,Male,COPD,110,125,75,38.5,23,10.8,2.3,COPD patient with increased respiratory distress and fever.,1
+P848,56,Female,CKD,90,140,88,37.2,17,6.5,1.0,"Patient with stable CKD, routine follow-up.",0
+P849,23,Male,,70,115,72,36.6,13,4.8,0.7,"Healthy individual, no medical complaints.",0
+P850,67,Female,Diabetes,108,158,92,38.6,20,11.5,2.6,"Patient with high fever, tachycardia, and altered mental status. Suspected sepsis.",1
+P851,62,Male,Hypertension,112,155,88,38.2,24,12.5,1.8,Patient presented with fever and tachycardia. Possible infection noted.,1
+P852,35,Female,,95,120,75,36.9,16,7.8,1.1,"Stable vitals, no signs of infection. Monitoring for any changes.",0
+P853,78,Female,Diabetes,128,95,55,39.5,28,14.2,3.5,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P854,48,Male,COPD,105,130,80,37.8,20,10.1,1.5,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P855,55,Female,,88,115,70,37.0,18,6.5,0.8,Post-surgical patient with stable vitals. No signs of infection.,0
+P856,28,Male,,75,125,80,36.5,14,5.2,0.6,"Mild fever and cough, rule out pneumonia.",0
+P857,70,Female,CKD,100,140,90,37.5,18,8.9,1.2,"No fever, normal vitals, discharged with follow-up.",0
+P858,60,Male,Hypertension,118,160,95,38.8,22,13.1,2.1,"Patient with COPD exacerbation, increased respiratory effort.",0
+P859,42,Female,,135,85,50,39.9,26,15.0,4.0,"Unstable BP, high fever, urgent blood culture ordered.",1
+P860,31,Male,,80,110,70,36.8,15,7.0,0.7,"Minor wound infection, prescribed antibiotics.",0
+P861,75,Male,Diabetes,125,170,98,39.1,25,11.8,2.5,"High fever, altered mental status, suspecting infection.",1
+P862,50,Female,Hypertension,90,135,85,37.2,17,8.2,0.9,"Stable post-op, monitoring for complications.",0
+P863,68,Male,COPD,115,150,92,38.5,23,10.5,1.6,"Increased shortness of breath, possible pneumonia.",0
+P864,25,Female,,78,118,72,36.7,16,6.8,0.7,"Healthy individual, presenting for routine check-up.",0
+P865,80,Male,CKD,108,145,95,37.9,20,9.5,1.4,"Elevated creatinine levels, monitoring kidney function.",0
+P866,59,Female,Diabetes,120,165,100,38.7,22,11.2,1.9,Patient complaining of fatigue and increased thirst.,0
+P867,39,Male,,92,122,78,37.1,18,7.5,1.0,"Post-trauma, stable vitals, observing for infection.",0
+P868,71,Female,Hypertension,105,148,90,38.0,19,8.7,1.3,"Elevated blood pressure, adjusting medication.",0
+P869,46,Male,COPD,110,132,82,37.6,21,9.8,1.5,"Experiencing cough and shortness of breath, suspecting COPD exacerbation.",0
+P870,30,Female,,85,105,65,36.6,15,6.0,0.6,"Healthy, no complaints.",0
+P871,67,Male,CKD,98,138,88,37.4,19,8.0,1.2,"Stable CKD, regular follow-up.",0
+P872,53,Female,,102,128,78,37.3,18,7.2,0.8,"Mild headache, otherwise healthy.",0
+P873,79,Male,Diabetes,118,160,95,38.9,24,13.0,2.3,"High fever, confusion, and hypotension. Sepsis suspected.",1
+P874,45,Female,Hypertension,87,115,75,36.8,17,6.7,0.8,"Normal blood pressure, continuing medication.",0
+P875,64,Male,,107,142,85,37.7,20,9.2,1.3,"Post-fall, no major injuries, monitoring for complications.",0
+P876,29,Female,,79,108,68,36.5,16,5.5,0.6,"Healthy, presenting for annual physical.",0
+P877,76,Male,COPD,114,155,90,38.4,22,10.8,1.7,"Increased sputum production, possible respiratory infection.",0
+P878,58,Female,CKD,95,130,80,37.2,18,7.8,1.1,"Stable CKD, following prescribed diet.",0
+P879,37,Male,,82,120,72,36.9,17,6.2,0.7,"Minor laceration, treated and discharged.",0
+P880,72,Female,Diabetes,110,150,92,38.1,21,9.9,1.6,"Elevated blood sugar, adjusting insulin dosage.",0
+P881,51,Male,Hypertension,98,135,85,37.5,19,8.5,1.2,"Normal blood pressure, maintaining healthy lifestyle.",0
+P882,69,Female,COPD,106,140,88,37.6,20,9.0,1.4,"Stable COPD, regular pulmonary function tests.",0
+P883,40,Male,,89,112,70,36.7,16,6.9,0.9,"Healthy, no medical concerns.",0
+P884,77,Female,CKD,102,145,90,37.8,19,8.3,1.3,"Monitoring kidney function, stable condition.",0
+P885,56,Male,Diabetes,115,160,98,38.6,23,11.9,2.2,"High fever, chills, and rapid heart rate. Suspected sepsis.",1
+P886,34,Female,,75,118,72,36.4,15,5.8,0.6,"Healthy, no current medical issues.",0
+P887,63,Male,Hypertension,108,152,92,38.3,21,10.4,1.7,"Slightly elevated blood pressure, monitoring closely.",0
+P888,27,Female,,75,118,72,36.4,15,5.8,0.6,"Healthy, no current medical issues.",0
+P901,65,Male,Hypertension,120,160,90,37.2,18,8.5,1.2,Patient presented with fever and mild cough. Monitoring for infection.,0
+P902,78,Female,Diabetes,105,150,80,38.5,22,12.1,1.8,"Fever, elevated WBC count, and confusion. Suspected sepsis.",1
+P903,32,Male,,90,120,70,36.8,16,7.0,0.8,"Stable vitals, no signs of infection.",0
+P904,55,Female,COPD,115,110,60,39.1,28,13.5,3.2,Severe hypotension and high lactate levels. Suspected sepsis.,1
+P905,48,Male,CKD,100,130,85,37.5,20,9.2,1.5,"Fever, elevated WBC count, and respiratory distress. Initiating broad-spectrum antibiotics.",1
+P906,72,Female,Hypertension,85,140,90,36.5,14,7.8,0.9,Post-surgical patient with stable vitals. No signs of infection.,0
+P907,28,Male,,75,115,75,37.0,12,6.5,0.7,"Mild fever and cough, rule out pneumonia.",0
+P908,60,Female,Diabetes,110,170,95,38.8,24,11.8,2.1,"Unstable BP, high fever, urgent blood culture ordered.",1
+P909,41,Male,,95,125,80,36.9,16,7.2,1.0,"Minor wound infection, prescribed antibiotics.",0
+P910,79,Female,COPD,125,100,55,39.5,30,14.2,3.8,"Hypotensive, tachycardic, and tachypneic.  Septic shock suspected.",1
+P911,52,Male,Hypertension,105,155,85,37.7,19,9.9,1.4,Elevated WBC and fever.  Possible infection.,0
+P912,35,Female,,80,110,70,36.6,14,6.8,0.6,"No fever, normal vitals, discharged with follow-up.",0
+P913,68,Male,CKD,118,165,92,38.1,21,10.5,1.7,Patient with CKD and fever. Monitoring closely.,0
+P914,25,Female,,72,105,65,37.1,13,7.1,0.7,"Healthy individual, no concerns.",0
+P915,75,Male,Diabetes,130,180,100,39.2,26,13.0,2.9,"High fever, altered mental status, and hypotension. Sepsis likely.",1
+P916,49,Female,COPD,98,135,80,37.9,22,11.2,1.9,COPD exacerbation with suspected infection.,1
+P917,62,Male,Hypertension,112,150,95,37.4,17,8.9,1.1,"Stable post-op, monitoring for infection.",0
+P918,39,Female,,88,120,75,36.7,15,7.5,0.9,"Patient presented with abdominal pain, rule out appendicitis.",0
+P919,80,Male,CKD,107,140,75,38.3,25,12.5,2.5,CKD patient with fever and elevated lactate. Concerning for sepsis.,1
+P920,58,Female,Diabetes,95,160,90,37.6,18,10.1,1.3,Elevated heart rate and temperature. Observing for signs of infection.,0
+P921,30,Male,,70,115,65,36.9,14,6.2,0.5,"Healthy patient, discharged.",0
+P922,71,Female,Hypertension,125,175,100,39.0,23,11.9,2.2,"High fever, tachycardia, and hypotension.  Sepsis suspected.",1
+P923,44,Male,COPD,102,130,70,38.0,27,13.8,2.8,COPD exacerbation with increased respiratory distress.  Possible infection.,1
+P924,57,Female,Diabetes,110,165,95,38.6,20,10.7,1.6,"Fever and chills, started on antibiotics.",0
+P925,23,Male,,78,125,80,37.2,16,7.9,0.8,"Minor laceration, treated and discharged.",0
+P926,69,Female,CKD,115,155,85,38.9,22,12.3,2.0,"Fever, tachycardia, and elevated WBC.  Sepsis protocol initiated.",1
+P927,40,Male,,92,110,75,37.3,17,8.2,1.0,Patient presented with flu-like symptoms.,0
+P928,77,Female,Hypertension,135,170,90,39.4,28,14.5,3.5,"Hypotensive, altered mental status, high lactate. Septic shock likely.",1
+P929,53,Male,Diabetes,108,145,85,38.2,21,11.5,1.9,Diabetes patient with signs of infection.  Monitoring closely.,1
+P930,27,Female,,85,100,60,37.0,15,6.7,0.7,"Healthy individual, no concerns.",0
+P931,64,Male,COPD,122,160,80,39.1,25,13.2,2.7,COPD exacerbation with high fever and increased respiratory rate.  Concerned for sepsis.,1
+P932,36,Female,,90,125,75,37.4,18,8.0,1.2,"Mild fever, likely viral infection.",0
+P933,73,Male,Hypertension,105,150,90,37.8,19,9.5,1.5,"Hypertension and fever, monitoring for any changes.",0
+P934,50,Female,CKD,118,135,75,38.5,23,12.7,2.4,CKD patient with fever and elevated lactate.  Initiating sepsis workup.,1
+P935,29,Male,,75,110,65,36.8,14,7.2,0.6,"Healthy patient, discharged.",0
+P936,66,Female,Diabetes,130,180,100,39.3,27,14.0,3.1,"High fever, tachycardia, and hypotension. Septic shock suspected.",1
+P937,42,Male,,98,140,80,37.5,20,9.8,1.3,Elevated heart rate and temperature. Observing for signs of infection.,0
+P938,79,Female,COPD,112,115,65,39.0,29,13.9,3.0,COPD exacerbation with significant respiratory distress and elevated lactate. Sepsis likely.,1
+P939,56,Male,Hypertension,100,165,95,37.9,18,8.7,1.4,Hypertension and fever.  Monitoring for infection.,0
+P940,33,Female,,82,120,70,37.1,16,7.5,0.9,"Minor viral illness, supportive care.",0
+P941,61,Male,CKD,125,175,90,39.2,24,12.9,2.6,"CKD patient with fever, tachycardia, and elevated WBC.  Sepsis suspected.",1
+P942,47,Female,Diabetes,95,150,80,37.7,21,11.1,1.8,Diabetes patient with fever and elevated lactate.  Concerned for sepsis.,1
+P943,21,Male,,70,105,60,36.9,12,6.9,0.5,"Healthy individual, no concerns.",0
+P944,74,Female,Hypertension,118,170,95,38.8,23,12.2,2.1,Hypertension with elevated temperature and WBC.  Monitoring for infection.,0
+P945,59,Male,COPD,105,130,70,38.4,26,13.6,2.9,COPD exacerbation with increasing respiratory distress and lactate.  Sepsis likely.,1
+P946,38,Female,,88,115,70,37.2,17,7.8,1.1,Mild fever and cough.  Likely viral.,0
+P947,67,Male,Diabetes,132,160,85,39.5,28,14.1,3.3,"Diabetes patient with fever, tachycardia, and hypotension. Septic shock possible.",1
+P948,45,Female,CKD,102,125,75,38.1,22,11.7,2.0,CKD patient with fever and elevated WBC and lactate. Sepsis suspected.,1
+P949,24,Male,,75,110,70,36.5,15,6.5,0.7,"Healthy individual, no concerns.",0
+P950,70,Female,,90,140,80,37.0,18,8.0,1.0,Post-surgical patient with stable vitals.,0
+P951,62,Male,Hypertension,102,155,88,37.2,18,7.5,1.2,Patient presented with elevated heart rate and mild fever. Monitoring for changes.,0
+P952,35,Female,,95,120,78,36.8,16,6.2,0.8,"Stable vitals, no apparent infection. Discharge planned.",0
+P953,78,Male,Diabetes,115,95,55,39.5,24,12.8,3.1,"Hypotension, high fever, and elevated lactate. Suspected sepsis.",1
+P954,48,Female,COPD,125,110,70,38.9,28,9.5,2.5,"Respiratory distress, elevated heart rate, and fever. Possible sepsis.",1
+P955,25,Male,,85,125,80,36.5,14,5.5,0.7,"Normal vitals, no signs of infection.",0
+P956,59,Female,CKD,105,160,92,37.8,20,8.9,1.5,Elevated heart rate and mild fever. Monitoring renal function.,0
+P957,71,Male,Hypertension,130,170,98,38.5,22,10.2,1.8,"High blood pressure, slight fever, monitoring for infection.",0
+P958,42,Female,,78,115,75,37.0,15,6.8,0.9,"Normal vitals, no concerns at this time.",0
+P959,65,Male,Diabetes,118,100,60,39.8,26,13.5,3.8,"Hypotension, high fever, elevated WBC and lactate. Sepsis suspected.",1
+P960,39,Female,,92,130,85,36.9,17,7.2,1.0,"Mild fever, monitoring for any changes.",0
+P961,75,Male,COPD,122,145,82,38.1,25,11.1,2.2,"COPD exacerbation, increased respiratory rate and fever.",1
+P962,51,Female,Hypertension,108,150,90,37.5,19,8.1,1.3,Elevated heart rate and mild fever. Observing for infection.,0
+P963,28,Male,,80,120,72,36.7,14,5.9,0.6,"Healthy vital signs, no signs of infection.",0
+P964,68,Female,CKD,98,165,95,37.9,21,9.3,1.7,"Mild fever, monitoring kidney function closely.",0
+P965,45,Male,Diabetes,112,105,65,39.2,23,12.1,2.9,"Hypotension, fever, and elevated WBC. Possible sepsis.",1
+P966,32,Female,,88,135,82,37.1,16,6.5,0.8,"Normal vital signs, no indications of infection.",0
+P967,80,Male,Hypertension,135,175,100,38.7,24,10.8,2.0,High blood pressure and fever. Evaluating for infection.,0
+P968,54,Female,,95,125,75,36.9,18,7.8,1.1,"Mild fever, monitoring for any developments.",0
+P969,21,Male,,75,110,70,36.6,12,5.2,0.7,"Healthy vital signs, no signs of infection.",0
+P970,60,Female,COPD,115,140,85,38.3,27,11.9,2.4,COPD exacerbation with increased respiratory rate and fever. Possible sepsis.,1
+P971,37,Male,Diabetes,100,100,60,39.1,22,11.5,2.7,"Low blood pressure, fever, and elevated WBC. Suspect sepsis.",1
+P972,73,Female,Hypertension,128,160,95,38.0,20,9.7,1.9,Elevated heart rate and mild fever. Monitoring closely.,0
+P973,49,Male,,82,130,80,37.3,15,6.1,0.9,"Normal vitals, no signs of infection.",0
+P974,64,Female,CKD,102,170,98,37.6,19,8.5,1.4,"Mild fever, monitoring renal function.",0
+P975,41,Male,,90,115,75,36.8,17,7.1,1.0,"Stable vitals, no signs of infection.",0
+P976,77,Female,Diabetes,120,95,50,39.6,25,13.2,3.5,"Hypotension, high fever, and elevated lactate. Sepsis likely.",1
+P977,57,Male,Hypertension,110,155,92,37.8,21,9.2,1.6,Elevated heart rate and mild fever. Observing closely.,0
+P978,30,Female,,85,120,78,37.0,16,6.6,0.8,"Normal vital signs, no concerns.",0
+P979,69,Male,COPD,125,135,75,38.6,29,11.6,2.6,COPD exacerbation with respiratory distress and fever. Concern for sepsis.,1
+P980,46,Female,,92,140,88,37.2,18,7.4,1.2,"Mild fever, monitoring for any changes.",0
+P981,23,Male,,78,110,72,36.5,14,5.7,0.7,"Healthy vitals, no signs of infection.",0
+P982,63,Female,CKD,105,165,95,37.9,22,9.9,1.8,"Mild fever, close monitoring of renal function.",0
+P983,38,Male,Diabetes,118,105,65,39.4,24,12.9,3.2,"Hypotension, high fever, elevated WBC and lactate. Sepsis suspected.",1
+P984,72,Female,Hypertension,132,170,98,38.2,23,10.5,2.1,"High blood pressure, fever, evaluating for infection.",0
+P985,50,Male,,88,125,82,37.1,17,6.9,1.1,"Mild fever, observing for any changes.",0
+P986,27,Female,,72,115,75,36.7,15,5.4,0.6,"Normal vitals, no signs of infection.",0
+P987,66,Male,COPD,120,145,80,38.8,28,12.2,2.8,COPD exacerbation with respiratory distress and fever. Possible sepsis.,1
+P988,43,Female,Diabetes,108,100,60,39.0,21,11.0,2.5,"Hypotension, fever, and elevated WBC. Concerning for sepsis.",1
+P989,79,Male,Hypertension,138,175,100,38.5,25,11.3,2.3,High blood pressure and fever. Monitoring for infection.,0
+P990,56,Female,,95,135,85,37.4,19,7.7,1.3,"Mild fever, observing for any changes.",0
+P991,33,Male,,80,120,78,36.9,16,6.3,0.9,"Normal vital signs, no signs of infection.",0
+P992,70,Female,CKD,112,160,92,37.7,20,9.5,1.7,"Mild fever, monitoring renal function.",0
+P993,47,Male,,98,130,80,37.5,18,7.2,1.2,"Mild fever, monitoring for infection.",0
+P994,24,Female,,75,118,72,36.6,14,5.8,0.7,"Normal vital signs, no signs of infection.",0
+P995,61,Male,Diabetes,115,105,62,39.3,23,12.6,3.0,"Hypotension, high fever, elevated WBC and lactate. Sepsis suspected.",1
+P996,36,Female,,88,125,80,37.1,17,6.7,0.8,"Normal vital signs, no indication of infection.",0
+P997,74,Male,COPD,122,150,85,38.4,26,11.8,2.5,COPD exacerbation with increased respiratory rate and fever. Possible sepsis.,1
+P998,53,Female,Hypertension,105,160,95,37.6,20,8.8,1.5,Elevated heart rate and mild fever. Observing for infection.,0
+P999,29,Male,,82,115,75,36.8,15,6.0,0.7,"Normal vitals, no signs of infection.",0
+P1000,67,Female,CKD,99,170,98,38.0,21,9.1,1.6,"Mild fever, monitoring renal function.",0
