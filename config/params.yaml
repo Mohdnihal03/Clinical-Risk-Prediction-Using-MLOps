@@ -1,0 +1,48 @@
+# Dataset configurations
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  model_dir: "model"
+  input_file: "data/raw/sepsis_datasets.csv"
+
+# Preprocessing settings
+preprocessing:
+  numerical_features:
+    - "Age"
+    - "Heart_Rate"
+    - "BP_Systolic"
+    - "BP_Diastolic"
+    - "Temperature"
+    - "Respiratory_Rate"
+    - "WBC_Count"
+    - "Lactate_Level"
+  categorical_features:
+    - "Gender"
+    - "Comorbidities"
+  text_features:
+    - "Clinical_Notes"
+  target: "Sepsis_Label"
+  text_vectorizer_params:
+    max_features: 100
+    ngram_range: [1, 2]
+    stop_words: "english"
+
+# Model configurations
+model:
+  name: "RandomForest"
+  test_size: 0.2
+  random_state: 42
+  hyperparameters:
+    n_estimators: 100
+    max_depth: 10
+    class_weight: "balanced"
+
+# Monitoring configurations
+monitoring:
+  enable_drift_detection: true
+  drift_threshold: 0.05
+  features_to_monitor:
+    - "Age"
+    - "Heart_Rate"
+    - "WBC_Count"
+    - "Lactate_Level"
