@@ -2,7 +2,7 @@
 import logging
 from pathlib import Path
 from ingest_data import CSVDataIngestor
-from preprocess import preprocess_data
+from preprocess import ClinicalPreprocessor
 from train import train_model
 
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +19,7 @@ def run_pipeline(input_file="data/raw/sepsis_datasets.csv"):
         
         # 1. Ingestion
         logger.info("Ingesting data...")
-        ingestor = CSVDataIngestor(config)  # Pass config here
+        ingestor = CSVDataIngestor(config)
         ingestion_result = ingestor.ingest_csv(input_file)
         
         if ingestion_result['status'] != 'success':
@@ -27,7 +27,8 @@ def run_pipeline(input_file="data/raw/sepsis_datasets.csv"):
         
         # 2. Preprocessing
         logger.info("Preprocessing data...")
-        processed_path = preprocess_data(ingestion_result['raw_data'])
+        preprocessor = ClinicalPreprocessor()
+        processed_path = preprocessor.preprocess(ingestion_result['raw_data'])
         
         # 3. Training
         logger.info("Training model...")
@@ -41,7 +42,7 @@ def run_pipeline(input_file="data/raw/sepsis_datasets.csv"):
         return model_path
         
     except Exception as e:
-        logger.error(f"Pipeline failed: {str(e)}")
+        logger.error(f"Pipeline failed: {str(e)}", exc_info=True)
         raise
 
 if __name__ == "__main__":
