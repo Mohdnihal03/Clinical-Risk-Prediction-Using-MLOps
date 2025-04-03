@@ -7,3 +7,5 @@ transformer
 scikit-learn
 joblib
 xgboost
+mlflow
+shap

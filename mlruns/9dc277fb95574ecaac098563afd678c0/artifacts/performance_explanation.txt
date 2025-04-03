@@ -1,0 +1,6 @@
+Model Performance Explanation:
+- Accuracy (0.964): Percentage of correct predictions
+- Precision (0.95): When predicting sepsis, how often we're correct
+- Recall (0.934): What percentage of actual sepsis cases we detected
+- F1 Score (0.942): Balance between precision and recall
+- ROC AUC (0.99): Model's ability to distinguish classes (1=perfect)

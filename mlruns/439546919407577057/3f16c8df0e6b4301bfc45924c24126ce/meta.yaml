@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/nihall/Desktop/mlops-clinical-risk-prediction/mlruns/3f16c8df0e6b4301bfc45924c24126ce/artifacts
+end_time: 1743663009022
+entry_point_name: ''
+experiment_id: '439546919407577057'
+lifecycle_stage: active
+run_id: 3f16c8df0e6b4301bfc45924c24126ce
+run_name: sepsis_evaluation
+run_uuid: 3f16c8df0e6b4301bfc45924c24126ce
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1743663004659
+status: 3
+tags: []
+user_id: nihall

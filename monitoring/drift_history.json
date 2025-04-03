@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": "2025-04-03 12:45:11",
+    "data_file": "data\\processed\\test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": false,
+    "data_drift": {
+      "detected": false,
+      "top_features": {},
+      "threshold": 0.1
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {
+        "reference_metrics": {},
+        "new_metrics": {},
+        "differences": {}
+      },
+      "threshold": 0.05
+    },
+    "label_drift": {
+      "detected": false,
+      "metrics": {
+        "reference_distribution": [],
+        "new_distribution": [],
+        "distribution_diff": 0.0
+      },
+      "threshold": 0.1
+    },
+    "notes": "Initial reference data established"
+  }
+]

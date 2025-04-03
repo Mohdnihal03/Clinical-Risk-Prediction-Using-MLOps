@@ -145,6 +145,7 @@ try:
     os.makedirs(mlruns_path, exist_ok=True)
     
     mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_tracking_uri("sqlite:///mlruns.db")
     if not mlflow.get_experiment_by_name("sepsis_prediction"):
         mlflow.create_experiment("sepsis_prediction", artifact_location=tracking_uri)
     mlflow.set_experiment("sepsis_prediction")
