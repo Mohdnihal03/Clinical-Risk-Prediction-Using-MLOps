@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/nihall/Desktop/mlops-clinical-risk-prediction/mlruns/28c1b4fc2e5e4ac7bd2616b921915f91/artifacts
+end_time: 1743661003241
+entry_point_name: ''
+experiment_id: '439546919407577057'
+lifecycle_stage: active
+run_id: 28c1b4fc2e5e4ac7bd2616b921915f91
+run_name: clinical_evaluation
+run_uuid: 28c1b4fc2e5e4ac7bd2616b921915f91
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1743661002094
+status: 3
+tags: []
+user_id: nihall
