@@ -1,6 +1,6 @@
 stages:
   data_ingestion:
-    cmd: python src/pipeline.py
+    cmd: python src/pipeline.py --stage ingest
     deps:
       - src/pipeline.py
       - src/ingest_data.py
@@ -9,16 +9,18 @@ stages:
       - data.input_file
       - data.raw_dir
     outs:
-      - data/raw/ingested_*.csv
+      - data/raw/ingested_data.csv
+      - data/raw/ingestion_report.html
     metrics:
       - metrics/ingestion_metrics.json:
           cache: false
 
   data_preprocessing:
-    cmd: python src/pipeline.py
+    cmd: python src/pipeline.py --stage preprocess
     deps:
       - src/preprocess.py
-      - data/raw/ingested_*.csv
+      - src/pipeline.py
+      - data/raw/ingested_data.csv
     params:
       - preprocessing.numerical_features
       - preprocessing.categorical_features
@@ -27,43 +29,79 @@ stages:
       - preprocessing.text_vectorizer_params
       - data.processed_dir
     outs:
-      - data/processed/processed_*.npz
-      - data/processed/X_transformed.csv
-      - data/processed/y_transformed.csv
-      - data/processed/cleaned_data.csv
+      - data/processed/train.npz
+      - data/processed/test.npz
+      - data/processed/feature_names.npy
       - model/preprocessor.joblib
+      - reports/preprocessing_report.html
     metrics:
       - metrics/preprocessing_metrics.json:
           cache: false
 
   model_training:
-    cmd: python src/pipeline.py
+    cmd: python src/pipeline.py --stage train
     deps:
       - src/train.py
-      - data/processed/processed_*.npz
+      - src/pipeline.py
+      - data/processed/train.npz
+      - data/processed/test.npz
+      - model/preprocessor.joblib
     params:
       - model.name
       - model.test_size
       - model.random_state
       - model.hyperparameters
+      - model.monitoring_metrics
       - data.model_dir
     outs:
       - model/trained_model.joblib
+      - model/model_card.md
+      - reports/training_report.html
     metrics:
       - metrics/training_metrics.json:
           cache: false
       - metrics/validation_metrics.json:
           cache: false
+      - metrics/feature_importance.json:
+          cache: false
 
   monitoring:
-    cmd: python src/monitor.py
+    cmd: python src/monitor.py --stage monitor
     deps:
       - src/monitor.py
       - model/trained_model.joblib
+      - data/processed/test.npz
+      - data/processed/feature_names.npy
+      - data/processed/reference_data.npz
     params:
       - monitoring.enable_drift_detection
-      - monitoring.drift_threshold
+      - monitoring.monitoring_dir
+      - monitoring.history_file
+      - monitoring.visualizations_dir
+      - monitoring.drift_thresholds
       - monitoring.features_to_monitor
+      - monitoring.schedule
+      - monitoring.alerts
+    outs:
+      - monitoring/drift_history.json
+      - monitoring/visualizations
     metrics:
       - metrics/drift_metrics.json:
           cache: false
+      - metrics/performance_metrics.json:
+          cache: false
+    plots:
+      - monitoring/plots/feature_drift.png:
+          cache: false
+      - monitoring/plots/performance_trend.png:
+          cache: false
+
+  report_generation:
+    cmd: python src/report.py
+    deps:
+      - src/report.py
+      - metrics/*
+      - monitoring/*
+    outs:
+      - reports/monitoring_report.html
+      - reports/full_report.pdf

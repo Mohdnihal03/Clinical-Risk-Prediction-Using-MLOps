@@ -4,6 +4,7 @@ data:
   processed_dir: "data/processed"
   model_dir: "model"
   input_file: "data/raw/sepsis_datasets.csv"
+  reference_data: "data/processed/reference_data.npz"  # Added reference data path
 
 # Preprocessing settings
 preprocessing:
@@ -36,13 +37,54 @@ model:
     n_estimators: 100
     max_depth: 10
     class_weight: "balanced"
+  monitoring_metrics:  # Added model performance metrics to monitor
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "roc_auc"
 
 # Monitoring configurations
 monitoring:
   enable_drift_detection: true
-  drift_threshold: 0.05
+  monitoring_dir: "monitoring"  # Directory for storing monitoring artifacts
+  history_file: "monitoring/drift_history.json"  # File to store drift history
+  visualizations_dir: "monitoring/visualizations"  # Directory for drift visualizations
+  
+  # Drift detection thresholds
+  drift_thresholds:
+    data_drift_threshold: 0.1  # KS test threshold for individual features
+    concept_drift_threshold: 0.05  # Performance drop threshold
+    label_drift_threshold: 0.1  # Label distribution change threshold
+    evidently_drift_threshold: 0.2  # Share of drifted features threshold (for Evidently)
+    significant_drift_ratio: 0.3  # Ratio of features that must drift to trigger alert
+  
+  # Features to monitor (expanded from original)
   features_to_monitor:
-    - "Age"
-    - "Heart_Rate"
-    - "WBC_Count"
-    - "Lactate_Level"
+    numerical:
+      - "Age"
+      - "Heart_Rate"
+      - "BP_Systolic"
+      - "BP_Diastolic"
+      - "Temperature"
+      - "Respiratory_Rate"
+      - "WBC_Count"
+      - "Lactate_Level"
+    categorical:
+      - "Gender"
+      - "Comorbidities"
+  
+  # Monitoring schedule
+  schedule:
+    daily: true
+    weekly: false
+    monthly: false
+    time: "09:00"  # Time to run daily monitoring
+  
+  # Alerting configuration
+  alerts:
+    email_notifications: false
+    email_recipients: []
+    slack_notifications: false
+    slack_webhook: ""
+    minimum_severity: "high"  # Can be "low", "medium", "high"
