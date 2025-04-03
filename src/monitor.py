@@ -1,7 +1,6 @@
 import logging
 import numpy as np
 import pandas as pd
-from pathlib import Path
 import joblib
 from scipy.stats import ks_2samp
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
@@ -9,124 +8,280 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import os
+from evidently.report import Report
+from evidently.metric_preset import DataDriftPreset
 
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
+# Initialize logger at module level
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(handler)
 
 class DriftDetector:
-    """
-    Detects data, concept, and label drift to determine when model retraining is necessary.
-    """
+    """Complete drift detection with all fixes and robust error handling."""
+    
     def __init__(self, config=None):
-        if config is None:
-            self.config = {
-                'reference_data_path': 'data/processed/reference_data.npz',
-                'model_path': 'model/sepsis_xgboost_model.joblib',
-                'drift_thresholds': {
-                    'data_drift_threshold': 0.1,  # KS test threshold
-                    'concept_drift_threshold': 0.05,  # Performance drop threshold
-                    'label_drift_threshold': 0.1,  # Label distribution threshold
-                },
-                'monitor_dir': 'monitoring',
-                'history_file': 'monitoring/drift_history.json'
-            }
-        else:
-            self.config = config
-            
-        # Create monitoring directory
-        os.makedirs(self.config['monitor_dir'], exist_ok=True)
+        # Default configuration with all required keys
+        self.default_config = {
+            'reference_data_path': 'data/processed/reference_data.npz',
+            'model_path': 'models/model.joblib',
+            'drift_thresholds': {
+                'data_drift_threshold': 0.1,
+                'concept_drift_threshold': 0.05,
+                'label_drift_threshold': 0.1,
+                'evidently_drift_threshold': 0.2,
+                'significant_drift_ratio': 0.3
+            },
+            'monitor_dir': 'monitoring',
+            'history_file': 'monitoring/drift_history.json',
+            'visualizations_dir': 'monitoring/visualizations'
+        }
         
-        # Initialize drift history if doesn't exist
+        # Merge configurations
+        self.config = {**self.default_config, **(config or {})}
+        
+        # Ensure all threshold keys exist
+        self.config['drift_thresholds'] = {
+            **self.default_config['drift_thresholds'],
+            **(self.config.get('drift_thresholds', {}))
+        }
+        
+        # Create directories
+        os.makedirs(self.config['monitor_dir'], exist_ok=True)
+        os.makedirs(self.config['visualizations_dir'], exist_ok=True)
+        
+        # Initialize history file
         if not os.path.exists(self.config['history_file']):
             with open(self.config['history_file'], 'w') as f:
                 json.dump([], f)
                 
-        # Load reference data if available
+        # Load reference data
+        self.X_ref = None
+        self.y_ref = None
+        self.feature_names = None
         self._load_reference_data()
-    
+
     def _load_reference_data(self):
-        """Load reference data for comparison"""
+        """Safely load reference data with proper handling of feature names"""
         try:
-            if os.path.exists(self.config['reference_data_path']):
-                data = np.load(self.config['reference_data_path'])
-                self.X_ref = data['X']
-                self.y_ref = data['y']
-                if 'feature_names' in data:
-                    self.feature_names = list(data['feature_names'])
-                else:
-                    self.feature_names = [f"Feature_{i}" for i in range(self.X_ref.shape[1])]
-                logger.info(f"Loaded reference data with shape {self.X_ref.shape}")
-            else:
-                logger.warning("Reference data not found")
-                self.X_ref = None
-                self.y_ref = None
-                self.feature_names = None
-        except Exception as e:
-            logger.error(f"Failed to load reference data: {str(e)}")
-            self.X_ref = None
-            self.y_ref = None
-            self.feature_names = None
-    
-    def _detect_data_drift(self, X_new):
-        """
-        Detect data drift using Kolmogorov-Smirnov test
-        Returns drift score per feature and boolean if drift detected
-        """
-        if self.X_ref is None:
-            logger.warning("No reference data available for data drift detection")
-            return {}, False
+            if not os.path.exists(self.config['reference_data_path']):
+                logger.warning(f"Reference data not found at {self.config['reference_data_path']}")
+                return
             
-        drift_scores = {}
+            # Load data first into memory
+            with open(self.config['reference_data_path'], 'rb') as f:
+                data = np.load(f, allow_pickle=True)
+                data_content = {k: data[k] for k in data.files}
+            
+            self.X_ref = data_content.get('X')
+            self.y_ref = data_content.get('y')
+            
+            # Handle feature names safely - including 0-d array case
+            if 'feature_names' in data_content:
+                feature_names = data_content['feature_names']
+                if feature_names.ndim == 0:  # Handle 0-d array case
+                    self.feature_names = [str(feature_names)]
+                else:
+                    self.feature_names = list(feature_names)
+            else:
+                self.feature_names = (
+                    [f"Feature_{i}" for i in range(self.X_ref.shape[1])] 
+                    if self.X_ref is not None else None
+                )
+            
+            logger.info(f"Successfully loaded reference data from {self.config['reference_data_path']}")
+            
+        except Exception as e:
+            logger.error(f"Error loading reference data: {str(e)}", exc_info=True)
+            self.X_ref = self.y_ref = self.feature_names = None
+
+    def _safe_load_data(self, path):
+        """Helper method to safely load numpy data"""
+        try:
+            with open(path, 'rb') as f:
+                data = np.load(f, allow_pickle=True)
+                return {k: data[k] for k in data.files}
+        except Exception as e:
+            logger.error(f"Error loading data from {path}: {str(e)}", exc_info=True)
+            return None
+
+    def _detect_data_drift(self, X_new):
+        """Comprehensive data drift detection using both KS test and Evidently"""
+        if self.X_ref is None or self.feature_names is None:
+            logger.warning("No reference data available for drift detection")
+            return {'ks_test': {}, 'evidently': {}}, False
+            
+        # KS Test Drift Detection
+        ks_scores = {}
         drifted_features = []
         
-        # Calculate KS statistic for each feature
-        for i in range(X_new.shape[1]):
-            if i < len(self.feature_names):
-                feature_name = self.feature_names[i]
-            else:
-                feature_name = f"Feature_{i}"
-                
-            # Skip if all values are the same (causes KS test to fail)
-            if len(np.unique(X_new[:, i])) <= 1 or len(np.unique(self.X_ref[:, i])) <= 1:
-                drift_scores[feature_name] = 0
-                continue
-                
-            # Perform KS test
-            ks_stat, p_value = ks_2samp(self.X_ref[:, i], X_new[:, i])
-            drift_scores[feature_name] = ks_stat
+        # Ensure we don't exceed feature dimensions
+        n_features = min(X_new.shape[1], len(self.feature_names), self.X_ref.shape[1])
+        
+        for i in range(n_features):
+            feature_name = self.feature_names[i]
+            try:
+                ks_stat, _ = ks_2samp(self.X_ref[:, i], X_new[:, i])
+                ks_scores[feature_name] = ks_stat
+                if ks_stat > self.config['drift_thresholds']['data_drift_threshold']:
+                    drifted_features.append(feature_name)
+            except Exception as e:
+                logger.warning(f"KS test failed for {feature_name}: {str(e)}")
+                ks_scores[feature_name] = 0
+        
+        ks_drift = len(drifted_features) > n_features * self.config['drift_thresholds']['significant_drift_ratio']
+        
+        # Evidently Drift Detection
+        evidently_metrics = {}
+        evidently_drift = False
+        
+        try:
+            ref_df = pd.DataFrame(self.X_ref[:, :n_features], columns=self.feature_names[:n_features])
+            new_df = pd.DataFrame(X_new[:, :n_features], columns=self.feature_names[:n_features])
             
-            # Check if drift detected for this feature
-            if ks_stat > self.config['drift_thresholds']['data_drift_threshold']:
-                drifted_features.append(feature_name)
+            report = Report(metrics=[DataDriftPreset()])
+            report.run(current_data=new_df, reference_data=ref_df, column_mapping=None)
+            
+            # Save report
+            report_path = os.path.join(
+                self.config['visualizations_dir'], 
+                f"drift_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+            )
+            report.save_html(report_path)
+            
+            # Parse results
+            result = json.loads(report.json())['metrics'][0]['result']
+            evidently_metrics = {
+                'n_features': result['n_features'],
+                'n_drifted': result['n_drifted_features'],
+                'share_drifted': result['share_drifted_features'],
+                'dataset_drift': result['dataset_drift']
+            }
+            evidently_drift = result['share_drifted_features'] > self.config['drift_thresholds']['evidently_drift_threshold']
+            
+        except Exception as e:
+            logger.error(f"Evidently analysis failed: {str(e)}", exc_info=True)
         
-        # Sort features by drift score
-        drift_scores = {k: v for k, v in sorted(
-            drift_scores.items(), key=lambda item: item[1], reverse=True
-        )}
-        
-        # Determine if significant drift detected
-        data_drift_detected = len(drifted_features) > len(self.feature_names) * 0.3  # If >30% features drifted
-        
-        if data_drift_detected:
-            logger.warning(f"Data drift detected in {len(drifted_features)} features")
-        
-        return drift_scores, data_drift_detected
-    
+        return {
+            'ks_test': {'scores': ks_scores, 'drift_detected': ks_drift},
+            'evidently': {'metrics': evidently_metrics, 'drift_detected': evidently_drift}
+        }, ks_drift or evidently_drift
+
+    def analyze_drift(self, new_data_path):
+        """Complete drift analysis with robust error handling"""
+        try:
+            # Safely load new data
+            new_data = self._safe_load_data(new_data_path)
+            if new_data is None or 'X' not in new_data or 'y' not in new_data:
+                raise ValueError("Invalid data format - must contain 'X' and 'y'")
+                
+            X_new, y_new = new_data['X'], new_data['y']
+            
+            # Initialize results structure
+            results = {
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'data_file': os.path.basename(new_data_path),
+                'drift_detected': False,
+                'retraining_recommended': False,
+                'data_drift': {'detected': False, 'methods': {}},
+                'concept_drift': {'detected': False, 'metrics': {}},
+                'label_drift': {'detected': False, 'metrics': {}}
+            }
+            
+            # Handle case where no reference data exists
+            if self.X_ref is None:
+                logger.info("Initializing new reference dataset")
+                try:
+                    feature_names = (
+                        np.array(self.feature_names) 
+                        if hasattr(self, 'feature_names') and self.feature_names is not None 
+                        else None
+                    )
+                    np.savez(
+                        self.config['reference_data_path'],
+                        X=X_new,
+                        y=y_new,
+                        feature_names=feature_names
+                    )
+                    results['note'] = "Initial reference dataset created"
+                    self._save_drift_history(results)
+                    return results, False
+                except Exception as e:
+                    logger.error(f"Failed to save reference data: {str(e)}")
+                    results['error'] = f"Reference data initialization failed: {str(e)}"
+                    return results, False
+                
+            # Perform all drift detection
+            data_drift_results, data_drift_detected = self._detect_data_drift(X_new)
+            concept_drift_results, concept_drift_detected = self._detect_concept_drift(X_new, y_new)
+            label_drift_results, label_drift_detected = self._detect_label_drift(y_new)
+            
+            # Update results
+            results.update({
+                'data_drift': {
+                    'detected': data_drift_detected,
+                    'methods': {
+                        'ks_test': {
+                            'detected': data_drift_results['ks_test']['drift_detected'],
+                            'top_features': dict(sorted(
+                                data_drift_results['ks_test']['scores'].items(),
+                                key=lambda x: x[1],
+                                reverse=True
+                            )[:5]),
+                            'threshold': self.config['drift_thresholds']['data_drift_threshold']
+                        },
+                        'evidently': {
+                            'detected': data_drift_results['evidently']['drift_detected'],
+                            'metrics': data_drift_results['evidently']['metrics'],
+                            'threshold': self.config['drift_thresholds']['evidently_drift_threshold']
+                        }
+                    }
+                },
+                'concept_drift': {
+                    'detected': concept_drift_detected,
+                    'metrics': concept_drift_results,
+                    'threshold': self.config['drift_thresholds']['concept_drift_threshold']
+                },
+                'label_drift': {
+                    'detected': label_drift_detected,
+                    'metrics': label_drift_results,
+                    'threshold': self.config['drift_thresholds']['label_drift_threshold']
+                }
+            })
+            
+            # Determine overall results
+            results['drift_detected'] = any([
+                results['data_drift']['detected'],
+                results['concept_drift']['detected'],
+                results['label_drift']['detected']
+            ])
+            
+            results['retraining_recommended'] = (
+                results['concept_drift']['detected'] or
+                (results['data_drift']['detected'] and results['label_drift']['detected'])
+            )
+            
+            self._save_drift_history(results)
+            return results, results['retraining_recommended']
+            
+        except Exception as e:
+            logger.error(f"Drift analysis failed: {str(e)}", exc_info=True)
+            return {
+                'error': str(e),
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }, False
+
     def _detect_concept_drift(self, X_new, y_new):
-        """
-        Detect concept drift by comparing model performance
-        between reference data and new data
-        """
+        """Detect concept drift by comparing model performance"""
         try:
             if self.X_ref is None or self.y_ref is None:
-                logger.warning("No reference data available for concept drift detection")
+                logger.warning("No reference data for concept drift detection")
                 return {}, False
                 
-            # Load model
             model = joblib.load(self.config['model_path'])
             
-            # Get baseline performance on reference data
+            # Reference performance
             y_ref_pred = model.predict(self.X_ref)
             ref_metrics = {
                 'accuracy': accuracy_score(self.y_ref, y_ref_pred),
@@ -135,7 +290,7 @@ class DriftDetector:
                 'f1': f1_score(self.y_ref, y_ref_pred)
             }
             
-            # Get performance on new data
+            # New data performance
             y_new_pred = model.predict(X_new)
             new_metrics = {
                 'accuracy': accuracy_score(y_new, y_new_pred),
@@ -144,228 +299,100 @@ class DriftDetector:
                 'f1': f1_score(y_new, y_new_pred)
             }
             
-            # Calculate differences
+            # Differences
             metric_diffs = {
                 metric: ref_metrics[metric] - new_metrics[metric]
                 for metric in ref_metrics
             }
             
-            # Determine if concept drift detected based on F1 score
-            concept_drift_detected = metric_diffs['f1'] > self.config['drift_thresholds']['concept_drift_threshold']
-            
-            if concept_drift_detected:
-                logger.warning(f"Concept drift detected: F1 score dropped by {metric_diffs['f1']:.4f}")
+            concept_drift = metric_diffs['f1'] > self.config['drift_thresholds']['concept_drift_threshold']
             
             return {
                 'reference_metrics': ref_metrics,
                 'new_metrics': new_metrics,
                 'differences': metric_diffs
-            }, concept_drift_detected
+            }, concept_drift
             
         except Exception as e:
-            logger.error(f"Concept drift detection failed: {str(e)}")
+            logger.error(f"Concept drift detection failed: {str(e)}", exc_info=True)
             return {}, False
-    
+
     def _detect_label_drift(self, y_new):
-        """
-        Detect label drift (changes in class distribution)
-        """
-        if self.y_ref is None:
-            logger.warning("No reference data available for label drift detection")
-            return {}, False
-        
-        # Calculate class distribution in reference data
-        ref_class_dist = np.bincount(self.y_ref.astype(int)) / len(self.y_ref)
-        
-        # Calculate class distribution in new data
-        new_class_dist = np.bincount(y_new.astype(int)) / len(y_new)
-        
-        # Ensure distributions have same shape (in case new data has different classes)
-        if len(ref_class_dist) != len(new_class_dist):
-            # Extend the smaller one with zeros
-            max_len = max(len(ref_class_dist), len(new_class_dist))
-            ref_class_dist = np.pad(ref_class_dist, (0, max_len - len(ref_class_dist)))
-            new_class_dist = np.pad(new_class_dist, (0, max_len - len(new_class_dist)))
-        
-        # Calculate absolute difference
-        distribution_diff = np.abs(ref_class_dist - new_class_dist).max()
-        
-        # Determine if label drift detected
-        label_drift_detected = distribution_diff > self.config['drift_thresholds']['label_drift_threshold']
-        
-        if label_drift_detected:
-            logger.warning(f"Label drift detected: Class distribution changed by {distribution_diff:.4f}")
-        
-        return {
-            'reference_distribution': ref_class_dist.tolist(),
-            'new_distribution': new_class_dist.tolist(),
-            'distribution_diff': distribution_diff
-        }, label_drift_detected
-    
-    def analyze_drift(self, new_data_path):
-        """Analyze all types of drift and return serializable results"""
+        """Detect label distribution drift"""
         try:
-            # Load new data
-            data = np.load(new_data_path)
-            X_new = data['X']
-            y_new = data['y']
+            if self.y_ref is None:
+                logger.warning("No reference labels for label drift detection")
+                return {}, False
+                
+            # Calculate distributions
+            ref_dist = np.bincount(self.y_ref.astype(int)) / len(self.y_ref)
+            new_dist = np.bincount(y_new.astype(int)) / len(y_new)
             
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            drift_results = {
-                'timestamp': timestamp,
-                'data_file': str(new_data_path),  # Convert Path to string
-                'drift_detected': False,
-                'retraining_recommended': False,
-                'data_drift': {
-                    'detected': False,
-                    'top_features': {},
-                    'threshold': float(self.config['drift_thresholds']['data_drift_threshold'])
-                },
-                'concept_drift': {
-                    'detected': False,
-                    'metrics': {
-                        'reference_metrics': {},
-                        'new_metrics': {},
-                        'differences': {}
-                    },
-                    'threshold': float(self.config['drift_thresholds']['concept_drift_threshold'])
-                },
-                'label_drift': {
-                    'detected': False,
-                    'metrics': {
-                        'reference_distribution': [],
-                        'new_distribution': [],
-                        'distribution_diff': 0.0
-                    },
-                    'threshold': float(self.config['drift_thresholds']['label_drift_threshold'])
-                }
-            }
+            # Align distributions
+            max_len = max(len(ref_dist), len(new_dist))
+            ref_dist = np.pad(ref_dist, (0, max_len - len(ref_dist)))
+            new_dist = np.pad(new_dist, (0, max_len - len(new_dist)))
             
-            # Check if reference data exists
-            if self.X_ref is None or self.y_ref is None:
-                logger.info("Setting current data as reference baseline")
-                np.savez(
-                    self.config['reference_data_path'],
-                    X=X_new,
-                    y=y_new,
-                    feature_names=np.array(self.feature_names) if hasattr(self, 'feature_names') else None
-                )
-                drift_results['notes'] = "Initial reference data established"
-                self._save_drift_history(drift_results)
-                return drift_results, False
+            # Calculate difference
+            dist_diff = np.abs(ref_dist - new_dist).max()
+            label_drift = dist_diff > self.config['drift_thresholds']['label_drift_threshold']
             
-            # Data drift detection
-            data_drift_scores, data_drift_detected = self._detect_data_drift(X_new)
-            drift_results['data_drift'].update({
-                'detected': bool(data_drift_detected),  # Ensure boolean
-                'top_features': {k: float(v) for k, v in 
-                            sorted(data_drift_scores.items(), 
-                                    key=lambda x: x[1], 
-                                    reverse=True)[:5]}
-            })
-            
-            # Concept drift detection
-            concept_metrics, concept_drift_detected = self._detect_concept_drift(X_new, y_new)
-            drift_results['concept_drift'].update({
-                'detected': bool(concept_drift_detected),
-                'metrics': {
-                    'reference_metrics': {k: float(v) for k, v in concept_metrics['reference_metrics'].items()},
-                    'new_metrics': {k: float(v) for k, v in concept_metrics['new_metrics'].items()},
-                    'differences': {k: float(v) for k, v in concept_metrics['differences'].items()}
-                }
-            })
-            
-            # Label drift detection
-            label_metrics, label_drift_detected = self._detect_label_drift(y_new)
-            drift_results['label_drift'].update({
-                'detected': bool(label_drift_detected),
-                'metrics': {
-                    'reference_distribution': [float(x) for x in label_metrics['reference_distribution']],
-                    'new_distribution': [float(x) for x in label_metrics['new_distribution']],
-                    'distribution_diff': float(label_metrics['distribution_diff'])
-                }
-            })
-            
-            # Determine overall drift
-            drift_results['drift_detected'] = bool(
-                drift_results['data_drift']['detected'] or
-                drift_results['concept_drift']['detected'] or
-                drift_results['label_drift']['detected']
-            )
-            
-            # Recommend retraining
-            drift_results['retraining_recommended'] = bool(
-                drift_results['concept_drift']['detected'] or
-                (drift_results['data_drift']['detected'] and 
-                drift_results['label_drift']['detected'])
-            )
-            
-            # Save results
-            self._save_drift_history(drift_results)
-            
-            return drift_results, drift_results['retraining_recommended']
+            return {
+                'reference_distribution': ref_dist.tolist(),
+                'new_distribution': new_dist.tolist(),
+                'distribution_diff': float(dist_diff)
+            }, label_drift
             
         except Exception as e:
-            logger.error(f"Drift analysis failed: {str(e)}", exc_info=True)
-            return {
-                'error': str(e),
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            }, False
-    
-    def _save_drift_history(self, drift_results):
-        """Save drift analysis results to history file with proper serialization"""
+            logger.error(f"Label drift detection failed: {str(e)}", exc_info=True)
+            return {}, False
+
+    def _save_drift_history(self, results):
+        """Save drift results to history file"""
         try:
-            # Ensure directory exists
-            os.makedirs(os.path.dirname(self.config['history_file']), exist_ok=True)
-            
-            # Load existing history or initialize empty list
+            # Load existing history
             history = []
             if os.path.exists(self.config['history_file']):
                 try:
                     with open(self.config['history_file'], 'r') as f:
                         history = json.load(f)
-                except (json.JSONDecodeError, IOError):
-                    history = []
+                except (json.JSONDecodeError, IOError) as e:
+                    logger.warning(f"Failed to load history file: {str(e)}")
             
             # Append new results
-            history.append(drift_results)
+            history.append(results)
             
-            # Write with atomic replacement
+            # Save with atomic write
             temp_file = self.config['history_file'] + '.tmp'
             with open(temp_file, 'w') as f:
-                json.dump(history, f, indent=2, default=str)  # Use default=str for non-serializable objects
+                json.dump(history, f, indent=2, default=str)
             
-            # Atomic rename
             os.replace(temp_file, self.config['history_file'])
+            logger.info(f"Saved drift results to {self.config['history_file']}")
             
-            logger.info(f"Successfully saved drift history to {self.config['history_file']}")
         except Exception as e:
             logger.error(f"Failed to save drift history: {str(e)}", exc_info=True)
             raise
         
     def _generate_drift_visualizations(self, X_new, y_new, data_drift_scores, 
-                                       concept_drift_metrics, label_drift_metrics):
+                                     concept_drift_metrics, label_drift_metrics):
         """Generate visualizations for drift analysis"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        os.makedirs("monitoring", exist_ok=True)
-        viz_dir = Path(self.config['monitor_dir']) / 'visualizations'
-        viz_dir.mkdir(exist_ok=True)
         
-        # 1. Data Drift Visualization
-        if data_drift_scores:
+        # 1. Data Drift Visualization (KS Test)
+        if data_drift_scores['ks_test']['scores']:
             plt.figure(figsize=(10, 6))
-            # Get top 10 drifted features
-            features = list(data_drift_scores.keys())[:10]
-            scores = [data_drift_scores[f] for f in features]
+            features = list(data_drift_scores['ks_test']['scores'].keys())[:10]
+            scores = [data_drift_scores['ks_test']['scores'][f] for f in features]
             
             plt.barh(features, scores)
             plt.axvline(x=self.config['drift_thresholds']['data_drift_threshold'], 
                        color='red', linestyle='--', label='Drift Threshold')
             plt.xlabel('Drift Score (KS Statistic)')
-            plt.title('Top 10 Features by Drift Score')
+            plt.title('Top 10 Features by Drift Score (KS Test)')
             plt.legend()
             plt.tight_layout()
-            plt.savefig(viz_dir / f"data_drift_{timestamp}.png")
+            plt.savefig(os.path.join(self.config['visualizations_dir'], f"ks_drift_{timestamp}.png"))
             plt.close()
         
         # 2. Concept Drift Visualization
@@ -386,7 +413,7 @@ class DriftDetector:
             plt.xticks(x, metrics)
             plt.legend()
             plt.tight_layout()
-            plt.savefig(viz_dir / f"concept_drift_{timestamp}.png")
+            plt.savefig(os.path.join(self.config['visualizations_dir'], f"concept_drift_{timestamp}.png"))
             plt.close()
         
         # 3. Label Drift Visualization
@@ -406,12 +433,16 @@ class DriftDetector:
             plt.xticks(x, ['Class ' + str(i) for i in range(len(ref_dist))])
             plt.legend()
             plt.tight_layout()
-            plt.savefig(viz_dir / f"label_drift_{timestamp}.png")
+            plt.savefig(os.path.join(self.config['visualizations_dir'], f"label_drift_{timestamp}.png"))
             plt.close()
 
 def detect_drift(new_data_path, config=None):
     """
     Wrapper function to detect drift and recommend retraining
+    
+    Args:
+        new_data_path: Path to new data in npz format
+        config: Optional configuration dictionary
     
     Returns:
         tuple: (drift_results, retraining_recommended)
