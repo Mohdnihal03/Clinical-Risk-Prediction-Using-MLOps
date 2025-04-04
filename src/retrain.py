@@ -1,12 +1,11 @@
 import logging
 import os
 import json
-import time
 import datetime
-import requests
 from pathlib import Path
 from typing import Dict, Any, Tuple, List, Optional
 from dotenv import load_dotenv
+import google.generativeai as genai
 
 # Import existing modules
 from train import train_model
@@ -39,7 +38,9 @@ class ModelRetrainer:
         
         # Gemini API setup
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
-        if not self.gemini_api_key:
+        if self.gemini_api_key:
+            genai.configure(api_key=self.gemini_api_key)
+        else:
             logger.warning("No Gemini API key provided. LLM analysis will be disabled.")
         
         # Monitoring configuration
@@ -88,29 +89,21 @@ class ModelRetrainer:
             logger.error(f"Failed to save metrics history: {str(e)}")
 
     def _call_gemini_api(self, prompt: str) -> str:
-        """Call Gemini API and return the response"""
+        """Call Gemini API using the new generativeai package"""
         if not self.gemini_api_key:
             return "Gemini API key not available"
             
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
-        headers = {
-            "Content-Type": "application/json",
-            "x-goog-api-key": self.gemini_api_key
-        }
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": 0.2,
-                "topP": 0.8,
-                "topK": 40
-            }
-        }
-        
         try:
-            response = requests.post(url, headers=headers, json=payload)
-            response.raise_for_status()
-            result = response.json()
-            return result['candidates'][0]['content']['parts'][0]['text']
+            model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest")
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.5,
+                    top_p=0.85,
+                    max_output_tokens=650
+                )
+            )
+            return response.text
         except Exception as e:
             logger.error(f"Gemini API call failed: {str(e)}")
             return f"Error calling Gemini API: {str(e)}"
@@ -165,16 +158,12 @@ class ModelRetrainer:
         model_path, test_data_path = train_model(str(self.processed_data_path))
         self.model_path = Path(model_path)
         self.test_data_path = Path(test_data_path)
-        
-        # Update model path in monitoring config
         self.monitoring_config['model_path'] = model_path
-        
         return model_path, test_data_path
 
     def evaluate_current_model(self) -> Dict[str, float]:
         """Run evaluation on current model and return metrics"""
         try:
-            # Perform initial training if no model exists
             if self._initial_training_required():
                 self.perform_initial_training()
             
@@ -185,7 +174,6 @@ class ModelRetrainer:
                 
             metrics = evaluate_model(str(self.model_path), str(self.test_data_path))
             
-            # Add timestamp and save to history
             metrics_entry = {
                 "timestamp": datetime.datetime.now().isoformat(),
                 "metrics": metrics
@@ -204,13 +192,10 @@ class ModelRetrainer:
         Returns: (drift_detected, drift_details)
         """
         if len(self.metrics_history) < 2:
-            logger.info("Not enough history to detect drift. Need at least 2 evaluations.")
-            return False, {"reason": "insufficient_history"}
+            logger.warning("Insufficient history - treating as critical case")
+            return True, {"reason": "insufficient_history"}
         
-        # Get latest metrics
         current_metrics = self.metrics_history[-1]["metrics"]
-        
-        # Check against threshold
         f1_score = current_metrics.get("f1", 0)
         auc_score = current_metrics.get("roc_auc", 0)
         
@@ -221,14 +206,15 @@ class ModelRetrainer:
             "previous_evaluations": len(self.metrics_history) - 1
         }
         
-        # Simple threshold-based detection
-        drift_detected = (f1_score < self.performance_threshold or auc_score < self.performance_threshold)
+        # Threshold-based detection
+        drift_detected = (f1_score < self.performance_threshold or 
+                         auc_score < self.performance_threshold)
         
         if drift_detected:
             drift_details["reason"] = "below_threshold"
             logger.warning(f"Performance drift detected! Metrics below threshold: F1={f1_score}, AUC={auc_score}")
         else:
-            # Check for significant decrease from previous run
+            # Check for significant decrease
             if len(self.metrics_history) >= 2:
                 previous_metrics = self.metrics_history[-2]["metrics"]
                 f1_decrease = previous_metrics.get("f1", 0) - f1_score
@@ -237,11 +223,10 @@ class ModelRetrainer:
                 drift_details["f1_change"] = -f1_decrease
                 drift_details["auc_change"] = -auc_decrease
                 
-                # Detect significant decrease (more than 5%)
                 if f1_decrease > 0.05 or auc_decrease > 0.05:
                     drift_detected = True
                     drift_details["reason"] = "significant_decrease"
-                    logger.warning(f"Performance drift detected! Significant decrease from previous run: F1 change={-f1_decrease}, AUC change={-auc_decrease}")
+                    logger.warning(f"Significant performance decrease detected")
         
         return drift_detected, drift_details
 
@@ -256,17 +241,12 @@ class ModelRetrainer:
             logger.info("Initiating model retraining...")
             new_model_path, new_test_data_path = train_model(str(self.processed_data_path))
             
-            # Update paths to new model and test data
             self.model_path = Path(new_model_path)
             self.test_data_path = Path(new_test_data_path)
-            
-            # Update monitoring config with new model path
             self.monitoring_config['model_path'] = str(new_model_path)
             
-            # Evaluate new model
             new_metrics = self.evaluate_current_model()
             
-            # Create retraining report
             retraining_report = {
                 "timestamp": datetime.datetime.now().isoformat(),
                 "new_model_path": str(new_model_path),
@@ -285,12 +265,6 @@ class ModelRetrainer:
     def run_retraining_workflow(self, force_retrain: bool = False) -> Dict[str, Any]:
         """
         Run the complete automated retraining workflow
-        
-        Args:
-            force_retrain: If True, skip drift detection and retrain anyway
-            
-        Returns:
-            Dict containing workflow results and actions taken
         """
         workflow_result = {
             "timestamp": datetime.datetime.now().isoformat(),
@@ -301,112 +275,105 @@ class ModelRetrainer:
         try:
             # Step 1: Initial training if needed
             if self._initial_training_required():
-                logger.info("No existing model found - performing initial training")
                 model_path, test_path = self.perform_initial_training()
-                workflow_result["actions_taken"].append("initial_training")
-                workflow_result["model_path"] = str(model_path)
-                workflow_result["test_data_path"] = str(test_path)
-                workflow_result["conclusion"] = "Initial training complete"
+                workflow_result.update({
+                    "actions_taken": ["initial_training"],
+                    "model_path": str(model_path),
+                    "test_data_path": str(test_path),
+                    "conclusion": "Initial training complete"
+                })
                 return workflow_result
             
             # Step 2: Evaluate current model
-            logger.info("Evaluating current model performance")
             current_metrics = self.evaluate_current_model()
-            workflow_result["current_metrics"] = current_metrics
-            workflow_result["actions_taken"].append("model_evaluation")
+            workflow_result.update({
+                "current_metrics": current_metrics,
+                "actions_taken": ["model_evaluation"]
+            })
             
-            # Step 3: Detect drift (unless force_retrain is True)
+            # Step 3: Detect drift conditions
+            performance_drift = False
+            data_drift = False
+            
             if not force_retrain:
-                logger.info("Detecting performance drift")
-                drift_detected, drift_details = self.detect_performance_drift()
-                workflow_result["performance_drift"] = {
-                    "detected": drift_detected,
-                    "details": drift_details
-                }
-                workflow_result["actions_taken"].append("performance_drift_detection")
+                # Check performance drift
+                performance_drift, drift_details = self.detect_performance_drift()
+                workflow_result.update({
+                    "performance_drift": {
+                        "detected": performance_drift,
+                        "details": drift_details
+                    },
+                    "actions_taken": workflow_result["actions_taken"] + ["performance_drift_detection"]
+                })
                 
-                if not drift_detected:
-                    # Check for data drift
-                    drift_results, data_drift_detected = self.check_for_data_drift()
-                    workflow_result["data_drift"] = {
-                        "results": drift_results,
-                        "detected": data_drift_detected
-                    }
-                    workflow_result["actions_taken"].append("data_drift_detection")
-                    
-                    if not data_drift_detected:
-                        logger.info("No significant drift detected")
-                        workflow_result["conclusion"] = "No retraining needed"
-                        return workflow_result
-            else:
-                logger.info("Force retrain flag set. Skipping drift detection.")
-                workflow_result["performance_drift"] = {
-                    "detected": True,
-                    "details": {"reason": "force_retrain"}
-                }
+                # Only check data drift if no performance drift
+                if not performance_drift:
+                    drift_results, data_drift = self.check_for_data_drift()
+                    workflow_result.update({
+                        "data_drift": {
+                            "results": drift_results,
+                            "detected": data_drift
+                        },
+                        "actions_taken": workflow_result["actions_taken"] + ["data_drift_detection"]
+                    })
             
-            # Step 4: Analyze with Gemini if available
-            gemini_analysis = None
-            if self.gemini_api_key:
-                logger.info("Analyzing drift with Gemini")
+            # Decision to retrain
+            should_retrain = force_retrain or performance_drift or data_drift
+            
+            if not should_retrain:
+                workflow_result["conclusion"] = "No retraining needed"
+                return workflow_result
+            
+            # Step 4: Optional Gemini analysis
+            if self.gemini_api_key and not force_retrain:
                 metrics_trend = [entry["metrics"] for entry in self.metrics_history[-5:]] if len(self.metrics_history) >= 5 else [entry["metrics"] for entry in self.metrics_history]
                 gemini_analysis = self._analyze_with_gemini(
                     metrics_trend,
                     workflow_result.get("performance_drift", {}).get("details", {}) | 
                     workflow_result.get("data_drift", {}).get("results", {})
                 )
-                workflow_result["gemini_analysis"] = gemini_analysis
-                workflow_result["actions_taken"].append("llm_analysis")
+                workflow_result.update({
+                    "gemini_analysis": gemini_analysis,
+                    "actions_taken": workflow_result["actions_taken"] + ["llm_analysis"]
+                })
                 
-                if not force_retrain and not gemini_analysis.get("retrain_recommended", True):
-                    logger.info("Gemini does not recommend retraining at this time")
+                if not gemini_analysis.get("retrain_recommended", True):
                     workflow_result["conclusion"] = "LLM advised against retraining"
                     return workflow_result
             
             # Step 5: Retrain model
-            logger.info("Retraining model")
             new_model_path, retraining_report = self.retrain_model()
             workflow_result.update({
                 "retraining_report": retraining_report,
                 "model_path": str(new_model_path),
-                "test_data_path": str(retraining_report["new_test_data_path"])
+                "test_data_path": str(retraining_report["new_test_data_path"]),
+                "actions_taken": workflow_result["actions_taken"] + ["model_retraining"],
+                "conclusion": "Retraining successful"
             })
-            workflow_result["actions_taken"].append("model_retraining")
-            
-            logger.info(f"Retraining workflow completed successfully. New model: {new_model_path}")
-            workflow_result["conclusion"] = "Retraining successful"
             
             return workflow_result
             
         except Exception as e:
             logger.error(f"Retraining workflow failed: {str(e)}")
-            workflow_result["error"] = str(e)
-            workflow_result["conclusion"] = "Failed"
-            return workflow_result
+            return {
+                **workflow_result,
+                "error": str(e),
+                "conclusion": "Failed"
+            }
 
 
 def run_automated_retraining(force_retrain: bool = False, config: Optional[Dict] = None) -> Dict[str, Any]:
     """
     Convenience function to run the complete retraining workflow
-    
-    Args:
-        force_retrain: Force retraining regardless of drift detection
-        config: Optional configuration dictionary for monitoring
-        
-    Returns:
-        Dict containing workflow results
     """
     retrainer = ModelRetrainer(monitoring_config=config)
     return retrainer.run_retraining_workflow(force_retrain=force_retrain)
 
 
 if __name__ == "__main__":
-    # Check if force retrain flag is set in environment
     force_retrain = os.getenv("FORCE_RETRAIN", "false").lower() == "true"
-    
     result = run_automated_retraining(force_retrain=force_retrain)
     
-    # Print summary of results
     print("\nAutomated Retraining Workflow Summary:")
     print(f"Actions taken: {', '.join(result.get('actions_taken', []))}")
     print(f"Conclusion: {result.get('conclusion', 'Unknown')}")
@@ -416,7 +383,7 @@ if __name__ == "__main__":
         for metric, value in result["current_metrics"].items():
             print(f"  {metric}: {value:.4f}")
     
-    if "retraining_report" in result and "metrics" in result["retraining_report"]:
+    if "retraining_report" in result:
         print("\nNew Model Metrics:")
         for metric, value in result["retraining_report"]["metrics"].items():
             print(f"  {metric}: {value:.4f}")

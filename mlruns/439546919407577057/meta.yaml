@@ -1,6 +1,0 @@
-artifact_location: file:///C:/Users/nihall/Desktop/mlops-clinical-risk-prediction/mlruns
-creation_time: 1743660201957
-experiment_id: '439546919407577057'
-last_update_time: 1743660201957
-lifecycle_stage: active
-name: sepsis_prediction

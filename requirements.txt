@@ -10,3 +10,4 @@ xgboost
 mlflow
 shap
 evidently
+google-generativeai

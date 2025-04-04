@@ -138,19 +138,29 @@ import pandas as pd
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# MLflow initialization
+# MLflow initialization with SQLite backend
 try:
-    mlruns_path = Path("mlruns").absolute()
-    tracking_uri = f"file:///{mlruns_path.as_posix()}"
-    os.makedirs(mlruns_path, exist_ok=True)
-    
+    # Set SQLite as the tracking URI
+    tracking_uri = "sqlite:///mlruns.db"
     mlflow.set_tracking_uri(tracking_uri)
-    mlflow.set_tracking_uri("sqlite:///mlruns.db")
+    
+    # Create experiment if it doesn't exist
     if not mlflow.get_experiment_by_name("sepsis_prediction"):
-        mlflow.create_experiment("sepsis_prediction", artifact_location=tracking_uri)
+        # For SQLite backend, artifact location should be a filesystem path
+        artifact_location = Path("mlruns").absolute().as_posix()
+        mlflow.create_experiment(
+            "sepsis_prediction",
+            artifact_location=f"file:///{artifact_location}"
+        )
+    
     mlflow.set_experiment("sepsis_prediction")
     
-    logger.info(f"MLflow initialized at {mlflow.get_tracking_uri()}")
+    # Ensure mlruns directory exists for artifacts
+    mlruns_path = Path("mlruns").absolute()
+    os.makedirs(mlruns_path, exist_ok=True)
+    
+    logger.info(f"MLflow initialized with tracking URI: {tracking_uri}")
+    logger.info(f"Artifacts will be stored at: {mlruns_path}")
 except Exception as e:
     logger.error(f"MLflow initialization failed: {str(e)}")
     raise
@@ -162,7 +172,7 @@ class ModelEvaluator:
         self.model = None
         self.X_test = None
         self.y_test = None
-        self.feature_names = None  # Will store feature names for interpretation
+        self.feature_names = None
 
     def load_artifacts(self):
         """Load model and test data"""
@@ -178,47 +188,37 @@ class ModelEvaluator:
             else:
                 self.feature_names = [f"Feature_{i}" for i in range(self.X_test.shape[1])]
                 
-            logger.info(f"Loaded test data with {self.X_test.shape[0]} samples and {self.X_test.shape[1]} features")
+            logger.info(f"Loaded test data with {self.X_test.shape[0]} samples")
         except Exception as e:
             logger.error(f"Failed to load artifacts: {str(e)}")
             raise
 
     def _create_shap_plots(self):
-        """Generate user-friendly SHAP visualizations"""
+        """Generate SHAP visualizations"""
         try:
             explainer = shap.TreeExplainer(self.model)
             shap_values = explainer.shap_values(self.X_test)
             
-            # 1. Summary Plot with Feature Names
+            # Summary Plot
             plt.figure(figsize=(10, 8))
-            shap.summary_plot(shap_values, self.X_test, feature_names=self.feature_names, show=False)
-            plt.title("Feature Importance and Impact on Predictions", fontsize=12)
-            plt.xlabel("Impact on Model Output", fontsize=10)
+            shap.summary_plot(shap_values, self.X_test, 
+                            feature_names=self.feature_names, show=False)
+            plt.title("Feature Importance", fontsize=12)
             plt.tight_layout()
             mlflow.log_figure(plt.gcf(), "shap_summary.png")
             plt.close()
             
-            # 2. Bar Plot of Mean Absolute SHAP Values (Simpler to understand)
+            # Feature Importance Plot
             plt.figure(figsize=(10, 6))
-            shap.summary_plot(shap_values, self.X_test, feature_names=self.feature_names, 
+            shap.summary_plot(shap_values, self.X_test, 
+                            feature_names=self.feature_names,
                             plot_type="bar", show=False)
-            plt.title("Most Important Features for Sepsis Prediction", fontsize=12)
-            plt.xlabel("Average Impact on Prediction", fontsize=10)
+            plt.title("Feature Importance Scores", fontsize=12)
             plt.tight_layout()
             mlflow.log_figure(plt.gcf(), "shap_feature_importance.png")
             plt.close()
             
-            # 3. Decision Plot for Sample Explanations (Easier to interpret)
-            sample_idx = np.random.randint(0, len(self.X_test), size=5)  # Show 5 random samples
-            plt.figure(figsize=(12, 8))
-            shap.decision_plot(explainer.expected_value, shap_values[sample_idx], 
-                             feature_names=self.feature_names)
-            plt.title("How Features Affect Individual Predictions", fontsize=12)
-            plt.tight_layout()
-            mlflow.log_figure(plt.gcf(), "shap_decision_examples.png")
-            plt.close()
-            
-            # Log SHAP values as CSV for further analysis
+            # Log SHAP values
             shap_df = pd.DataFrame(shap_values, columns=self.feature_names)
             shap_csv_path = "shap_values.csv"
             shap_df.to_csv(shap_csv_path, index=False)
@@ -229,10 +229,10 @@ class ModelEvaluator:
             raise
 
     def evaluate(self):
-        """Run full evaluation workflow with improved explanations"""
+        """Run evaluation workflow"""
         try:
             with mlflow.start_run(run_name="sepsis_evaluation"):
-                # Log basic model info
+                # Log parameters
                 mlflow.log_params({
                     "model_type": "XGBoost",
                     "n_estimators": getattr(self.model, 'n_estimators', 'unknown')
@@ -242,7 +242,7 @@ class ModelEvaluator:
                 y_pred = self.model.predict(self.X_test)
                 y_proba = self.model.predict_proba(self.X_test)[:, 1]
                 
-                # Calculate and log metrics
+                # Calculate metrics
                 metrics = {
                     "accuracy": round(accuracy_score(self.y_test, y_pred), 3),
                     "precision": round(precision_score(self.y_test, y_pred), 3),
@@ -252,7 +252,7 @@ class ModelEvaluator:
                 }
                 mlflow.log_metrics(metrics)
                 
-                # Log confusion matrix with percentages
+                # Confusion matrix
                 fig, ax = plt.subplots(figsize=(8, 6))
                 conf_matrix = confusion_matrix(self.y_test, y_pred)
                 conf_matrix_perc = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
@@ -263,27 +263,14 @@ class ModelEvaluator:
                         ax.text(x=j, y=i, 
                                s=f"{conf_matrix[i, j]}\n({conf_matrix_perc[i, j]:.1%})", 
                                va='center', ha='center')
-                plt.title("Confusion Matrix (Counts and Percentages)")
-                plt.xlabel("Predicted Label")
-                plt.ylabel("True Label")
+                plt.title("Confusion Matrix")
                 mlflow.log_figure(fig, "confusion_matrix.png")
                 plt.close()
                 
-                # Generate improved SHAP explanations
+                # SHAP plots
                 self._create_shap_plots()
                 
-                # Add text explanation of metrics
-                metrics_explanation = (
-                    "Model Performance Explanation:\n"
-                    f"- Accuracy ({metrics['accuracy']}): Percentage of correct predictions\n"
-                    f"- Precision ({metrics['precision']}): When predicting sepsis, how often we're correct\n"
-                    f"- Recall ({metrics['recall']}): What percentage of actual sepsis cases we detected\n"
-                    f"- F1 Score ({metrics['f1']}): Balance between precision and recall\n"
-                    f"- ROC AUC ({metrics['roc_auc']}): Model's ability to distinguish classes (1=perfect)"
-                )
-                mlflow.log_text(metrics_explanation, "performance_explanation.txt")
-                
-                logger.info("Evaluation completed successfully")
+                logger.info(f"Evaluation completed with metrics: {metrics}")
                 return metrics
                 
         except Exception as e:

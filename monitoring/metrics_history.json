@@ -1,22 +1,36 @@
 [
   {
-    "timestamp": "2025-04-04T09:46:59.138533",
+    "timestamp": "2023-01-01",
     "metrics": {
-      "accuracy": 0.964,
-      "precision": 0.95,
-      "recall": 0.934,
-      "f1": 0.942,
-      "roc_auc": 0.99
+      "f1": 0.85,
+      "roc_auc": 0.88
     }
   },
   {
-    "timestamp": "2025-04-04T09:55:03.615992",
+    "timestamp": "2023-01-02",
     "metrics": {
-      "accuracy": 0.964,
-      "precision": 0.95,
-      "recall": 0.934,
-      "f1": 0.942,
-      "roc_auc": 0.99
+      "f1": 0.75,
+      "roc_auc": 0.77
+    }
+  },
+  {
+    "timestamp": "2025-04-04T11:15:18.648782",
+    "metrics": {
+      "accuracy": 0.45,
+      "precision": 0.444,
+      "recall": 0.4,
+      "f1": 0.421,
+      "roc_auc": 0.48
+    }
+  },
+  {
+    "timestamp": "2025-04-04T11:15:29.161227",
+    "metrics": {
+      "accuracy": 0.45,
+      "precision": 0.444,
+      "recall": 0.4,
+      "f1": 0.421,
+      "roc_auc": 0.48
     }
   }
 ]
