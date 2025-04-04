@@ -150,15 +150,32 @@ class DriftDetector:
             )
             report.save_html(report_path)
             
-            # Parse results
-            result = json.loads(report.json())['metrics'][0]['result']
+            # Parse results - this handles the new Evidently report structure
+            result = json.loads(report.json())
+            
+            # Initialize metrics with default values
             evidently_metrics = {
-                'n_features': result['n_features'],
-                'n_drifted': result['n_drifted_features'],
-                'share_drifted': result['share_drifted_features'],
-                'dataset_drift': result['dataset_drift']
+                'n_features': 0,
+                'n_drifted': 0,
+                'share_drifted': 0,
+                'dataset_drift': False
             }
-            evidently_drift = result['share_drifted_features'] > self.config['drift_thresholds']['evidently_drift_threshold']
+            
+            # Extract metrics from the report
+            if 'metrics' in result and len(result['metrics']) > 0:
+                drift_metric = result['metrics'][0]
+                
+                if 'result' in drift_metric:
+                    drift_result = drift_metric['result']
+                    
+                    evidently_metrics.update({
+                        'n_features': drift_result.get('number_of_columns', 0),
+                        'n_drifted': drift_result.get('number_of_drifted_columns', 0),
+                        'share_drifted': drift_result.get('share_of_drifted_columns', 0),
+                        'dataset_drift': drift_result.get('dataset_drift', False)
+                    })
+            
+            evidently_drift = evidently_metrics['share_drifted'] > self.config['drift_thresholds']['evidently_drift_threshold']
             
         except Exception as e:
             logger.error(f"Evidently analysis failed: {str(e)}", exc_info=True)

@@ -1,13 +1,14 @@
-# src/pipeline.py
 import logging
 import json
 import os
 from pathlib import Path
+from datetime import datetime
 from ingest_data import CSVDataIngestor
 from preprocess import ClinicalPreprocessor
 from train import train_model
 from evaluate import evaluate_model
 from monitor import DriftDetector
+from retrain import ModelRetrainer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,9 +17,11 @@ def initialize_monitoring(config):
     """Initialize monitoring directory and history file"""
     monitor_dir = config['monitoring']['monitor_dir']
     history_file = config['monitoring']['history_file']
+    visualizations_dir = config['monitoring']['visualizations_dir']
     
-    # Create monitoring directory if it doesn't exist
+    # Create monitoring directories if they don't exist
     os.makedirs(monitor_dir, exist_ok=True)
+    os.makedirs(visualizations_dir, exist_ok=True)
     
     # Initialize empty history file if it doesn't exist
     if not os.path.exists(history_file):
@@ -26,29 +29,35 @@ def initialize_monitoring(config):
             json.dump([], f)
         logger.info(f"Created new monitoring history file at {history_file}")
 
-def run_pipeline(input_file="data/raw/sepsis_datasets.csv", monitor=False):
-    """End-to-end pipeline execution with optional monitoring"""
-    try:
-        # Configuration
-        config = {
-            'raw_data_dir': 'data/raw',
-            'processed_dir': 'data/processed',
-            'model_dir': 'model',
-            'test_data_path': 'data/processed/test_data.npz',
-            'monitoring': {
-                'reference_data_path': 'data/processed/reference_data.npz',
-                'history_file': 'monitoring/drift_history.json',
-                'monitor_dir': 'monitoring',
-                'drift_thresholds': {
-                    'data_drift_threshold': 0.1,
-                    'concept_drift_threshold': 0.05,
-                    'label_drift_threshold': 0.1,
-                }
+def get_default_config():
+    """Return default configuration dictionary"""
+    return {
+        'raw_data_dir': 'data/raw',
+        'processed_dir': 'data/processed',
+        'model_dir': 'model',
+        'test_data_path': 'data/processed/test_data.npz',
+        'monitoring': {
+            'reference_data_path': 'data/processed/reference_data.npz',
+            'history_file': 'monitoring/drift_history.json',
+            'monitor_dir': 'monitoring',
+            'visualizations_dir': 'monitoring/visualizations',
+            'drift_thresholds': {
+                'data_drift_threshold': 0.1,
+                'concept_drift_threshold': 0.05,
+                'label_drift_threshold': 0.1,
+                'significant_drift_ratio': 0.3
             }
         }
+    }
+
+def run_pipeline(input_file="data/raw/sepsis_datasets.csv", monitor=False, retrain_if_needed=False):
+    """End-to-end pipeline execution with optional monitoring and retraining"""
+    try:
+        # Configuration
+        config = get_default_config()
         
         # Initialize monitoring system if enabled
-        if monitor:
+        if monitor or retrain_if_needed:
             initialize_monitoring(config)
         
         # 1. Ingestion
@@ -64,12 +73,31 @@ def run_pipeline(input_file="data/raw/sepsis_datasets.csv", monitor=False):
         preprocessor = ClinicalPreprocessor()
         processed_path = preprocessor.preprocess(ingestion_result['raw_data'])
         
-        # 3. Training
-        logger.info("Training model...")
-        model_path, test_data_path = train_model(processed_path)
+        # 3. Training/Retraining
+        if retrain_if_needed:
+            logger.info("Running automated retraining workflow...")
+            retrainer = ModelRetrainer(
+                processed_data_path=processed_path,
+                monitoring_config=config['monitoring']
+            )
+            retrain_result = retrainer.run_retraining_workflow()
+            
+            if retrain_result['conclusion'] == "Retraining successful":
+                model_path = retrain_result['model_path']
+                test_data_path = retrain_result['test_data_path']
+                logger.info(f"Retraining successful. Using new model at {model_path}")
+            else:
+                logger.info("No retraining needed. Proceeding with existing model.")
+                model_path, test_data_path = train_model(processed_path)
+        else:
+            logger.info("Training model...")
+            model_path, test_data_path = train_model(processed_path)
 
         logger.info(f"Model path: {model_path}")
         logger.info(f"Test data path: {test_data_path}")
+        
+        # Update config with new model path for monitoring
+        config['monitoring']['model_path'] = model_path
         
         # 4. Evaluation
         logger.info("Starting evaluation...")
@@ -84,11 +112,7 @@ def run_pipeline(input_file="data/raw/sepsis_datasets.csv", monitor=False):
         if monitor:
             logger.info("Starting drift monitoring...")
             try:
-                # Initialize drift detector
-                monitoring_config = config['monitoring'].copy()
-                monitoring_config['model_path'] = model_path
-                
-                detector = DriftDetector(monitoring_config)
+                detector = DriftDetector(config['monitoring'])
                 
                 # Analyze drift using the test data
                 drift_results, retrain_recommended = detector.analyze_drift(test_data_path)
@@ -96,14 +120,14 @@ def run_pipeline(input_file="data/raw/sepsis_datasets.csv", monitor=False):
                 # Save the initial reference setup to history
                 if 'notes' in drift_results and 'First run' in drift_results['notes']:
                     # Load current history
-                    with open(monitoring_config['history_file'], 'r') as f:
+                    with open(config['monitoring']['history_file'], 'r') as f:
                         history = json.load(f)
                     
                     # Add our initial results
                     history.append(drift_results)
                     
                     # Save back to file
-                    with open(monitoring_config['history_file'], 'w') as f:
+                    with open(config['monitoring']['history_file'], 'w') as f:
                         json.dump(history, f, indent=2)
                     
                     logger.info(f"Saved initial reference setup to drift history")
@@ -124,11 +148,16 @@ def run_pipeline(input_file="data/raw/sepsis_datasets.csv", monitor=False):
                    f"Model: {model_path}\n"
                    f"Test data: {test_data_path}")
         
-        return model_path
+        return {
+            'model_path': model_path,
+            'test_data_path': test_data_path,
+            'eval_results': eval_results,
+            'config': config
+        }
         
     except Exception as e:
         logger.error(f"Pipeline failed: {str(e)}", exc_info=True)
         raise
 
 if __name__ == "__main__":
-    run_pipeline(monitor=True)
+    run_pipeline(monitor=True, retrain_if_needed=True)

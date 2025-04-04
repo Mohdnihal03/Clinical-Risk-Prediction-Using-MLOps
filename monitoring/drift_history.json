@@ -60,5 +60,258 @@
       },
       "threshold": 0.1
     }
+  },
+  {
+    "timestamp": "2025-04-04 09:37:32",
+    "data_file": "test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": false,
+    "data_drift": {
+      "detected": false,
+      "methods": {
+        "ks_test": {
+          "detected": false,
+          "top_features": {
+            "None": 0.0
+          },
+          "threshold": 0.1
+        },
+        "evidently": {
+          "detected": false,
+          "metrics": {},
+          "threshold": 0.2
+        }
+      }
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {
+        "reference_metrics": {
+          "accuracy": 0.9641025641025641,
+          "precision": 0.95,
+          "recall": 0.9344262295081968,
+          "f1": 0.9421487603305785
+        },
+        "new_metrics": {
+          "accuracy": 0.9641025641025641,
+          "precision": 0.95,
+          "recall": 0.9344262295081968,
+          "f1": 0.9421487603305785
+        },
+        "differences": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      },
+      "threshold": 0.05
+    },
+    "label_drift": {
+      "detected": "False",
+      "metrics": {
+        "reference_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "new_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "distribution_diff": 0.0
+      },
+      "threshold": 0.1
+    }
+  },
+  {
+    "timestamp": "2025-04-04 09:46:59",
+    "data_file": "test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": false,
+    "data_drift": {
+      "detected": false,
+      "methods": {
+        "ks_test": {
+          "detected": false,
+          "top_features": {
+            "None": 0.0
+          },
+          "threshold": 0.1
+        },
+        "evidently": {
+          "detected": false,
+          "metrics": {},
+          "threshold": 0.2
+        }
+      }
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {},
+      "threshold": 0.05
+    },
+    "label_drift": {
+      "detected": "False",
+      "metrics": {
+        "reference_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "new_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "distribution_diff": 0.0
+      },
+      "threshold": 0.1
+    }
+  },
+  {
+    "timestamp": "2025-04-04 09:47:04",
+    "data_file": "test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": false,
+    "data_drift": {
+      "detected": false,
+      "methods": {
+        "ks_test": {
+          "detected": false,
+          "top_features": {
+            "None": 0.0
+          },
+          "threshold": 0.1
+        },
+        "evidently": {
+          "detected": false,
+          "metrics": {},
+          "threshold": 0.2
+        }
+      }
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {
+        "reference_metrics": {
+          "accuracy": 0.9641025641025641,
+          "precision": 0.95,
+          "recall": 0.9344262295081968,
+          "f1": 0.9421487603305785
+        },
+        "new_metrics": {
+          "accuracy": 0.9641025641025641,
+          "precision": 0.95,
+          "recall": 0.9344262295081968,
+          "f1": 0.9421487603305785
+        },
+        "differences": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      },
+      "threshold": 0.05
+    },
+    "label_drift": {
+      "detected": "False",
+      "metrics": {
+        "reference_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "new_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "distribution_diff": 0.0
+      },
+      "threshold": 0.1
+    }
+  },
+  {
+    "timestamp": "2025-04-04 09:53:37",
+    "data_file": "test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": false,
+    "data_drift": {
+      "detected": false,
+      "methods": {}
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {}
+    },
+    "label_drift": {
+      "detected": false,
+      "metrics": {}
+    },
+    "note": "Initial reference dataset created"
+  },
+  {
+    "timestamp": "2025-04-04 09:55:03",
+    "data_file": "test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": false,
+    "data_drift": {
+      "detected": false,
+      "methods": {
+        "ks_test": {
+          "detected": false,
+          "top_features": {
+            "None": 0.0
+          },
+          "threshold": 0.1
+        },
+        "evidently": {
+          "detected": false,
+          "metrics": {
+            "n_features": 1,
+            "n_drifted": 0,
+            "share_drifted": 0.0,
+            "dataset_drift": false
+          },
+          "threshold": 0.2
+        }
+      }
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {
+        "reference_metrics": {
+          "accuracy": 0.9641025641025641,
+          "precision": 0.95,
+          "recall": 0.9344262295081968,
+          "f1": 0.9421487603305785
+        },
+        "new_metrics": {
+          "accuracy": 0.9641025641025641,
+          "precision": 0.95,
+          "recall": 0.9344262295081968,
+          "f1": 0.9421487603305785
+        },
+        "differences": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      },
+      "threshold": 0.05
+    },
+    "label_drift": {
+      "detected": "False",
+      "metrics": {
+        "reference_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "new_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "distribution_diff": 0.0
+      },
+      "threshold": 0.1
+    }
   }
 ]
