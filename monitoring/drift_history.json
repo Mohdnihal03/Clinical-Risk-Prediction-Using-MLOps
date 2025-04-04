@@ -1252,5 +1252,24 @@
       },
       "threshold": 0.1
     }
+  },
+  {
+    "timestamp": "2025-04-04 15:06:12",
+    "data_file": "test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": false,
+    "data_drift": {
+      "detected": false,
+      "methods": {}
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {}
+    },
+    "label_drift": {
+      "detected": false,
+      "metrics": {}
+    },
+    "note": "Initial reference dataset created"
   }
 ]
