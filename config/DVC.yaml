@@ -96,12 +96,12 @@ stages:
       - monitoring/plots/performance_trend.png:
           cache: false
 
-  report_generation:
-    cmd: python src/report.py
-    deps:
-      - src/report.py
-      - metrics/*
-      - monitoring/*
-    outs:
-      - reports/monitoring_report.html
-      - reports/full_report.pdf
+  # report_generation:
+  #   cmd: python src/report.py
+  #   deps:
+  #     - src/report.py
+  #     - metrics/*
+  #     - monitoring/*
+  #   outs:
+  #     - reports/monitoring_report.html
+  #     - reports/full_report.pdf

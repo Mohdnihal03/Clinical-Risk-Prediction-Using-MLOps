@@ -88,3 +88,31 @@ monitoring:
     slack_notifications: false
     slack_webhook: ""
     minimum_severity: "high"  # Can be "low", "medium", "high"
+
+retraining:
+  enabled: true
+  strategy: "performance_based"  # performance_based|scheduled|manual
+  performance_threshold: 0.75  # F1 score threshold
+  max_retrains: 3  # Max retrains before full retraining
+  schedule:
+    interval: "monthly"  # weekly|monthly|quarterly
+    day: 1  # Day of month/week
+    
+  data:
+    lookback_window: 90  # days
+    min_samples: 1000
+    
+  validation:
+    enabled: true
+    threshold: 0.7  # Minimum validation score
+    metrics:
+      - "f1"
+      - "roc_auc"
+
+# MLflow tracking
+mlflow:
+  enabled: true
+  tracking_uri: "sqlite:///mlruns.db"
+  artifact_location: "mlruns"
+  experiment_name: "sepsis_prediction"
+  registered_model_name: "sepsis_risk_model"
