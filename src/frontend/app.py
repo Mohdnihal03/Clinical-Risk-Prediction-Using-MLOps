@@ -42,19 +42,30 @@ PREPROCESSOR_PATH = r"model\preprocessor.joblib"
 TEST_DATA_PATH = r"data\processed\test_data.npz"
 
 def load_model_and_preprocessor():
-    """Load the trained model and preprocessor"""
+    """Load the trained model and preprocessor with error handling"""
+    model, preprocessor = None, None
     try:
         model = joblib.load(MODEL_PATH)
-        preprocessor = joblib.load(PREPROCESSOR_PATH)
-        return model, preprocessor
+        st.success("✅ Model loaded successfully")
     except Exception as e:
-        st.error(f"Error loading model or preprocessor: {str(e)}")
-        return None, None
+        st.error(f"Error loading model: {str(e)}")
+    
+    try:
+        preprocessor = joblib.load(PREPROCESSOR_PATH)
+        st.success("✅ Preprocessor loaded successfully")
+    except Exception as e:
+        st.error(f"Error loading preprocessor: {str(e)}")
+    
+    return model, preprocessor
 
 def load_test_data():
     """Load the test data for metrics display"""
     try:
-        data = np.load(TEST_DATA_PATH)
+        if not os.path.exists(TEST_DATA_PATH):
+            st.warning(f"Test data file not found at {TEST_DATA_PATH}")
+            return None, None, None
+            
+        data = np.load(TEST_DATA_PATH, allow_pickle=True)
         X_test = data['X']
         y_test = data['y']
         
@@ -63,6 +74,7 @@ def load_test_data():
         else:
             feature_names = [f"Feature_{i}" for i in range(X_test.shape[1])]
             
+        st.success("✅ Test data loaded successfully")
         return X_test, y_test, feature_names
     except Exception as e:
         st.warning(f"Error loading test data: {str(e)}")
@@ -215,6 +227,11 @@ def create_patient_form():
     
     return None
 
+def load_css():
+    """Load custom CSS to beautify the Streamlit app"""
+    with open("src/frontend/styles.css", "r") as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
 def make_prediction(patient_data):
     """Make sepsis prediction for patient data"""
     try:
@@ -282,6 +299,7 @@ def make_prediction(patient_data):
 
 def main():
     # Header
+    load_css()
     st.title("🏥 Sepsis Prediction System")
     st.write("""
     This application helps healthcare providers assess a patient's risk of developing sepsis

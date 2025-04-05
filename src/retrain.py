@@ -208,27 +208,28 @@ class ModelRetrainer:
         
         # Threshold-based detection
         drift_detected = (f1_score < self.performance_threshold or 
-                         auc_score < self.performance_threshold)
+                        auc_score < self.performance_threshold)
         
         if drift_detected:
             drift_details["reason"] = "below_threshold"
             logger.warning(f"Performance drift detected! Metrics below threshold: F1={f1_score}, AUC={auc_score}")
-        else:
-            # Check for significant decrease
-            if len(self.metrics_history) >= 2:
-                previous_metrics = self.metrics_history[-2]["metrics"]
-                f1_decrease = previous_metrics.get("f1", 0) - f1_score
-                auc_decrease = previous_metrics.get("roc_auc", 0) - auc_score
-                
-                drift_details["f1_change"] = -f1_decrease
-                drift_details["auc_change"] = -auc_decrease
-                
-                if f1_decrease > 0.05 or auc_decrease > 0.05:
-                    drift_detected = True
-                    drift_details["reason"] = "significant_decrease"
-                    logger.warning(f"Significant performance decrease detected")
+            return True, drift_details
         
-        return drift_detected, drift_details
+        # Check for significant decrease if we have history
+        if len(self.metrics_history) >= 2:
+            previous_metrics = self.metrics_history[-2]["metrics"]
+            f1_decrease = previous_metrics.get("f1", 0) - f1_score
+            auc_decrease = previous_metrics.get("roc_auc", 0) - auc_score
+            
+            drift_details["f1_change"] = -f1_decrease
+            drift_details["auc_change"] = -auc_decrease
+            
+            if f1_decrease > 0.05 or auc_decrease > 0.05:
+                drift_details["reason"] = "significant_decrease"
+                logger.warning(f"Significant performance decrease detected")
+                return True, drift_details
+        
+        return False, drift_details
 
     def check_for_data_drift(self) -> Tuple[Dict, bool]:
         """Check for data drift using monitor.py"""

@@ -341,16 +341,11 @@ class DriftDetector:
                 logger.warning("No reference labels for label drift detection")
                 return {}, False
                 
-            # Calculate distributions
-            ref_dist = np.bincount(self.y_ref.astype(int)) / len(self.y_ref)
-            new_dist = np.bincount(y_new.astype(int)) / len(y_new)
+            # Calculate distributions with minlength to ensure same shape
+            ref_dist = np.bincount(self.y_ref.astype(int), minlength=2) / len(self.y_ref)
+            new_dist = np.bincount(y_new.astype(int), minlength=2) / len(y_new)
             
-            # Align distributions
-            max_len = max(len(ref_dist), len(new_dist))
-            ref_dist = np.pad(ref_dist, (0, max_len - len(ref_dist)))
-            new_dist = np.pad(new_dist, (0, max_len - len(new_dist)))
-            
-            # Calculate difference
+            # Calculate maximum difference
             dist_diff = np.abs(ref_dist - new_dist).max()
             label_drift = dist_diff > self.config['drift_thresholds']['label_drift_threshold']
             
