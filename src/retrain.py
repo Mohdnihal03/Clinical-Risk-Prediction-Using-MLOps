@@ -22,34 +22,32 @@ load_dotenv()
 class ModelRetrainer:
     def __init__(
         self,
-        model_path: str = "model/sepsis_xgboost_model.joblib",
-        test_data_path: str = "data/processed/test_data.npz",
-        processed_data_path: str = "data/processed/train.npz",
+        model_path: str = None,  # Make this optional
+        test_data_path: str = None,
+        processed_data_path: str = None,
         performance_threshold: float = 0.75,
-        metrics_history_path: str = "monitoring/metrics_history.json",
+        metrics_history_path: str = None,
         monitoring_config: Optional[Dict] = None
     ):
-        """Initialize ModelRetrainer with default paths and configuration"""
-        self.model_path = Path(model_path)
-        self.test_data_path = Path(test_data_path)
-        self.processed_data_path = Path(processed_data_path)
-        self.performance_threshold = performance_threshold
-        self.metrics_history_path = Path(metrics_history_path)
-        
-        # Gemini API setup
+        """Initialize ModelRetrainer with default or custom paths"""
+        # Get project root
+        project_root = Path(__file__).parent.parent
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
-        if self.gemini_api_key:
-            genai.configure(api_key=self.gemini_api_key)
-        else:
-            logger.warning("No Gemini API key provided. LLM analysis will be disabled.")
+        # Set default paths if not provided
+        self.model_path = Path(model_path) if model_path else project_root / "models/sepsis_xgboost_model.joblib"
+        self.test_data_path = Path(test_data_path) if test_data_path else project_root / "data/processed/test_data.npz"
+        self.processed_data_path = Path(processed_data_path) if processed_data_path else project_root / "data/processed/train.npz"
+        self.metrics_history_path = Path(metrics_history_path) if metrics_history_path else project_root / "monitoring/metrics_history.json"
         
-        # Monitoring configuration
+        self.performance_threshold = performance_threshold
+        
+        # Initialize monitoring config
         self.monitoring_config = monitoring_config or {
-            'reference_data_path': 'data/processed/reference_data.npz',
+            'reference_data_path': str(project_root / "data/processed/reference_data.npz"),
             'model_path': str(self.model_path),
-            'monitor_dir': 'monitoring',
-            'history_file': 'monitoring/drift_history.json',
-            'visualizations_dir': 'monitoring/visualizations',
+            'monitor_dir': str(project_root / "monitoring"),
+            'history_file': str(project_root / "monitoring/drift_history.json"),
+            'visualizations_dir': str(project_root / "monitoring/visualizations"),
             'drift_thresholds': {
                 'data_drift_threshold': 0.1,
                 'concept_drift_threshold': 0.05,

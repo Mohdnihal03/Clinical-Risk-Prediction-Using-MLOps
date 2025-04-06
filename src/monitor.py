@@ -25,7 +25,7 @@ class DriftDetector:
         # Default configuration with all required keys
         self.default_config = {
             'reference_data_path': 'data/processed/reference_data.npz',
-            'model_path': 'models/model.joblib',
+            'model_path': 'model/sepsis_xgboost_model.joblib',
             'drift_thresholds': {
                 'data_drift_threshold': 0.1,
                 'concept_drift_threshold': 0.05,
@@ -151,7 +151,7 @@ class DriftDetector:
             report.save_html(report_path)
             
             # Parse results - this handles the new Evidently report structure
-            result = json.loads(report.json())
+            result = report.as_dict()
             
             # Initialize metrics with default values
             evidently_metrics = {
@@ -162,20 +162,18 @@ class DriftDetector:
             }
             
             # Extract metrics from the report
-            if 'metrics' in result and len(result['metrics']) > 0:
-                drift_metric = result['metrics'][0]
-                
-                if 'result' in drift_metric:
-                    drift_result = drift_metric['result']
-                    
+            for metric in result['metrics']:
+                if metric['metric'] == 'DatasetDriftMetric':
+                    drift_result = metric['result']
                     evidently_metrics.update({
                         'n_features': drift_result.get('number_of_columns', 0),
                         'n_drifted': drift_result.get('number_of_drifted_columns', 0),
                         'share_drifted': drift_result.get('share_of_drifted_columns', 0),
                         'dataset_drift': drift_result.get('dataset_drift', False)
                     })
+                    break
             
-            evidently_drift = evidently_metrics['share_drifted'] > self.config['drift_thresholds']['evidently_drift_threshold']
+            evidently_drift = (evidently_metrics['share_drifted'] > self.config['drift_thresholds']['evidently_drift_threshold'])
             
         except Exception as e:
             logger.error(f"Evidently analysis failed: {str(e)}", exc_info=True)

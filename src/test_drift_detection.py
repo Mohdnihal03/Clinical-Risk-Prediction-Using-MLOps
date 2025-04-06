@@ -218,8 +218,9 @@ class TestDriftDetection(unittest.TestCase):
             {"timestamp": "2023-01-02", "metrics": {"f1": 0.82, "roc_auc": 0.85}},
             {"timestamp": "2023-01-03", "metrics": {"f1": 0.75, "roc_auc": 0.77}}
         ]
-        
+        os.environ["GEMINI_API_KEY"] = "fake_key"
         result = retrainer.run_retraining_workflow(force_retrain=False)
+        os.environ.pop("GEMINI_API_KEY", None)
         self.assertIn("performance_drift_detection", result["actions_taken"])
         self.assertIn("model_retraining", result["actions_taken"])
         self.assertEqual("Retraining successful", result["conclusion"])
