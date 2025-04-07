@@ -2,11 +2,12 @@ import logging
 import os
 import json
 import datetime
+import shutil
 from pathlib import Path
 from typing import Dict, Any, Tuple, List, Optional
 from dotenv import load_dotenv
 import google.generativeai as genai
-
+import numpy as np
 # Import existing modules
 from train import train_model
 from evaluate import evaluate_model
@@ -26,19 +27,31 @@ class ModelRetrainer:
         test_data_path: str = "data/processed/test_data.npz",
         processed_data_path: str = "data/processed/train.npz",
         performance_threshold: float = 0.75,
-        metrics_history_path: str = "monitoring/metrics_history.json",
-        monitoring_config: Optional[Dict] = None,
-        versions_dir: str = "versions"  # Add versions directory parameter
+        metrics_history_path: str = None,
+        monitoring_config: Optional[Dict] = None
     ):
         """Initialize ModelRetrainer with default paths and configuration"""
-        # Use absolute paths based on project root
-        self.project_root = Path.cwd()
-        self.model_path = self.project_root / model_path
-        self.test_data_path = self.project_root / test_data_path
-        self.processed_data_path = self.project_root / processed_data_path
+        self.model_path = Path(model_path)
+        self.model_dir = self.model_path.parent
+        self.test_data_path = Path(test_data_path)
+        self.processed_data_path = Path(processed_data_path)
         self.performance_threshold = performance_threshold
-        self.metrics_history_path = self.project_root / metrics_history_path
-        self.versions_dir = self.project_root / versions_dir  # Set versions directory
+        
+        # Set metrics paths to be in the same directory as the model
+        if metrics_history_path is None:
+            self.metrics_history_path = self.model_dir / "metrics_history.json"
+        else:
+            self.metrics_history_path = Path(metrics_history_path)
+        
+        # Define paths for before/after drift metrics and models
+        self.versioned_dir = self.model_dir / "versions"
+        self.before_drift_dir = self.versioned_dir / "before_drift"
+        self.after_drift_dir = self.versioned_dir / "after_drift"
+        
+        # Ensure these directories exist
+        self.versioned_dir.mkdir(exist_ok=True, parents=True)
+        self.before_drift_dir.mkdir(exist_ok=True, parents=True)
+        self.after_drift_dir.mkdir(exist_ok=True, parents=True)
         
         # Gemini API setup
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -49,12 +62,11 @@ class ModelRetrainer:
         
         # Monitoring configuration
         self.monitoring_config = monitoring_config or {
-            'reference_data_path': str(self.project_root / 'data/processed/reference_data.npz'),
+            'reference_data_path': 'data/processed/reference_data.npz',
             'model_path': str(self.model_path),
-            'monitor_dir': str(self.project_root / 'monitoring'),
-            'history_file': str(self.project_root / 'monitoring/drift_history.json'),
-            'visualizations_dir': str(self.project_root / 'monitoring/visualizations'),
-            'versions_dir': str(self.versions_dir),  # Add versions directory to config
+            'monitor_dir': self.model_dir / 'monitoring',
+            'history_file': self.model_dir / 'monitoring/drift_history.json',
+            'visualizations_dir': self.model_dir / 'monitoring/visualizations',
             'drift_thresholds': {
                 'data_drift_threshold': 0.1,
                 'concept_drift_threshold': 0.05,
@@ -67,7 +79,6 @@ class ModelRetrainer:
         self.model_path.parent.mkdir(exist_ok=True, parents=True)
         self.test_data_path.parent.mkdir(exist_ok=True, parents=True)
         self.metrics_history_path.parent.mkdir(exist_ok=True, parents=True)
-        self.versions_dir.mkdir(exist_ok=True, parents=True)  # Create versions directory
         Path(self.monitoring_config['visualizations_dir']).mkdir(exist_ok=True, parents=True)
 
         # Initialize metrics history
@@ -93,6 +104,58 @@ class ModelRetrainer:
                 json.dump(self.metrics_history, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to save metrics history: {str(e)}")
+
+    def _save_before_drift_artifacts(self, metrics: Dict[str, float]):
+        """Save current model and metrics as 'before drift' artifacts"""
+        try:
+            # Save metrics
+            before_drift_metrics_path = self.before_drift_dir / "metrics.json"
+            with open(before_drift_metrics_path, 'w') as f:
+                json.dump({
+                    "timestamp": datetime.datetime.now().isoformat(),
+                    "metrics": metrics,
+                    "model_path": str(self.model_path)
+                }, f, indent=2)
+            
+            # Copy model file
+            before_drift_model_path = self.before_drift_dir / self.model_path.name
+            shutil.copy2(self.model_path, before_drift_model_path)
+            
+            # Copy test data
+            before_drift_test_path = self.before_drift_dir / self.test_data_path.name
+            shutil.copy2(self.test_data_path, before_drift_test_path)
+            
+            logger.info(f"Saved 'before drift' artifacts to {self.before_drift_dir}")
+            return str(before_drift_model_path)
+        except Exception as e:
+            logger.error(f"Failed to save 'before drift' artifacts: {str(e)}")
+            return None
+
+    def _save_after_drift_artifacts(self, metrics: Dict[str, float]):
+        """Save new model and metrics as 'after drift' artifacts"""
+        try:
+            # Save metrics
+            after_drift_metrics_path = self.after_drift_dir / "metrics.json"
+            with open(after_drift_metrics_path, 'w') as f:
+                json.dump({
+                    "timestamp": datetime.datetime.now().isoformat(),
+                    "metrics": metrics,
+                    "model_path": str(self.model_path)
+                }, f, indent=2)
+            
+            # Copy model file
+            after_drift_model_path = self.after_drift_dir / self.model_path.name
+            shutil.copy2(self.model_path, after_drift_model_path)
+            
+            # Copy test data
+            after_drift_test_path = self.after_drift_dir / self.test_data_path.name
+            shutil.copy2(self.test_data_path, after_drift_test_path)
+            
+            logger.info(f"Saved 'after drift' artifacts to {self.after_drift_dir}")
+            return str(after_drift_model_path)
+        except Exception as e:
+            logger.error(f"Failed to save 'after drift' artifacts: {str(e)}")
+            return None
 
     def _call_gemini_api(self, prompt: str) -> str:
         """Call Gemini API using the new generativeai package"""
@@ -239,36 +302,47 @@ class ModelRetrainer:
     def check_for_data_drift(self) -> Tuple[Dict, bool]:
         """Check for data drift using monitor.py"""
         detector = DriftDetector(self.monitoring_config)
-        return detector.analyze_drift(str(self.test_data_path))
-
-    def save_version_artifacts(self, version_name: str):
-        """Save artifacts for version control and comparison"""
-        version_dir = self.versions_dir / version_name
-        version_dir.mkdir(exist_ok=True, parents=True)
+        results, drift_detected = detector.analyze_drift(str(self.test_data_path))
         
-        # Copy current model and data
-        try:
-            import shutil
-            if self.model_path.exists():
-                shutil.copy2(self.model_path, version_dir / self.model_path.name)
-            if self.test_data_path.exists():
-                shutil.copy2(self.test_data_path, version_dir / self.test_data_path.name)
+        # Add top-level flags for specific drift types
+        if 'concept_drift' in results and 'detected' in results['concept_drift']:
+            results['concept_drift_detected'] = results['concept_drift']['detected']
             
-            # Save metrics
-            if self.metrics_history:
-                with open(version_dir / "metrics.json", 'w') as f:
-                    json.dump(self.metrics_history[-1], f, indent=2)
-                    
-            logger.info(f"Saved '{version_name}' artifacts to {version_dir}")
+        if 'data_drift' in results and 'detected' in results['data_drift']:
+            results['data_drift_detected'] = results['data_drift']['detected']
+            
+        if 'label_drift' in results and 'detected' in results['label_drift']:
+            results['label_drift_detected'] = results['label_drift']['detected']
+        
+        # Add label distribution information
+        try:
+            test_data = np.load(self.test_data_path)
+            y_test = test_data['y']
+            unique, counts = np.unique(y_test, return_counts=True)
+            results['label_distribution'] = dict(zip(unique.astype(str), counts))
         except Exception as e:
-            logger.error(f"Failed to save version artifacts: {str(e)}")
+            logger.warning(f"Could not compute label distribution: {str(e)}")
+            results['label_distribution'] = {}
+        
+        # Add drifted_features to the results based on existing data
+        if 'data_drift' in results and 'methods' in results['data_drift']:
+            if 'ks_test' in results['data_drift']['methods'] and 'top_features' in results['data_drift']['methods']['ks_test']:
+                # Extract top features that exceed the threshold
+                top_features = results['data_drift']['methods']['ks_test']['top_features']
+                threshold = results['data_drift']['methods']['ks_test']['threshold']
+                
+                # Find features whose drift value exceeds the threshold
+                drifted_features = [feat for feat, value in top_features.items() 
+                                if float(value) > threshold]
+                
+                # Add to results
+                results['drifted_features'] = drifted_features
+        
+        return results, drift_detected
 
     def retrain_model(self) -> Tuple[str, Dict[str, Any]]:
         """Retrain the model and return the new model path and metrics"""
         try:
-            # Save current version before retraining
-            self.save_version_artifacts("before_drift")
-            
             logger.info("Initiating model retraining...")
             new_model_path, new_test_data_path = train_model(str(self.processed_data_path))
             
@@ -278,8 +352,8 @@ class ModelRetrainer:
             
             new_metrics = self.evaluate_current_model()
             
-            # Save after retraining
-            self.save_version_artifacts("after_drift")
+            # Save after-drift artifacts
+            self._save_after_drift_artifacts(new_metrics)
             
             retraining_report = {
                 "timestamp": datetime.datetime.now().isoformat(),
@@ -324,6 +398,12 @@ class ModelRetrainer:
                 "current_metrics": current_metrics,
                 "actions_taken": ["model_evaluation"]
             })
+            
+            # Save current model and metrics as "before drift"
+            before_drift_model_path = self._save_before_drift_artifacts(current_metrics)
+            if before_drift_model_path:
+                workflow_result["before_drift_model_path"] = before_drift_model_path
+                workflow_result["actions_taken"].append("saved_before_drift")
             
             # Step 3: Detect drift conditions
             performance_drift = False

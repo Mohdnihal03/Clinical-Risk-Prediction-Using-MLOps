@@ -194,39 +194,29 @@ class ModelEvaluator:
             raise
 
     def _create_shap_plots(self):
-        """Generate SHAP visualizations"""
         try:
+            import shap
             explainer = shap.TreeExplainer(self.model)
             shap_values = explainer.shap_values(self.X_test)
             
-            # Summary Plot
-            plt.figure(figsize=(10, 8))
-            shap.summary_plot(shap_values, self.X_test, 
-                            feature_names=self.feature_names, show=False)
-            plt.title("Feature Importance", fontsize=12)
-            plt.tight_layout()
-            mlflow.log_figure(plt.gcf(), "shap_summary.png")
+            # Handle multi-class SHAP values (take first class if binary)
+            if isinstance(shap_values, list):
+                shap_values = shap_values[1]  # For binary classification, take positive class
+            
+            # Create SHAP summary plot
+            plt.figure()
+            shap.summary_plot(shap_values, self.X_test, feature_names=self.feature_names, show=False)
+            summary_path = os.path.join(self.output_dir, "shap_summary.png")
+            plt.savefig(summary_path)
             plt.close()
             
-            # Feature Importance Plot
-            plt.figure(figsize=(10, 6))
-            shap.summary_plot(shap_values, self.X_test, 
-                            feature_names=self.feature_names,
-                            plot_type="bar", show=False)
-            plt.title("Feature Importance Scores", fontsize=12)
-            plt.tight_layout()
-            mlflow.log_figure(plt.gcf(), "shap_feature_importance.png")
-            plt.close()
-            
-            # Log SHAP values
+            # Create SHAP values DataFrame for feature importance
             shap_df = pd.DataFrame(shap_values, columns=self.feature_names)
-            shap_csv_path = "shap_values.csv"
-            shap_df.to_csv(shap_csv_path, index=False)
-            mlflow.log_artifact(shap_csv_path)
+            return shap_df
             
         except Exception as e:
             logger.warning(f"SHAP visualization failed: {str(e)}")
-            raise
+            return None
 
     def evaluate(self):
         """Run evaluation workflow"""

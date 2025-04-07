@@ -1,219 +1,273 @@
-# Create a test script test_drift_detection.py
-import os
-import tempfile
-import shutil
-from pathlib import Path
+# # src/evaluate.py
+# import logging
+# import mlflow
+# import numpy as np
+# import joblib
+# from pathlib import Path
+# from sklearn.metrics import (
+#     accuracy_score, precision_score, recall_score, 
+#     f1_score, roc_auc_score, confusion_matrix
+# )
+# import matplotlib.pyplot as plt
+# import shap
+# import os
+
+# # Initialize logging
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+
+# # Improved MLflow initialization for Windows
+# try:
+#     # Convert Windows path to proper file URI
+#     mlruns_path = Path("mlruns").absolute()
+#     tracking_uri = f"file:///{mlruns_path.as_posix()}"
+    
+#     # Ensure directory exists
+#     os.makedirs(mlruns_path, exist_ok=True)
+    
+#     mlflow.set_tracking_uri(tracking_uri)
+    
+#     # Create experiment if it doesn't exist
+#     if not mlflow.get_experiment_by_name("sepsis_prediction"):
+#         mlflow.create_experiment("sepsis_prediction", artifact_location=tracking_uri)
+#     mlflow.set_experiment("sepsis_prediction")
+    
+#     logger.info(f"MLflow tracking URI: {mlflow.get_tracking_uri()}")
+#     logger.info(f"MLflow experiment: {mlflow.get_experiment_by_name('sepsis_prediction')}")
+# except Exception as e:
+#     logger.error(f"MLflow initialization failed: {str(e)}")
+#     raise
+
+# class ModelEvaluator:
+#     def __init__(self, model_path: str, test_data_path: str):
+#         self.model_path = Path(model_path)
+#         self.test_data_path = Path(test_data_path)
+#         self.model = None
+#         self.X_test = None
+#         self.y_test = None
+
+#     def load_artifacts(self):
+#         """Load model and test data"""
+#         try:
+#             self.model = joblib.load(self.model_path)
+#             data = np.load(self.test_data_path)
+#             self.X_test = data['X']
+#             self.y_test = data['y']
+#             logger.info(f"Loaded test data with shape {self.X_test.shape}")
+#         except Exception as e:
+#             logger.error(f"Failed to load artifacts: {str(e)}")
+#             raise
+
+#     def evaluate(self):
+#         """Run full evaluation workflow"""
+#         logger.info("Starting MLflow evaluation run...")
+#         try:
+#             with mlflow.start_run(run_name="sepsis_evaluation"):
+#                 # Log parameters
+#                 mlflow.log_params({
+#                     "model_type": "XGBoost",
+#                     "n_estimators": getattr(self.model, 'n_estimators', 'unknown'),
+#                     "model_path": str(self.model_path),
+#                     "test_data_path": str(self.test_data_path)
+#                 })
+                
+#                 # Make predictions
+#                 y_pred = self.model.predict(self.X_test)
+#                 y_proba = self.model.predict_proba(self.X_test)[:, 1]
+                
+#                 # Calculate metrics
+#                 metrics = {
+#                     "accuracy": accuracy_score(self.y_test, y_pred),
+#                     "precision": precision_score(self.y_test, y_pred),
+#                     "recall": recall_score(self.y_test, y_pred),
+#                     "f1": f1_score(self.y_test, y_pred),
+#                     "roc_auc": roc_auc_score(self.y_test, y_proba)
+#                 }
+#                 mlflow.log_metrics(metrics)
+                
+#                 # Log confusion matrix
+#                 fig, ax = plt.subplots()
+#                 conf_matrix = confusion_matrix(self.y_test, y_pred)
+#                 ax.matshow(conf_matrix, cmap=plt.cm.Blues, alpha=0.3)
+#                 for i in range(conf_matrix.shape[0]):
+#                     for j in range(conf_matrix.shape[1]):
+#                         ax.text(x=j, y=i, s=conf_matrix[i, j], va='center', ha='center')
+#                 plt.title("Confusion Matrix")
+#                 mlflow.log_figure(fig, "confusion_matrix.png")
+#                 plt.close()
+                
+#                 # Log SHAP plot
+#                 try:
+#                     explainer = shap.TreeExplainer(self.model)
+#                     shap_values = explainer.shap_values(self.X_test)
+#                     plt.figure()
+#                     shap.summary_plot(shap_values, self.X_test, show=False)
+#                     plt.tight_layout()
+#                     mlflow.log_figure(plt.gcf(), "shap_summary.png")
+#                     plt.close()
+#                 except Exception as e:
+#                     logger.warning(f"SHAP visualization failed: {str(e)}")
+                
+#                 logger.info(f"Evaluation metrics: {metrics}")
+#                 return metrics
+                
+#         except Exception as e:
+#             logger.error(f"Evaluation failed: {str(e)}", exc_info=True)
+#             raise
+
+# def evaluate_model(model_path: str, test_data_path: str):
+#     evaluator = ModelEvaluator(model_path, test_data_path)
+#     evaluator.load_artifacts()
+#     return evaluator.evaluate()
+
+import logging
+import mlflow
 import numpy as np
-import pandas as pd
-import json
 import joblib
-from sklearn.ensemble import RandomForestClassifier
-import sys
-import unittest
-from unittest.mock import patch, MagicMock
+from pathlib import Path
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, 
+    f1_score, roc_auc_score, confusion_matrix
+)
+import matplotlib.pyplot as plt
+import shap
+import os
+import pandas as pd
 
-# Add the parent directory to the path so we can import the modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Import the modules to test
-from retrain import ModelRetrainer
-
-class MockTrainModel:
-    @staticmethod
-    def train_model(data_path):
-        """Mock train_model function that returns paths to model and test data"""
-        # Extract directory from data_path
-        data_dir = os.path.dirname(data_path)
-        
-        # Create model directory if it doesn't exist
-        model_dir = os.path.join(os.path.dirname(data_dir), "model")
-        os.makedirs(model_dir, exist_ok=True)
-        
-        # Define paths
-        model_path = os.path.join(model_dir, "model.joblib")
-        test_data_path = os.path.join(data_dir, "test_data.npz")
-        
-        # Create a dummy model
-        model = RandomForestClassifier(n_estimators=10)
-        X = np.random.rand(100, 5)
-        y = np.random.randint(0, 2, 100)
-        model.fit(X, y)
-        joblib.dump(model, model_path)
-        
-        # Create test data
-        np.savez(test_data_path, X=X[:20], y=y[:20])
-        
-        return model_path, test_data_path
-
-class MockEvaluateModel:
-    @staticmethod
-    def evaluate_model(model_path, test_data_path):
-        """Mock evaluate_model function that returns metrics"""
-        # Return mock metrics
-        return {
-            "accuracy": 0.85,
-            "precision": 0.84,
-            "recall": 0.86,
-            "f1": 0.85,
-            "roc_auc": 0.90
-        }
-
-def test_performance_drift():
-    retrainer = ModelRetrainer(performance_threshold=0.75)
+# MLflow initialization with SQLite backend
+try:
+    # Set SQLite as the tracking URI
+    tracking_uri = "sqlite:///mlruns.db"
+    mlflow.set_tracking_uri(tracking_uri)
     
-    # Simulate good performance history
-    good_metrics = [
-        {"f1": 0.82, "roc_auc": 0.85},
-        {"f1": 0.81, "roc_auc": 0.84},
-        {"f1": 0.83, "roc_auc": 0.86}
-    ]
-    
-    # Simulate performance drop below threshold
-    bad_metrics = {"f1": 0.72, "roc_auc": 0.73}
-    
-    # Test 1: No drift with good metrics
-    retrainer.metrics_history = [{"timestamp": "2023-01-01", "metrics": m} for m in good_metrics]
-    drift_detected, details = retrainer.detect_performance_drift()
-    print(f"Test 1 (good metrics): Drift detected? {drift_detected} (Should be False)")
-    assert not drift_detected, "Should not detect drift with good metrics"
-    
-    # Test 2: Add bad metrics
-    retrainer.metrics_history.append({"timestamp": "2023-01-02", "metrics": bad_metrics})
-    drift_detected, details = retrainer.detect_performance_drift()
-    print(f"Test 2 (below threshold): Drift detected? {drift_detected} (Should be True)")
-    print("Details:", json.dumps(details, indent=2))
-    assert drift_detected, "Should detect drift when metrics are below threshold"
-    assert details["reason"] == "below_threshold", "Drift reason should be below_threshold"
-    
-    # Test 3: Significant decrease
-    retrainer.metrics_history = [
-        {"timestamp": "2023-01-01", "metrics": {"f1": 0.85, "roc_auc": 0.88}},
-        {"timestamp": "2023-01-02", "metrics": {"f1": 0.75, "roc_auc": 0.77}}
-    ]
-    drift_detected, details = retrainer.detect_performance_drift()
-    print(f"Test 3 (significant drop): Drift detected? {drift_detected} (Should be True)")
-    print("Details:", json.dumps(details, indent=2))
-    assert drift_detected, "Should detect drift with significant performance drop"
-    assert details["reason"] == "significant_decrease", "Drift reason should be significant_decrease"
-
-@patch('retrain.train_model', MockTrainModel.train_model)
-@patch('retrain.evaluate_model', MockEvaluateModel.evaluate_model)
-def test_retraining_workflow():
-    """Test the complete retraining workflow with simulated drift"""
-    # Create temporary test environment
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmpdir_path = Path(tmpdir)
-        
-        # Create required directory structure
-        data_dir = tmpdir_path / "data" / "processed"
-        model_dir = tmpdir_path / "model"
-        monitor_dir = tmpdir_path / "monitoring"
-        
-        os.makedirs(data_dir, exist_ok=True)
-        os.makedirs(model_dir, exist_ok=True)
-        os.makedirs(monitor_dir, exist_ok=True)
-        
-        # Create test data files
-        train_path = data_dir / "train.npz"
-        test_path = data_dir / "test_data.npz"
-        reference_path = data_dir / "reference_data.npz"
-        model_path = model_dir / "model.joblib"
-        metrics_history_path = monitor_dir / "metrics_history.json"
-        
-        # Create dummy train data
-        X = np.random.rand(100, 5)
-        y = np.random.randint(0, 2, 100)
-        feature_names = np.array([f"feature_{i}" for i in range(5)])
-        np.savez(train_path, X=X, y=y, feature_names=feature_names)
-        
-        # Create dummy test data
-        np.savez(test_path, X=X[:20], y=y[:20], feature_names=feature_names)
-        
-        # Create dummy reference data
-        np.savez(reference_path, X=X[:50], y=y[:50], feature_names=feature_names)
-        
-        # Initialize retrainer with customized paths
-        custom_config = {
-            'reference_data_path': str(reference_path),
-            'model_path': str(model_path),
-            'monitor_dir': str(monitor_dir),
-            'history_file': str(monitor_dir / "drift_history.json"),
-            'visualizations_dir': str(monitor_dir / "visualizations"),
-        }
-        
-        retrainer = ModelRetrainer(
-            model_path=str(model_path),
-            test_data_path=str(test_path),
-            processed_data_path=str(train_path),
-            performance_threshold=0.8,
-            metrics_history_path=str(metrics_history_path),
-            monitoring_config=custom_config
+    # Create experiment if it doesn't exist
+    if not mlflow.get_experiment_by_name("sepsis_prediction"):
+        # For SQLite backend, artifact location should be a filesystem path
+        artifact_location = Path("mlruns").absolute().as_posix()
+        mlflow.create_experiment(
+            "sepsis_prediction",
+            artifact_location=f"file:///{artifact_location}"
         )
-        
-        # Set up the metrics history to simulate drift
-        retrainer.metrics_history = [
-            {"timestamp": "2023-01-01", "metrics": {"f1": 0.85, "roc_auc": 0.88}},
-            {"timestamp": "2023-01-02", "metrics": {"f1": 0.75, "roc_auc": 0.77}}  # Below threshold
-        ]
-        retrainer._save_metrics_history()
-        
-        print("\n=== Testing Performance Drift Scenario ===")
-        result = retrainer.run_retraining_workflow()
-        print("Actions:", result["actions_taken"])
-        print("Conclusion:", result["conclusion"])
-        
-        # Verify retraining occurred
-        assert "model_retraining" in result["actions_taken"], "Retraining should have occurred"
-        assert result["conclusion"] == "Retraining successful", "Retraining should have succeeded"
-        
-        print("Test passed successfully")
+    
+    mlflow.set_experiment("sepsis_prediction")
+    
+    # Ensure mlruns directory exists for artifacts
+    mlruns_path = Path("mlruns").absolute()
+    os.makedirs(mlruns_path, exist_ok=True)
+    
+    logger.info(f"MLflow initialized with tracking URI: {tracking_uri}")
+    logger.info(f"Artifacts will be stored at: {mlruns_path}")
+except Exception as e:
+    logger.error(f"MLflow initialization failed: {str(e)}")
+    raise
 
-@patch('retrain.train_model', MockTrainModel.train_model)
-@patch('retrain.evaluate_model', MockEvaluateModel.evaluate_model)
-def test_initial_training():
-    """Test the initial training workflow when no model exists"""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmpdir_path = Path(tmpdir)
-        
-        # Create required directory structure
-        data_dir = tmpdir_path / "data" / "processed"
-        os.makedirs(data_dir, exist_ok=True)
-        
-        # Create dummy train data
-        train_path = data_dir / "train.npz"
-        X = np.random.rand(100, 5)
-        y = np.random.randint(0, 2, 100)
-        np.savez(train_path, X=X, y=y)
-        
-        # Initialize retrainer with nonexistent model path to trigger initial training
-        model_path = tmpdir_path / "model" / "model.joblib"
-        test_path = data_dir / "test_data.npz"
-        
-        retrainer = ModelRetrainer(
-            model_path=str(model_path),
-            test_data_path=str(test_path),
-            processed_data_path=str(train_path)
-        )
-        
-        print("\n=== Testing Initial Training Scenario ===")
-        result = retrainer.run_retraining_workflow()
-        print("Actions:", result["actions_taken"])
-        print("Conclusion:", result["conclusion"])
-        
-        # Verify initial training occurred
-        assert "initial_training" in result["actions_taken"], "Initial training should have occurred"
-        assert result["conclusion"] == "Initial training complete", "Initial training should have completed"
-        
-        print("Initial training test passed successfully")
+class ModelEvaluator:
+    def __init__(self, model_path: str, test_data_path: str):
+        self.model_path = Path(model_path)
+        self.test_data_path = Path(test_data_path)
+        self.model = None
+        self.X_test = None
+        self.y_test = None
+        self.feature_names = None
 
-if __name__ == "__main__":
-    print("Running performance drift tests...")
-    test_performance_drift()
-    
-    print("\nRunning initial training test...")
-    test_initial_training()
-    
-    print("\nRunning retraining workflow test...")
-    test_retraining_workflow()
-    
-    print("\nAll tests completed successfully!")
+    def load_artifacts(self):
+        """Load model and test data"""
+        try:
+            self.model = joblib.load(self.model_path)
+            data = np.load(self.test_data_path)
+            self.X_test = data['X']
+            self.y_test = data['y']
+            
+            # Try to load feature names if available
+            if 'feature_names' in data:
+                self.feature_names = list(data['feature_names'])
+            else:
+                self.feature_names = [f"Feature_{i}" for i in range(self.X_test.shape[1])]
+                
+            logger.info(f"Loaded test data with {self.X_test.shape[0]} samples")
+        except Exception as e:
+            logger.error(f"Failed to load artifacts: {str(e)}")
+            raise
+
+    def _create_shap_plots(self):
+        try:
+            import shap
+            explainer = shap.TreeExplainer(self.model)
+            shap_values = explainer.shap_values(self.X_test)
+            
+            # Handle multi-class SHAP values (take first class if binary)
+            if isinstance(shap_values, list):
+                shap_values = shap_values[1]  # For binary classification, take positive class
+            
+            # Create SHAP summary plot
+            plt.figure()
+            shap.summary_plot(shap_values, self.X_test, feature_names=self.feature_names, show=False)
+            summary_path = os.path.join(self.output_dir, "shap_summary.png")
+            plt.savefig(summary_path)
+            plt.close()
+            
+            # Create SHAP values DataFrame for feature importance
+            shap_df = pd.DataFrame(shap_values, columns=self.feature_names)
+            return shap_df
+            
+        except Exception as e:
+            logger.warning(f"SHAP visualization failed: {str(e)}")
+            return None
+
+    def evaluate(self):
+        """Run evaluation workflow"""
+        try:
+            with mlflow.start_run(run_name="sepsis_evaluation"):
+                # Log parameters
+                mlflow.log_params({
+                    "model_type": "XGBoost",
+                    "n_estimators": getattr(self.model, 'n_estimators', 'unknown')
+                })
+                
+                # Make predictions
+                y_pred = self.model.predict(self.X_test)
+                y_proba = self.model.predict_proba(self.X_test)[:, 1]
+                
+                # Calculate metrics
+                metrics = {
+                    "accuracy": round(accuracy_score(self.y_test, y_pred), 3),
+                    "precision": round(precision_score(self.y_test, y_pred), 3),
+                    "recall": round(recall_score(self.y_test, y_pred), 3),
+                    "f1": round(f1_score(self.y_test, y_pred), 3),
+                    "roc_auc": round(roc_auc_score(self.y_test, y_proba), 3)
+                }
+                mlflow.log_metrics(metrics)
+                
+                # Confusion matrix
+                fig, ax = plt.subplots(figsize=(8, 6))
+                conf_matrix = confusion_matrix(self.y_test, y_pred)
+                conf_matrix_perc = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+                
+                ax.matshow(conf_matrix_perc, cmap=plt.cm.Blues, alpha=0.3)
+                for i in range(conf_matrix.shape[0]):
+                    for j in range(conf_matrix.shape[1]):
+                        ax.text(x=j, y=i, 
+                               s=f"{conf_matrix[i, j]}\n({conf_matrix_perc[i, j]:.1%})", 
+                               va='center', ha='center')
+                plt.title("Confusion Matrix")
+                mlflow.log_figure(fig, "confusion_matrix.png")
+                plt.close()
+                
+                # SHAP plots
+                self._create_shap_plots()
+                
+                logger.info(f"Evaluation completed with metrics: {metrics}")
+                return metrics
+                
+        except Exception as e:
+            logger.error(f"Evaluation failed: {str(e)}", exc_info=True)
+            raise
+
+def evaluate_model(model_path: str, test_data_path: str):
+    evaluator = ModelEvaluator(model_path, test_data_path)
+    evaluator.load_artifacts()
+    return evaluator.evaluate()

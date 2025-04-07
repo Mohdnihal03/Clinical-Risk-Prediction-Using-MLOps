@@ -6,28 +6,29 @@ import matplotlib.pyplot as plt
 import os
 import sys
 import logging
+import json
+from datetime import datetime
 from pathlib import Path
 import shap
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, 
     f1_score, roc_auc_score, confusion_matrix
 )
+import google.generativeai as genai
+from streamlit.components.v1 import html
+from dotenv import load_dotenv
+# Configuration
+MODEL_PATH = r"model\sepsis_xgboost_model.joblib"
+PREPROCESSOR_PATH = r"model\preprocessor.joblib"
+TEST_DATA_PATH = r"data\processed\test_data.npz"
+HISTORY_PATH = r"data/patient_history.csv"
+COLOR_SCHEME = {"low": "#4CAF50", "medium": "#FFC107", "high": "#F44336"}
 
-# Add the project directory to the Python path to enable imports
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-
-# Import your custom modules (make sure these import statements match your project structure)
-try:
-    # This line assumes your modules are in a src folder
-    sys.path.append('./src')
-    from preprocess import ClinicalPreprocessor
-    from train import ModelTrainer
-except ImportError as e:
-    st.error(f"Import error: {str(e)}. Make sure your project modules are properly set up.")
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Initialize Gemini
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 # Page configuration
 st.set_page_config(
@@ -36,33 +37,33 @@ st.set_page_config(
     layout="wide"
 )
 
-# Initialize paths
-MODEL_PATH = r"model\sepsis_xgboost_model.joblib"
-PREPROCESSOR_PATH = r"model\preprocessor.joblib"
-TEST_DATA_PATH = r"data\processed\test_data.npz"
+# Initialize session state
+if "patient_history" not in st.session_state:
+    if os.path.exists(HISTORY_PATH):
+        st.session_state.patient_history = pd.read_csv(HISTORY_PATH)
+    else:
+        st.session_state.patient_history = pd.DataFrame(columns=[
+            "timestamp", "age", "gender", "heart_rate", "bp_systolic",
+            "bp_diastolic", "temperature", "respiratory_rate", "wbc_count",
+            "lactate_level", "comorbidities", "clinical_notes", 
+            "prediction", "probability"
+        ])
 
 def load_model_and_preprocessor():
-    """Load the trained model and preprocessor with error handling"""
-    model, preprocessor = None, None
+    """Load model and preprocessor with error handling"""
     try:
         model = joblib.load(MODEL_PATH)
-        st.success("✅ Model loaded successfully")
-    except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-    
-    try:
         preprocessor = joblib.load(PREPROCESSOR_PATH)
-        st.success("✅ Preprocessor loaded successfully")
+        return model, preprocessor
     except Exception as e:
-        st.error(f"Error loading preprocessor: {str(e)}")
-    
-    return model, preprocessor
+        st.error(f"Loading error: {str(e)}")
+        return None, None
 
 def load_test_data():
-    """Load the test data for metrics display"""
+    """Load test data for evaluation metrics"""
     try:
         if not os.path.exists(TEST_DATA_PATH):
-            st.warning(f"Test data file not found at {TEST_DATA_PATH}")
+            st.warning(f"Test data not found at {TEST_DATA_PATH}")
             return None, None, None
             
         data = np.load(TEST_DATA_PATH, allow_pickle=True)
@@ -74,292 +75,635 @@ def load_test_data():
         else:
             feature_names = [f"Feature_{i}" for i in range(X_test.shape[1])]
             
-        st.success("✅ Test data loaded successfully")
         return X_test, y_test, feature_names
     except Exception as e:
-        st.warning(f"Error loading test data: {str(e)}")
+        st.error(f"Error loading test data: {str(e)}")
         return None, None, None
 
 def display_metrics():
     """Display model evaluation metrics"""
-    try:
-        # Load test data and model
-        X_test, y_test, _ = load_test_data()
-        model, _ = load_model_and_preprocessor()
-        
-        if X_test is None or model is None:
-            st.warning("Cannot display metrics without test data and model")
-            return
-        
-        # Make predictions
-        y_pred = model.predict(X_test)
-        y_proba = model.predict_proba(X_test)[:, 1]
-        
-        # Calculate metrics
-        metrics = {
-            "Accuracy": round(accuracy_score(y_test, y_pred), 3),
-            "Precision": round(precision_score(y_test, y_pred), 3),
-            "Recall (Sensitivity)": round(recall_score(y_test, y_pred), 3),
-            "F1 Score": round(f1_score(y_test, y_pred), 3),
-            "ROC AUC": round(roc_auc_score(y_test, y_pred), 3)
-        }
-        
-        # Create columns for metrics display
-        col1, col2, col3, col4, col5 = st.columns(5)
-        with col1:
-            st.metric("Accuracy", f"{metrics['Accuracy']:.3f}")
-        with col2:
-            st.metric("Precision", f"{metrics['Precision']:.3f}")
-        with col3:
-            st.metric("Recall", f"{metrics['Recall (Sensitivity)']:.3f}")
-        with col4:
-            st.metric("F1 Score", f"{metrics['F1 Score']:.3f}")
-        with col5:
-            st.metric("ROC AUC", f"{metrics['ROC AUC']:.3f}")
-        
-        # Confusion Matrix
-        conf_matrix = confusion_matrix(y_test, y_pred)
-        conf_matrix_perc = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
-        
-        fig, ax = plt.subplots(figsize=(6, 5))
-        ax.matshow(conf_matrix_perc, cmap='Blues', alpha=0.7)
-        for i in range(conf_matrix.shape[0]):
-            for j in range(conf_matrix.shape[1]):
-                ax.text(x=j, y=i, 
-                       s=f"{conf_matrix[i, j]}\n({conf_matrix_perc[i, j]:.1%})", 
-                       va='center', ha='center')
-                       
-        ax.set_xlabel('Predicted')
-        ax.set_ylabel('Actual')
-        ax.set_title('Confusion Matrix')
-        ax.xaxis.set_ticks_position('bottom')
-        ax.set_xticks([0, 1])
-        ax.set_yticks([0, 1])
-        ax.set_xticklabels(['No Sepsis', 'Sepsis'])
-        ax.set_yticklabels(['No Sepsis', 'Sepsis'])
-        
-        st.pyplot(fig)
-        
-    except Exception as e:
-        st.error(f"Error displaying metrics: {str(e)}")
+    X_test, y_test, _ = load_test_data()
+    model, _ = load_model_and_preprocessor()
+    
+    if X_test is None or model is None:
+        st.warning("Cannot display metrics without test data and model")
+        return
+    
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:, 1]
+    
+    # Calculate metrics
+    metrics = {
+        "Accuracy": accuracy_score(y_test, y_pred),
+        "Precision": precision_score(y_test, y_pred),
+        "Recall": recall_score(y_test, y_pred),
+        "F1 Score": f1_score(y_test, y_pred),
+        "ROC AUC": roc_auc_score(y_test, y_pred)
+    }
+    
+    # Display metrics in columns
+    cols = st.columns(5)
+    for i, (name, value) in enumerate(metrics.items()):
+        cols[i].metric(name, f"{value:.3f}")
+    
+    # Confusion matrix
+    st.subheader("Confusion Matrix")
+    cm = confusion_matrix(y_test, y_pred)
+    fig, ax = plt.subplots()
+    im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    ax.figure.colorbar(im, ax=ax)
+    
+    # Add labels
+    ax.set(xticks=[0, 1], yticks=[0, 1],
+           xticklabels=['No Sepsis', 'Sepsis'], 
+           yticklabels=['No Sepsis', 'Sepsis'],
+           title='Confusion Matrix',
+           ylabel='True label',
+           xlabel='Predicted label')
+    
+    # Add text annotations
+    thresh = cm.max() / 2.
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            ax.text(j, i, format(cm[i, j], 'd'),
+                    ha="center", va="center",
+                    color="white" if cm[i, j] > thresh else "black")
+    st.pyplot(fig)
 
-def display_feature_importance():
-    """Display feature importance from SHAP values"""
+def save_patient_case(data, prediction, probability):
+    """Save patient case to history"""
+    new_case = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        **data.iloc[0].to_dict(),
+        "prediction": prediction,
+        "probability": probability
+    }
+    
+    hist_df = pd.concat([st.session_state.patient_history, pd.DataFrame([new_case])])
+    hist_df.to_csv(HISTORY_PATH, index=False)
+    st.session_state.patient_history = hist_df
+
+def analyze_with_gemini(metrics_trend, drift_details):
+    """Use Gemini to analyze performance trends"""
+    if not GEMINI_API_KEY:
+        return {"error": "API key missing"}
+    
+    # Convert Timestamps to strings in metrics_trend
+    for entry in metrics_trend:
+        if 'timestamp' in entry:
+            entry['timestamp'] = str(entry['timestamp'])
+    
+    # Convert Timestamps in drift_details
+    if 'timestamp' in drift_details:
+        drift_details['timestamp'] = str(drift_details['timestamp'])
+    
+    prompt = f"""
+    Analyze sepsis model performance:
+    Recent metrics (newest last):
+    {json.dumps(metrics_trend, indent=2, default=str)}
+    
+    Drift detection:
+    {json.dumps(drift_details, indent=2, default=str)}
+    
+    Provide JSON analysis with:
+    - analysis: Text analysis
+    - retrain_recommended: Boolean
+    - confidence: 0-1 score
+    - improvements: List of suggestions
+    - data_checks: List of checks
+    
+    Respond ONLY with valid JSON in this exact format:
+    {{
+        "analysis": "your analysis here",
+        "retrain_recommended": true/false,
+        "confidence": 0.XX,
+        "improvements": ["suggestion1", "suggestion2"],
+        "data_checks": ["check1", "check2"]
+    }}
+    """
+    
     try:
-        model, _ = load_model_and_preprocessor()
-        X_test, _, feature_names = load_test_data()
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
+        response = model.generate_content(prompt)
         
-        if model is None or X_test is None:
-            st.warning("Cannot display feature importance without model and test data")
-            return
+        # Try to extract the JSON part from the response
+        response_text = response.text
+        
+        # Sometimes the response might include markdown formatting
+        if '```json' in response_text:
+            response_text = response_text.split('```json')[1].split('```')[0]
+        elif '```' in response_text:
+            response_text = response_text.split('```')[1].split('```')[0]
             
-        # Sample a subset of test data for SHAP (for performance)
-        sample_size = min(100, X_test.shape[0])
-        X_sample = X_test[:sample_size]
-        
-        # Generate SHAP values
-        explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X_sample)
-        
-        # Create and display SHAP summary plot
-        st.write("### Feature Importance (SHAP)")
-        fig, ax = plt.subplots(figsize=(10, 8))
-        shap.summary_plot(shap_values, X_sample, feature_names=feature_names, show=False)
-        st.pyplot(fig)
-        
+        return json.loads(response_text.strip())
+    except json.JSONDecodeError as e:
+        return {
+            "error": f"Failed to parse JSON response: {str(e)}",
+            "raw_response": response.text if 'response' in locals() else None
+        }
     except Exception as e:
-        st.error(f"Error displaying feature importance: {str(e)}")
+        return {"error": str(e)}
+
+def create_shap_force_plot(model, patient_data, feature_names):
+    """Create SHAP force plot for individual prediction"""
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(patient_data)
+    
+    force_plot = shap.force_plot(
+        explainer.expected_value,
+        shap_values[0],
+        patient_data[0],
+        feature_names=feature_names,
+        matplotlib=False,
+        show=False
+    )
+    
+    shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
+    return shap_html
+
+def display_prediction_result(prediction, probability):
+    """Display prediction with color coding"""
+    st.write("## Prediction Result")
+    
+    if probability >= 0.7:
+        color = COLOR_SCHEME["high"]
+        risk_level = "High Risk"
+    elif probability >= 0.4:
+        color = COLOR_SCHEME["medium"]
+        risk_level = "Medium Risk"
+    else:
+        color = COLOR_SCHEME["low"]
+        risk_level = "Low Risk"
+    
+    # Risk Header
+    st.markdown(f"""
+    <div style="padding: 1rem; border-radius: 0.5rem; background-color: {color}20;
+                border-left: 0.5rem solid {color}; margin: 1rem 0;">
+        <h3 style="color: {color}; margin: 0;">{risk_level}</h3>
+        <p style="margin: 0.5rem 0 0 0; font-size: 1.2rem;">
+            Probability: {probability:.1%}
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Progress Bar
+    st.markdown(f"""
+    <div style="margin: 1rem 0; height: 20px; border-radius: 10px; background: #eee;">
+        <div style="width: {probability:.0%}; height: 100%; border-radius: 10px;
+                    background: {color}; transition: width 0.5s ease;"></div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    return risk_level
 
 def create_patient_form():
-    """Create input form for patient data"""
-    with st.form("patient_data_form"):
-        st.write("### Patient Information")
+    """Enhanced patient input form with sections"""
+    with st.form("patient_form"):
+        # Personal Information
+        with st.expander("**Patient Demographics**", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                age = st.number_input("Age", 0, 120, 65)
+            with col2:
+                gender = st.selectbox("Gender", ["Male", "Female", "Other"])
         
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            age = st.number_input("Age", min_value=0, max_value=120, value=65)
-            gender = st.selectbox("Gender", options=["Male", "Female", "Other"])
-            heart_rate = st.number_input("Heart Rate (bpm)", min_value=30, max_value=250, value=95)
-            bp_systolic = st.number_input("BP Systolic (mmHg)", min_value=50, max_value=250, value=120)
-            bp_diastolic = st.number_input("BP Diastolic (mmHg)", min_value=30, max_value=150, value=80)
-        
-        with col2:
-            temperature = st.number_input("Temperature (°C)", min_value=34.0, max_value=42.0, value=38.2, step=0.1)
-            respiratory_rate = st.number_input("Respiratory Rate (breaths/min)", min_value=5, max_value=60, value=22)
-            wbc_count = st.number_input("WBC Count (cells/μL)", min_value=1000, max_value=50000, value=13500)
-            lactate_level = st.number_input("Lactate Level (mmol/L)", min_value=0.0, max_value=20.0, value=2.8, step=0.1)
-        
-        comorbidities = st.multiselect(
-            "Comorbidities", 
-            options=["Diabetes", "Hypertension", "COPD", "Cardiac Disease", "Immunocompromised", "Renal Disease", "None"],
-            default=["None"]
-        )
-        
-        clinical_notes = st.text_area(
-            "Clinical Notes", 
-            value="Patient presented with fever and elevated heart rate. No recent surgeries.",
-            height=100
-        )
-        
-        submitted = st.form_submit_button("Predict Sepsis Risk")
-        
-        if submitted:
-            # Process comorbidities into string format
-            comorbidities_str = ", ".join(comorbidities) if comorbidities and "None" not in comorbidities else "None"
+        # Vital Signs
+        with st.expander("**Vital Signs**", expanded=True):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                heart_rate = st.number_input("Heart Rate (bpm)", 30, 250, 95)
+            with col2:
+                bp_systolic = st.number_input("Systolic BP (mmHg)", 50, 250, 120)
+            with col3:
+                bp_diastolic = st.number_input("Diastolic BP (mmHg)", 30, 150, 80)
             
-            # Create dataframe with patient data
-            patient_data = pd.DataFrame({
-                'Age': [age],
-                'Gender': [gender],
-                'Heart_Rate': [heart_rate],
-                'BP_Systolic': [bp_systolic],
-                'BP_Diastolic': [bp_diastolic],
-                'Temperature': [temperature],
-                'Respiratory_Rate': [respiratory_rate],
-                'WBC_Count': [wbc_count],
-                'Lactate_Level': [lactate_level],
-                'Comorbidities': [comorbidities_str],
-                'Clinical_Notes': [clinical_notes]
-            })
-            
-            return patient_data
-    
+            col1, col2 = st.columns(2)
+            with col1:
+                temperature = st.number_input("Temperature (°C)", 34.0, 42.0, 38.2, 0.1)
+            with col2:
+                respiratory_rate = st.number_input("Respiratory Rate", 5, 60, 22)
+        
+        # Lab Results
+        with st.expander("**Laboratory Results**"):
+            col1, col2 = st.columns(2)
+            with col1:
+                wbc_count = st.number_input("WBC Count (cells/μL)", 1000, 50000, 13500)
+            with col2:
+                lactate_level = st.number_input("Lactate (mmol/L)", 0.0, 20.0, 2.8, 0.1)
+        
+        # Medical History
+        with st.expander("**Medical History**"):
+            comorbidities = st.multiselect(
+                "Comorbidities",
+                ["Diabetes", "Hypertension", "COPD", "Cardiac Disease", 
+                 "Immunocompromised", "Renal Disease", "None"],
+                default=["None"]
+            )
+            clinical_notes = st.text_area(
+                "Clinical Notes",
+                "Patient presented with fever and elevated heart rate..."
+            )
+        
+        if st.form_submit_button("Predict Sepsis Risk"):
+            return pd.DataFrame([{
+                "Age": age, "Gender": gender, "Heart_Rate": heart_rate,
+                "BP_Systolic": bp_systolic, "BP_Diastolic": bp_diastolic,
+                "Temperature": temperature, "Respiratory_Rate": respiratory_rate,
+                "WBC_Count": wbc_count, "Lactate_Level": lactate_level,
+                "Comorbidities": ", ".join(comorbidities),
+                "Clinical_Notes": clinical_notes
+            }])
     return None
 
-def load_css():
-    """Load custom CSS to beautify the Streamlit app"""
-    with open("src/frontend/styles.css", "r") as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-def make_prediction(patient_data):
-    """Make sepsis prediction for patient data"""
-    try:
-        model, preprocessor = load_model_and_preprocessor()
+def patient_history_page():
+    """Display historical patient cases"""
+    st.header("Patient History")
+    
+    if not st.session_state.patient_history.empty:
+        df = st.session_state.patient_history.sort_values("timestamp", ascending=False)
         
-        if model is None or preprocessor is None:
-            st.error("Model or preprocessor not available")
-            return
-        
-        # Preprocess the input data
-        X_processed = preprocessor.transform(patient_data)
-        
-        # Make prediction
-        prediction_proba = model.predict_proba(X_processed)[0, 1]
-        prediction = 1 if prediction_proba >= 0.5 else 0
-        
-        # Display prediction
-        st.write("### Prediction Result")
-        
+        # Filters
         col1, col2 = st.columns(2)
-        
         with col1:
-            if prediction == 1:
-                st.error("⚠️ High Risk of Sepsis")
-            else:
-                st.success("✅ Low Risk of Sepsis")
-        
+            risk_filter = st.selectbox("Filter by Risk Level", 
+                                     ["All", "High", "Medium", "Low"])
         with col2:
-            risk_percentage = prediction_proba * 100
-            st.write(f"Sepsis Probability: {risk_percentage:.1f}%")
-            
-            # Create a progress bar for risk visualization
-            st.progress(prediction_proba)
+            date_filter = st.date_input("Filter by Date")
         
-        # Risk factors
-        if prediction_proba > 0.3:
-            st.write("### Risk Factors")
-            st.info(
-                "Key factors that may be contributing to sepsis risk:\n"
-                "- Elevated WBC count\n"
-                "- Increased lactate levels\n"
-                "- Elevated temperature\n"
-                "- Increased heart rate"
-            )
-            
-            st.write("### Recommended Actions")
-            if prediction_proba > 0.7:
-                st.warning(
-                    "Urgent intervention recommended:\n"
-                    "- Immediate blood cultures\n"
-                    "- Administer broad-spectrum antibiotics\n"
-                    "- Fluid resuscitation\n"
-                    "- Monitor vital signs continuously"
-                )
-            else:
-                st.info(
-                    "Close monitoring recommended:\n"
-                    "- Serial vital sign measurements\n"
-                    "- Repeat laboratory tests in 4-6 hours\n"
-                    "- Consider blood cultures if condition worsens"
-                )
+        # Apply filters
+        if risk_filter != "All":
+            df = df[df["prediction"] == (1 if risk_filter == "High" else 0)]
+        if date_filter:
+            df = df[pd.to_datetime(df["timestamp"]).dt.date == date_filter]
         
-    except Exception as e:
-        st.error(f"Error making prediction: {str(e)}")
+        # Display cases
+        for _, row in df.iterrows():
+            with st.container():
+                risk_color = COLOR_SCHEME["high"] if row["prediction"] == 1 else \
+                            COLOR_SCHEME["medium"] if row["probability"] >= 0.4 else \
+                            COLOR_SCHEME["low"]
+                
+                st.markdown(f"""
+                <div style="padding:1rem; margin:0.5rem 0; border-radius:0.5rem;
+                            border-left:0.5rem solid {risk_color}; 
+                            background:#f8f9fa;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <h4>{row['timestamp']}</h4>
+                        <div style="color:{risk_color}; font-weight:bold;">
+                            {row['probability']:.1%} Risk
+                        </div>
+                    </div>
+                    <p>Age: {row['age']} | Gender: {row['gender']}</p>
+                    <p>WBC: {row['wbc_count']} | Lactate: {row['lactate_level']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+    else:
+        st.info("No historical cases available")
 
 def main():
-    # Header
-    load_css()
-    st.title("🏥 Sepsis Prediction System")
-    st.write("""
-    This application helps healthcare providers assess a patient's risk of developing sepsis
-    based on clinical data. Enter the patient's information below to get a prediction.
-    """)
+    # Custom CSS
+    st.markdown(f"""
+    <style>
+        .high-risk {{ color: {COLOR_SCHEME['high']} !important; }}
+        .medium-risk {{ color: {COLOR_SCHEME['medium']} !important; }}
+        .low-risk {{ color: {COLOR_SCHEME['low']} !important; }}
+    </style>
+    """, unsafe_allow_html=True)
     
-    # Sidebar
+    # Navigation
+    pages = {
+        "Prediction Tool": prediction_page,
+        "Model Performance": performance_page,
+        "Patient History": patient_history_page,
+        "About": about_page
+    }
+    
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Prediction Tool", "Model Performance", "About"])
+    page = st.sidebar.radio("Go to", list(pages.keys()))
+    pages[page]()
+
+def prediction_page():
+    st.title("Sepsis Risk Assessment")
+    patient_data = create_patient_form()
     
-    st.sidebar.write("---")
-    st.sidebar.write("### Model Information")
-    st.sidebar.info("""
-    This system uses an XGBoost classifier trained on clinical data
-    to predict sepsis risk. The model evaluates patient vital signs,
-    laboratory values, and clinical notes.
-    """)
+    if patient_data is not None:
+        model, preprocessor = load_model_and_preprocessor()
+        if model and preprocessor:
+            try:
+                # Preprocess and predict
+                processed_data = preprocessor.transform(patient_data)
+                probability = model.predict_proba(processed_data)[0][1]
+                prediction = int(probability >= 0.5)
+                
+                # Display results
+                risk_level = display_prediction_result(prediction, probability)
+                save_patient_case(patient_data, prediction, probability)
+                
+                # SHAP Explanation
+                # st.header("Prediction Explanation")
+                # X_test, _, feature_names = load_test_data()
+                # shap_html = create_shap_force_plot(model, processed_data, feature_names)
+                # html(shap_html, height=300)
+                
+                # Clinical Recommendations
+                st.header("Clinical Guidance")
+                if risk_level == "High Risk":
+                    st.markdown(f"""
+                    <div class="high-risk">
+                        <h4>🚨 Immediate Actions Required:</h4>
+                        <ul>
+                            <li>Obtain blood cultures immediately</li>
+                            <li>Administer broad-spectrum antibiotics within 1 hour</li>
+                            <li>Initiate fluid resuscitation</li>
+                            <li>Continuous vital sign monitoring</li>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+                elif risk_level == "Medium Risk":
+                    st.markdown(f"""
+                    <div class="medium-risk">
+                        <h4>⚠️ Recommended Actions:</h4>
+                        <ul>
+                            <li>Repeat lactate measurement in 2 hours</li>
+                            <li>Consider blood cultures</li>
+                            <li>Reassess in 1 hour</li>
+                            <li>Monitor urine output</li>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="low-risk">
+                        <h4>✅ Monitoring Recommendations:</h4>
+                        <ul>
+                            <li>Continue routine monitoring</li>
+                            <li>Reassess if condition changes</li>
+                            <li>Educate patient on warning signs</li>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+            except Exception as e:
+                st.error(f"Prediction error: {str(e)}")
+
+from pathlib import Path  # Make sure this import is at the top
+
+def load_metrics_history():
+    """Load metrics history with proper timestamp parsing"""
+    try:
+        metrics_file = Path(r"C:\Users\nihall\Desktop\mlops-clinical-risk-prediction\monitoring\metrics_history.json")
+        if not metrics_file.exists():
+            st.warning(f"Metrics history file not found at {metrics_file}")
+            return None
+
+        with open(metrics_file, "r") as f:
+            raw_data = json.load(f)
+
+        transformed = []
+        for entry in raw_data:
+            try:
+                # Parse timestamp with microseconds support
+                timestamp_str = entry.get("timestamp", "")
+                if timestamp_str:
+                    try:
+                        timestamp = pd.to_datetime(timestamp_str, format='ISO8601')
+                    except:
+                        timestamp = pd.to_datetime(timestamp_str, errors='coerce')
+                else:
+                    timestamp = pd.NaT
+
+                transformed.append({
+                    "timestamp": timestamp,
+                    **entry.get("metrics", {})
+                })
+            except Exception as e:
+                st.error(f"Error processing metrics entry: {str(e)}")
+                continue
+
+        return pd.DataFrame(transformed).dropna(subset=['timestamp']) if transformed else None
+
+    except Exception as e:
+        st.error(f"Error loading metrics history: {str(e)}")
+        return None
+
+def load_drift_history():
+    """Load drift history with proper timestamp parsing"""
+    try:
+        drift_file = Path("monitoring/drift_history.json")
+        if not drift_file.exists():
+            st.warning(f"Drift history file not found at {drift_file}")
+            return None
+
+        with open(drift_file, "r") as f:
+            raw_data = json.load(f)
+
+        transformed = []
+        for entry in raw_data:
+            try:
+                # Parse timestamp with microseconds support
+                timestamp_str = entry.get("timestamp", "")
+                if timestamp_str:
+                    try:
+                        timestamp = pd.to_datetime(timestamp_str, format='ISO8601')
+                    except:
+                        timestamp = pd.to_datetime(timestamp_str, errors='coerce')
+                else:
+                    timestamp = pd.NaT
+
+                # Safe nested dictionary access
+                data_drift = entry.get("data_drift", {})
+                methods = data_drift.get("methods", {})
+                ks_test = methods.get("ks_test", {})
+                evidently = methods.get("evidently", {})
+                
+                transformed.append({
+                    "timestamp": timestamp,
+                    "drift_detected": entry.get("drift_detected", False),
+                    "retraining_recommended": entry.get("retraining_recommended", False),
+                    "ks_test_detected": ks_test.get("detected", False),
+                    "ks_test_score": list(ks_test.get("top_features", {}).values())[0] 
+                                    if ks_test.get("top_features") else 0,
+                    "evidently_drifted": evidently.get("metrics", {}).get("share_drifted", 0),
+                    "concept_drift": entry.get("concept_drift", {}).get("detected", False)
+                })
+            except Exception as e:
+                st.error(f"Error processing drift entry: {str(e)}")
+                continue
+
+        return pd.DataFrame(transformed).dropna(subset=['timestamp']) if transformed else None
+
+    except Exception as e:
+        st.error(f"Error loading drift history: {str(e)}")
+        return None
+
+def colored_metric(label, value, delta=None, color=None):
+    """Custom metric with color support using Markdown"""
+    if color:
+        st.markdown(f"""
+        <div style="border-left: 0.25rem solid {color}; padding-left: 1rem;">
+            <div style="font-size: 0.8rem; color: #7f7f7f;">{label}</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: {color};">{value}</div>
+            {f'<div style="font-size: 0.8rem;">{delta}</div>' if delta else ''}
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.metric(label, value, delta)
+
+def performance_page():
+    st.title("Model Performance Monitoring")
     
-    # Main content based on selected page
-    if page == "Prediction Tool":
-        patient_data = create_patient_form()
+    # Model Metrics
+    st.header("Performance Metrics")
+    display_metrics()
+    
+    # Drift Detection
+    st.header("Data Drift Analysis")
+    
+    # Load historical data
+    metrics_df = load_metrics_history()
+    drift_df = load_drift_history()
+    
+    if metrics_df is None or drift_df is None:
+        st.warning("Could not load monitoring data")
+        return
+    
+    # Ensure proper datetime indexing
+    metrics_df = metrics_df.set_index('timestamp').sort_index()
+    drift_df = drift_df.set_index('timestamp').sort_index()
+
+    # Create tabs for different views
+    tab1, tab2, tab3 = st.tabs(["Performance Trends", "Drift Analysis", "AI Recommendations"])
+    
+    with tab1:
+        st.subheader("Model Performance Over Time")
+        # Select metrics to display
+        available_metrics = [col for col in metrics_df.columns 
+                           if col not in ['timestamp']]
+        selected_metrics = st.multiselect(
+            "Select metrics to plot",
+            options=available_metrics,
+            default=[col for col in ['f1', 'roc_auc'] if col in available_metrics]
+        )
         
-        if patient_data is not None:
-            make_prediction(patient_data)
+        if selected_metrics:
+            fig, ax = plt.subplots(figsize=(10, 5))
+            for metric in selected_metrics:
+                ax.plot(metrics_df.index, metrics_df[metric], label=metric, marker='o')
+            ax.legend()
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Score")
+            ax.set_title("Model Metrics Over Time")
+            ax.grid(True)
+            st.pyplot(fig)
+        
+        # Show metrics table
+        st.dataframe(metrics_df.sort_index(ascending=False).head(10))
+
+    with tab2:
+        st.subheader("Data Drift Analysis")
+        # Show current drift status
+        latest_drift = drift_df.iloc[-1]
+        cols = st.columns(3)
+        
+        # Use our custom colored_metric instead of st.metric
+        with cols[0]:
+            colored_metric(
+                "Overall Drift Detected",
+                "Yes" if latest_drift['drift_detected'] else "No",
+                color="#F44336" if latest_drift['drift_detected'] else "#4CAF50"
+            )
+        
+        with cols[1]:
+            colored_metric(
+                "KS Test Score",
+                f"{latest_drift['ks_test_score']:.3f}",
+                delta="Drift" if latest_drift['ks_test_detected'] else "No Drift",
+                color="#F44336" if latest_drift['ks_test_detected'] else "#4CAF50"
+            )
+        
+        with cols[2]:
+            colored_metric(
+                "Evidently Drift",
+                f"{latest_drift['evidently_drifted']*100:.1f}%",
+                delta="Drift" if latest_drift['evidently_drifted'] > 0.2 else "No Drift",
+                color="#F44336" if latest_drift['evidently_drifted'] > 0.2 else "#4CAF50"
+            )
             
-    elif page == "Model Performance":
-        st.header("Model Performance Metrics")
-        st.write("""
-        These metrics show how well the model performs on test data.
-        Higher values indicate better performance.
-        """)
+        # Drift trend visualization
+        st.subheader("Drift Scores Over Time")
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.plot(drift_df.index, drift_df['ks_test_score'], label='KS Test Score', marker='o')
+        ax.plot(drift_df.index, drift_df['evidently_drifted'], label='Evidently Drift %', marker='o')
+        ax.axhline(y=0.1, color='r', linestyle='--', label='KS Threshold')
+        ax.axhline(y=0.2, color='g', linestyle='--', label='Evidently Threshold')
+        ax.legend()
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Drift Score")
+        ax.set_title("Drift Detection Over Time")
+        ax.grid(True)
+        st.pyplot(fig)
         
-        display_metrics()
-        
-        st.write("---")
-        
-        display_feature_importance()
-        
-    else:  # About page
-        st.header("About the Sepsis Prediction System")
-        st.write("""
-        ### What is Sepsis?
-        
-        Sepsis is a life-threatening condition that occurs when the body's response to infection 
-        causes injury to its own tissues and organs. If not recognized and treated promptly, 
-        sepsis can lead to septic shock, multiple organ failure, and death.
-        
-        ### How Does This Tool Work?
-        
-        This tool uses machine learning to analyze patient data and identify patterns associated 
-        with sepsis development. The model was trained on historical patient data where sepsis 
-        outcomes were known. It considers vital signs, laboratory values, and clinical notes to 
-        make predictions.
-        
-        ### Intended Use
-        
-        This tool is designed to assist healthcare providers in identifying patients at risk for 
-        sepsis. It should be used as a supportive tool alongside clinical judgment and established 
-        sepsis protocols, not as a replacement for clinical decision-making.
-        """)
+        # Show drift table
+        st.dataframe(drift_df.sort_index(ascending=False).head(10))
+
+    with tab3:
+        st.subheader("AI-Powered Recommendations")
+        if st.button("Generate Analysis"):
+            with st.spinner("Analyzing with Gemini AI..."):
+                # Prepare data for AI analysis
+                analysis_data = {
+                    "metrics_trend": metrics_df.tail(5).reset_index().to_dict('records'),
+                    "drift_details": drift_df.iloc[-1].to_dict()
+                }
+                
+                analysis = analyze_with_gemini(
+                    metrics_trend=analysis_data["metrics_trend"],
+                    drift_details=analysis_data["drift_details"]
+                )
+                
+                if "error" in analysis:
+                    st.error(f"Analysis failed: {analysis['error']}")
+                else:
+                    st.subheader("AI Analysis Report")
+                    st.write(analysis.get("analysis", ""))
+                    
+                    cols = st.columns(2)
+                    cols[0].metric("Retrain Recommended", 
+                                 "Yes" if analysis.get("retrain_recommended") else "No",
+                                 color="red" if analysis.get("retrain_recommended") else "green")
+                    cols[1].metric("Confidence Level", 
+                                 f"{analysis.get('confidence', 0)*100:.1f}%")
+                    
+                    st.subheader("Recommended Actions")
+                    for imp in analysis.get("improvements", []):
+                        st.write(f"✅ {imp}")
+                    
+                    st.subheader("Suggested Data Checks")
+                    for check in analysis.get("data_checks", []):
+                        st.write(f"🔍 {check}")
+
+def about_page():
+    st.title("About the System")
+    st.markdown("""
+                
+    ## Sepsis Prediction System
+    
+    This clinical decision support tool uses machine learning to assess patients' risk of developing sepsis.
+    
+    **Key Features:**
+    - Real-time risk assessment
+    - Explainable AI with SHAP values
+    - Patient history tracking
+    - Model performance monitoring
+    
+    **Clinical Use:**
+    - Early identification of at-risk patients
+    - Evidence-based recommendations
+    - Documentation support
+    
+    **Disclaimer:**
+    This tool is intended to assist clinical decision making but should not replace professional judgment.
+    """)
 
 if __name__ == "__main__":
     main()
