@@ -132,5 +132,195 @@
       },
       "threshold": 0.1
     }
+  },
+  {
+    "timestamp": "2025-04-07 09:56:50",
+    "data_file": "test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": false,
+    "data_drift": {
+      "detected": false,
+      "methods": {
+        "ks_test": {
+          "detected": false,
+          "top_features": {
+            "None": 0.0
+          },
+          "threshold": 0.1
+        },
+        "evidently": {
+          "detected": false,
+          "metrics": {
+            "n_features": 1,
+            "n_drifted": 0,
+            "share_drifted": 0.0,
+            "dataset_drift": false
+          },
+          "threshold": 0.2
+        }
+      }
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {
+        "reference_metrics": {
+          "accuracy": 0.9641025641025641,
+          "precision": 0.95,
+          "recall": 0.9344262295081968,
+          "f1": 0.9421487603305785
+        },
+        "new_metrics": {
+          "accuracy": 0.9641025641025641,
+          "precision": 0.95,
+          "recall": 0.9344262295081968,
+          "f1": 0.9421487603305785
+        },
+        "differences": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      },
+      "threshold": 0.05
+    },
+    "label_drift": {
+      "detected": "False",
+      "metrics": {
+        "reference_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "new_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "distribution_diff": 0.0
+      },
+      "threshold": 0.1
+    }
+  },
+  {
+    "timestamp": "2025-04-07 10:24:39",
+    "data_file": "test.npz",
+    "drift_detected": true,
+    "retraining_recommended": true,
+    "data_drift": {
+      "detected": false,
+      "methods": {
+        "ks_test": {
+          "detected": false,
+          "top_features": {
+            "Feature_3": 0.067,
+            "Feature_4": 0.06,
+            "Feature_0": 0.056,
+            "Feature_2": 0.049,
+            "Feature_1": 0.029
+          },
+          "threshold": 0.1
+        },
+        "evidently": {
+          "detected": false,
+          "metrics": {
+            "n_features": 5,
+            "n_drifted": 0,
+            "share_drifted": 0.0,
+            "dataset_drift": false
+          },
+          "threshold": 0.2
+        }
+      }
+    },
+    "concept_drift": {
+      "detected": true,
+      "metrics": {
+        "reference_metrics": {
+          "accuracy": 0.994,
+          "precision": 1.0,
+          "recall": 0.9882121807465619,
+          "f1": 0.9940711462450593
+        },
+        "new_metrics": {
+          "accuracy": 0.006,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "differences": {
+          "accuracy": 0.988,
+          "precision": 1.0,
+          "recall": 0.9882121807465619,
+          "f1": 0.9940711462450593
+        }
+      },
+      "threshold": 0.05
+    },
+    "label_drift": {
+      "detected": "False",
+      "metrics": {
+        "reference_distribution": [
+          0.491,
+          0.509
+        ],
+        "new_distribution": [
+          0.506,
+          0.494
+        ],
+        "distribution_diff": 0.015000000000000013
+      },
+      "threshold": 0.1
+    }
+  },
+  {
+    "timestamp": "2025-04-07 10:24:41",
+    "data_file": "test.npz",
+    "drift_detected": true,
+    "retraining_recommended": "False",
+    "data_drift": {
+      "detected": true,
+      "methods": {
+        "ks_test": {
+          "detected": true,
+          "top_features": {
+            "Feature_2": 0.715,
+            "Feature_0": 0.698,
+            "Feature_1": 0.697,
+            "Feature_3": 0.692,
+            "Feature_4": 0.687
+          },
+          "threshold": 0.1
+        },
+        "evidently": {
+          "detected": true,
+          "metrics": {
+            "n_features": 5,
+            "n_drifted": 5,
+            "share_drifted": 1.0,
+            "dataset_drift": true
+          },
+          "threshold": 0.2
+        }
+      }
+    },
+    "concept_drift": {
+      "detected": false,
+      "metrics": {},
+      "threshold": 0.05
+    },
+    "label_drift": {
+      "detected": "False",
+      "metrics": {
+        "reference_distribution": [
+          0.526,
+          0.474
+        ],
+        "new_distribution": [
+          0.528,
+          0.472
+        ],
+        "distribution_diff": 0.0020000000000000018
+      },
+      "threshold": 0.1
+    }
   }
 ]

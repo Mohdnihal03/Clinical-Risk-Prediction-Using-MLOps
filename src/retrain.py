@@ -22,32 +22,39 @@ load_dotenv()
 class ModelRetrainer:
     def __init__(
         self,
-        model_path: str = None,  # Make this optional
-        test_data_path: str = None,
-        processed_data_path: str = None,
+        model_path: str = "model/sepsis_xgboost_model.joblib",
+        test_data_path: str = "data/processed/test_data.npz",
+        processed_data_path: str = "data/processed/train.npz",
         performance_threshold: float = 0.75,
-        metrics_history_path: str = None,
-        monitoring_config: Optional[Dict] = None
+        metrics_history_path: str = "monitoring/metrics_history.json",
+        monitoring_config: Optional[Dict] = None,
+        versions_dir: str = "versions"  # Add versions directory parameter
     ):
-        """Initialize ModelRetrainer with default or custom paths"""
-        # Get project root
-        project_root = Path(__file__).parent.parent
-        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
-        # Set default paths if not provided
-        self.model_path = Path(model_path) if model_path else project_root / "models/sepsis_xgboost_model.joblib"
-        self.test_data_path = Path(test_data_path) if test_data_path else project_root / "data/processed/test_data.npz"
-        self.processed_data_path = Path(processed_data_path) if processed_data_path else project_root / "data/processed/train.npz"
-        self.metrics_history_path = Path(metrics_history_path) if metrics_history_path else project_root / "monitoring/metrics_history.json"
-        
+        """Initialize ModelRetrainer with default paths and configuration"""
+        # Use absolute paths based on project root
+        self.project_root = Path.cwd()
+        self.model_path = self.project_root / model_path
+        self.test_data_path = self.project_root / test_data_path
+        self.processed_data_path = self.project_root / processed_data_path
         self.performance_threshold = performance_threshold
+        self.metrics_history_path = self.project_root / metrics_history_path
+        self.versions_dir = self.project_root / versions_dir  # Set versions directory
         
-        # Initialize monitoring config
+        # Gemini API setup
+        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
+        if self.gemini_api_key:
+            genai.configure(api_key=self.gemini_api_key)
+        else:
+            logger.warning("No Gemini API key provided. LLM analysis will be disabled.")
+        
+        # Monitoring configuration
         self.monitoring_config = monitoring_config or {
-            'reference_data_path': str(project_root / "data/processed/reference_data.npz"),
+            'reference_data_path': str(self.project_root / 'data/processed/reference_data.npz'),
             'model_path': str(self.model_path),
-            'monitor_dir': str(project_root / "monitoring"),
-            'history_file': str(project_root / "monitoring/drift_history.json"),
-            'visualizations_dir': str(project_root / "monitoring/visualizations"),
+            'monitor_dir': str(self.project_root / 'monitoring'),
+            'history_file': str(self.project_root / 'monitoring/drift_history.json'),
+            'visualizations_dir': str(self.project_root / 'monitoring/visualizations'),
+            'versions_dir': str(self.versions_dir),  # Add versions directory to config
             'drift_thresholds': {
                 'data_drift_threshold': 0.1,
                 'concept_drift_threshold': 0.05,
@@ -60,6 +67,7 @@ class ModelRetrainer:
         self.model_path.parent.mkdir(exist_ok=True, parents=True)
         self.test_data_path.parent.mkdir(exist_ok=True, parents=True)
         self.metrics_history_path.parent.mkdir(exist_ok=True, parents=True)
+        self.versions_dir.mkdir(exist_ok=True, parents=True)  # Create versions directory
         Path(self.monitoring_config['visualizations_dir']).mkdir(exist_ok=True, parents=True)
 
         # Initialize metrics history
@@ -206,37 +214,61 @@ class ModelRetrainer:
         
         # Threshold-based detection
         drift_detected = (f1_score < self.performance_threshold or 
-                        auc_score < self.performance_threshold)
+                         auc_score < self.performance_threshold)
         
         if drift_detected:
             drift_details["reason"] = "below_threshold"
             logger.warning(f"Performance drift detected! Metrics below threshold: F1={f1_score}, AUC={auc_score}")
-            return True, drift_details
+        else:
+            # Check for significant decrease
+            if len(self.metrics_history) >= 2:
+                previous_metrics = self.metrics_history[-2]["metrics"]
+                f1_decrease = previous_metrics.get("f1", 0) - f1_score
+                auc_decrease = previous_metrics.get("roc_auc", 0) - auc_score
+                
+                drift_details["f1_change"] = -f1_decrease
+                drift_details["auc_change"] = -auc_decrease
+                
+                if f1_decrease > 0.05 or auc_decrease > 0.05:
+                    drift_detected = True
+                    drift_details["reason"] = "significant_decrease"
+                    logger.warning(f"Significant performance decrease detected")
         
-        # Check for significant decrease if we have history
-        if len(self.metrics_history) >= 2:
-            previous_metrics = self.metrics_history[-2]["metrics"]
-            f1_decrease = previous_metrics.get("f1", 0) - f1_score
-            auc_decrease = previous_metrics.get("roc_auc", 0) - auc_score
-            
-            drift_details["f1_change"] = -f1_decrease
-            drift_details["auc_change"] = -auc_decrease
-            
-            if f1_decrease > 0.05 or auc_decrease > 0.05:
-                drift_details["reason"] = "significant_decrease"
-                logger.warning(f"Significant performance decrease detected")
-                return True, drift_details
-        
-        return False, drift_details
+        return drift_detected, drift_details
 
     def check_for_data_drift(self) -> Tuple[Dict, bool]:
         """Check for data drift using monitor.py"""
         detector = DriftDetector(self.monitoring_config)
         return detector.analyze_drift(str(self.test_data_path))
 
+    def save_version_artifacts(self, version_name: str):
+        """Save artifacts for version control and comparison"""
+        version_dir = self.versions_dir / version_name
+        version_dir.mkdir(exist_ok=True, parents=True)
+        
+        # Copy current model and data
+        try:
+            import shutil
+            if self.model_path.exists():
+                shutil.copy2(self.model_path, version_dir / self.model_path.name)
+            if self.test_data_path.exists():
+                shutil.copy2(self.test_data_path, version_dir / self.test_data_path.name)
+            
+            # Save metrics
+            if self.metrics_history:
+                with open(version_dir / "metrics.json", 'w') as f:
+                    json.dump(self.metrics_history[-1], f, indent=2)
+                    
+            logger.info(f"Saved '{version_name}' artifacts to {version_dir}")
+        except Exception as e:
+            logger.error(f"Failed to save version artifacts: {str(e)}")
+
     def retrain_model(self) -> Tuple[str, Dict[str, Any]]:
         """Retrain the model and return the new model path and metrics"""
         try:
+            # Save current version before retraining
+            self.save_version_artifacts("before_drift")
+            
             logger.info("Initiating model retraining...")
             new_model_path, new_test_data_path = train_model(str(self.processed_data_path))
             
@@ -245,6 +277,9 @@ class ModelRetrainer:
             self.monitoring_config['model_path'] = str(new_model_path)
             
             new_metrics = self.evaluate_current_model()
+            
+            # Save after retraining
+            self.save_version_artifacts("after_drift")
             
             retraining_report = {
                 "timestamp": datetime.datetime.now().isoformat(),
