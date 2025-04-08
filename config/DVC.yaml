@@ -1,6 +1,6 @@
 stages:
-  data_ingestion:
-    cmd: python src/pipeline.py --stage ingest
+  ingest_data:
+    cmd: python src/pipeline.py --stage ingest_data
     deps:
       - src/pipeline.py
       - src/ingest_data.py
@@ -15,7 +15,7 @@ stages:
       - metrics/ingestion_metrics.json:
           cache: false
 
-  data_preprocessing:
+  preprocess:
     cmd: python src/pipeline.py --stage preprocess
     deps:
       - src/preprocess.py
@@ -38,7 +38,7 @@ stages:
       - metrics/preprocessing_metrics.json:
           cache: false
 
-  model_training:
+  train:
     cmd: python src/pipeline.py --stage train
     deps:
       - src/train.py
@@ -65,7 +65,7 @@ stages:
       - metrics/feature_importance.json:
           cache: false
 
-  monitoring:
+  monitor:
     cmd: python src/monitor.py --stage monitor
     deps:
       - src/monitor.py

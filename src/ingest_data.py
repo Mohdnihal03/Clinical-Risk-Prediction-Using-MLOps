@@ -1,4 +1,56 @@
 # src/ingest_data.py
+'''
+CSV Data Ingestion Module
+
+1. Purpose:
+This module provides functionality to ingest and validate patient sepsis data from CSV files.
+It performs the following key operations:
+- Validates input CSV files against required schema (columns and data types)
+- Processes valid files into a standardized format
+- Saves ingested data with proper formatting and timestamping
+- Handles errors gracefully with detailed logging
+
+2. Input/Requirements:
+- Input comes from CSV files containing patient sepsis-related metrics
+- Required configuration dictionary with:
+  - 'raw_data_dir': Directory to store successfully ingested files
+  - 'processed_dir': Directory for processed files (future use)
+- CSV files must contain these exact columns:
+  - Patient_ID, Age, Gender, Heart_Rate, BP_Systolic, BP_Diastolic
+  - Temperature, Respiratory_Rate, WBC_Count, Lactate_Level
+  - Comorbidities, Clinical_Notes, Sepsis_Label
+
+3. How It Works:
+- Initialization: Sets up directories and validation rules
+- Validation: Checks for required columns before processing
+- Ingestion Process:
+  a. Reads input CSV file using pandas
+  b. Validates column structure
+  c. Generates timestamped output filename
+  d. Saves data with consistent CSV formatting:
+     - Quotes all non-numeric fields
+     - Properly escapes special characters
+     - Handles clinical notes (free text) carefully
+- Output: Returns status dictionary with:
+  - Success/Failure indication
+  - File path of ingested data
+  - Record count (if successful) or error details
+
+4. Why?
+- Stops bad data from causing errors later
+- Makes sure all files have the same format
+- Keeps patient records organized and safe
+- Helps spot missing info early
+
+5. Summary:
+The CSVDataIngestor class provides a robust pipeline for receiving and standardizing
+patient sepsis data from external sources. It enforces data quality at ingestion time
+and prepares files for downstream processing. The implementation handles edge cases
+like missing files, invalid data, and special characters in clinical notes.
+"""
+
+'''
+
 import os
 import logging
 from datetime import datetime

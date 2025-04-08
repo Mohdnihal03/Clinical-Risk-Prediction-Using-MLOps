@@ -12,3 +12,6 @@ shap
 evidently
 google-generativeai
 streamlit
+python-dotenv
+dvc
+docker

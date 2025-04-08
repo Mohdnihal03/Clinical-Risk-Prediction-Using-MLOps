@@ -5,15 +5,31 @@ import joblib
 import matplotlib.pyplot as plt
 import os
 import sys
-import logging
 import json
-from datetime import datetime
+import logging
 from pathlib import Path
 import shap
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, 
     f1_score, roc_auc_score, confusion_matrix
 )
+
+# Add the project directory to the Python path to enable imports
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
+# Import your custom modules (make sure these import statements match your project structure)
+try:
+    # This line assumes your modules are in a src folder
+    sys.path.append('./src')
+    from preprocess import ClinicalPreprocessor
+    from train import ModelTrainer
+except ImportError as e:
+    st.error(f"Import error: {str(e)}. Make sure your project modules are properly set up.")
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 import google.generativeai as genai
 from streamlit.components.v1 import html
 from dotenv import load_dotenv

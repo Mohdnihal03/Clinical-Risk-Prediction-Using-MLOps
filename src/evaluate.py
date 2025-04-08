@@ -1,124 +1,103 @@
-# # src/evaluate.py
-# import logging
-# import mlflow
-# import numpy as np
-# import joblib
-# from pathlib import Path
-# from sklearn.metrics import (
-#     accuracy_score, precision_score, recall_score, 
-#     f1_score, roc_auc_score, confusion_matrix
-# )
-# import matplotlib.pyplot as plt
-# import shap
-# import os
+# src/evaluate.py
+'''
+Model Evaluation and Tracking Module
 
-# # Initialize logging
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
+1. Purpose:
+This module provides comprehensive model evaluation capabilities for the sepsis prediction system, including:
+- Performance metric calculation and tracking
+- Explainability analysis using SHAP values
+- Visualization generation
+- MLflow experiment tracking for full reproducibility
 
-# # Improved MLflow initialization for Windows
-# try:
-#     # Convert Windows path to proper file URI
-#     mlruns_path = Path("mlruns").absolute()
-#     tracking_uri = f"file:///{mlruns_path.as_posix()}"
-    
-#     # Ensure directory exists
-#     os.makedirs(mlruns_path, exist_ok=True)
-    
-#     mlflow.set_tracking_uri(tracking_uri)
-    
-#     # Create experiment if it doesn't exist
-#     if not mlflow.get_experiment_by_name("sepsis_prediction"):
-#         mlflow.create_experiment("sepsis_prediction", artifact_location=tracking_uri)
-#     mlflow.set_experiment("sepsis_prediction")
-    
-#     logger.info(f"MLflow tracking URI: {mlflow.get_tracking_uri()}")
-#     logger.info(f"MLflow experiment: {mlflow.get_experiment_by_name('sepsis_prediction')}")
-# except Exception as e:
-#     logger.error(f"MLflow initialization failed: {str(e)}")
-#     raise
+2. Key Features:
+- Automated metric calculation (accuracy, precision, recall, F1, ROC-AUC)
+- Confusion matrix visualization with percentages
+- SHAP value analysis for model interpretability
+- Full ML experiment tracking with:
+  - Parameter logging
+  - Metric storage
+  - Artifact versioning
+- SQLite backend for lightweight tracking
 
-# class ModelEvaluator:
-#     def __init__(self, model_path: str, test_data_path: str):
-#         self.model_path = Path(model_path)
-#         self.test_data_path = Path(test_data_path)
-#         self.model = None
-#         self.X_test = None
-#         self.y_test = None
+3. Input Requirements:
+- Trained model in joblib format
+- Test dataset in NPZ format (containing X, y arrays)
+- Optional: Feature names for interpretability
 
-#     def load_artifacts(self):
-#         """Load model and test data"""
-#         try:
-#             self.model = joblib.load(self.model_path)
-#             data = np.load(self.test_data_path)
-#             self.X_test = data['X']
-#             self.y_test = data['y']
-#             logger.info(f"Loaded test data with shape {self.X_test.shape}")
-#         except Exception as e:
-#             logger.error(f"Failed to load artifacts: {str(e)}")
-#             raise
+4. Outputs:
+- Logged metrics in MLflow
+- Saved visualizations:
+  - Confusion matrix plot
+  - SHAP summary plot
+- Evaluation report with key performance indicators
 
-#     def evaluate(self):
-#         """Run full evaluation workflow"""
-#         logger.info("Starting MLflow evaluation run...")
-#         try:
-#             with mlflow.start_run(run_name="sepsis_evaluation"):
-#                 # Log parameters
-#                 mlflow.log_params({
-#                     "model_type": "XGBoost",
-#                     "n_estimators": getattr(self.model, 'n_estimators', 'unknown'),
-#                     "model_path": str(self.model_path),
-#                     "test_data_path": str(self.test_data_path)
-#                 })
-                
-#                 # Make predictions
-#                 y_pred = self.model.predict(self.X_test)
-#                 y_proba = self.model.predict_proba(self.X_test)[:, 1]
-                
-#                 # Calculate metrics
-#                 metrics = {
-#                     "accuracy": accuracy_score(self.y_test, y_pred),
-#                     "precision": precision_score(self.y_test, y_pred),
-#                     "recall": recall_score(self.y_test, y_pred),
-#                     "f1": f1_score(self.y_test, y_pred),
-#                     "roc_auc": roc_auc_score(self.y_test, y_proba)
-#                 }
-#                 mlflow.log_metrics(metrics)
-                
-#                 # Log confusion matrix
-#                 fig, ax = plt.subplots()
-#                 conf_matrix = confusion_matrix(self.y_test, y_pred)
-#                 ax.matshow(conf_matrix, cmap=plt.cm.Blues, alpha=0.3)
-#                 for i in range(conf_matrix.shape[0]):
-#                     for j in range(conf_matrix.shape[1]):
-#                         ax.text(x=j, y=i, s=conf_matrix[i, j], va='center', ha='center')
-#                 plt.title("Confusion Matrix")
-#                 mlflow.log_figure(fig, "confusion_matrix.png")
-#                 plt.close()
-                
-#                 # Log SHAP plot
-#                 try:
-#                     explainer = shap.TreeExplainer(self.model)
-#                     shap_values = explainer.shap_values(self.X_test)
-#                     plt.figure()
-#                     shap.summary_plot(shap_values, self.X_test, show=False)
-#                     plt.tight_layout()
-#                     mlflow.log_figure(plt.gcf(), "shap_summary.png")
-#                     plt.close()
-#                 except Exception as e:
-#                     logger.warning(f"SHAP visualization failed: {str(e)}")
-                
-#                 logger.info(f"Evaluation metrics: {metrics}")
-#                 return metrics
-                
-#         except Exception as e:
-#             logger.error(f"Evaluation failed: {str(e)}", exc_info=True)
-#             raise
+5. MLflow Integration:
+- Uses SQLite backend for portable tracking
+- Automatic experiment creation
+- Artifact storage in local filesystem
+- Full reproducibility through logged parameters
 
-# def evaluate_model(model_path: str, test_data_path: str):
-#     evaluator = ModelEvaluator(model_path, test_data_path)
-#     evaluator.load_artifacts()
-#     return evaluator.evaluate()
+6. Evaluation Metrics:
+- Standard classification metrics:
+  - Accuracy, Precision, Recall
+  - F1-score (balanced)
+  - ROC-AUC (probability-based)
+- Confusion matrix with:
+  - Absolute counts
+  - Percentage values
+
+7. Explainability:
+- SHAP (SHapley Additive Explanations) analysis:
+  - Feature importance visualization
+  - Model behavior interpretation
+  - Interaction effects capture
+
+8. Error Handling:
+- Robust artifact loading
+- Graceful degradation for optional components
+- Comprehensive logging
+- Visual validation of outputs
+
+9. Usage Example:
+>>> evaluator = ModelEvaluator("model/xgboost.joblib", "data/test.npz")
+>>> metrics = evaluator.evaluate()
+
+10. Dependencies:
+- MLflow for experiment tracking
+- SHAP for explainability
+- Matplotlib for visualization
+- Standard scikit-learn metrics
+
+11. Design Decisions:
+- SQLite backend chosen for:
+  - Lightweight operation
+  - No external dependencies
+  - Easy version control
+- SHAP over other methods because:
+  - Theoretical soundness
+  - Feature interaction capture
+  - Visual interpretability
+- Percentage+count confusion matrix for:
+  - Balanced view of performance
+  - Clinical relevance
+
+12. Clinical Relevance:
+- Focus on recall (sensitivity) for sepsis detection
+- SHAP analysis helps validate clinical plausibility
+- Confidence percentages support decision making
+
+13. Monitoring Integration:
+- All metrics available for drift detection
+- Model behavior baselined
+- Feature importance tracking over time
+
+14. Summary:
+The ModelEvaluator class provides a production-grade evaluation framework that combines quantitative
+performance assessment with qualitative model interpretability analysis. Its tight integration with
+MLflow ensures all evaluation results are properly versioned and reproducible, while the explainability
+components help build trust in the model's predictions - a critical factor for clinical deployment.
+'''
+
 
 import logging
 import mlflow
