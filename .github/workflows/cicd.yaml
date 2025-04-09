@@ -33,7 +33,7 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          pytest src/test_drift_detection.py -v --junitxml=test-results.xml
+          pytest tests/test_pipeline.py -v --junitxml=test-results.xml
 
       # Build Docker image
       - name: Build Docker image

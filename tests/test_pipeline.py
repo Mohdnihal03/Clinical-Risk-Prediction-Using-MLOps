@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import datetime
 import joblib
-from retrain import ModelRetrainer
+from src.retrain import ModelRetrainer
 from sklearn.ensemble import RandomForestClassifier
 import pytest
 
