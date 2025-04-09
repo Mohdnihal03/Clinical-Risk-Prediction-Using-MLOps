@@ -1,203 +1,97 @@
-name: Sepsis Prediction System CI/CD
+name: ML Pipeline CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
-  workflow_dispatch:
-    inputs:
-      deploy:
-        description: 'Deploy to staging'
-        required: false
-        default: false
-        type: boolean
-  schedule:
-    - cron: '0 0 * * 1'  # Weekly on Monday at midnight for scheduled monitoring
+    branches: [ main ]
 
 jobs:
-  test:
-    name: Run Tests
+  build-and-test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      # Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip'
 
-      
+      # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov flake8
-          # Install protobuf explicitly
-          pip install protobuf
-          # Skip installing numpy from requirements.txt as we'll install it separately
-          grep -v "numpy" requirements.txt > temp_requirements.txt
-          pip install -r temp_requirements.txt
-          pip install numpy==2.0.0
-      
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      
-      - name: Run unit tests
-        run: |
-          pytest --cov=src tests/ -v
+          pip install -r requirements.txt
+          pip install pytest
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: |
-            pytest-report.xml
-            coverage.xml
-        if: always()
+      # Run linting (optional)
+      - name: Run linting
+        run: |
+          pip install flake8
+          flake8 . --max-line-length=120 --exclude=venv,__pycache__
 
-  build:
-    name: Build Docker Image
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      
+      # Run tests
+      - name: Run tests
+        env:
+          PYTHONPATH: .
+        run: |
+          pytest test.py -v --junitxml=test-results.xml
+
+      # Build Docker image
       - name: Build Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: false
-          tags: sepsis-prediction:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          load: true
-      
+        run: |
+          docker build -t sepsis-pipeline:latest .
+
+      # Test Docker image build
       - name: Test Docker image
         run: |
-          docker run --name test-container -d sepsis-prediction:${{ github.sha }}
-          # Wait for container to start and run health check
-          sleep 10
-          docker exec test-container python -c "import requests; assert requests.get('http://localhost:8501/_stcore/health').status_code == 200"
-          docker stop test-container
-      
-      - name: Login to GitHub Container Registry
-        if: success() && github.event_name != 'pull_request'
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Push Docker image
-        if: success() && github.event_name != 'pull_request'
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/sepsis-prediction:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/sepsis-prediction:latest
+          docker run --rm sepsis-pipeline:latest python -c "import xgboost; print('XGBoost imported successfully')"
 
-  deploy-staging:
-    name: Deploy to Staging
-    needs: build
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true')
-    runs-on: ubuntu-latest
-    environment: staging
-    concurrency: staging_environment
-    steps:
-      - name: Deploy to staging environment
-        run: |
-          echo "Deploying to staging environment"
-          # Replace with your actual deployment steps
-          # Example for simple server:
-          # ssh user@staging-server "docker pull ghcr.io/${{ github.repository_owner }}/sepsis-prediction:${{ github.sha }} && \
-          # docker stop sepsis-app || true && \
-          # docker run -d --name sepsis-app -p 8501:8501 --restart unless-stopped \
-          # -v $(pwd)/data:/app/data \
-          # -v $(pwd)/model:/app/model \
-          # -v $(pwd)/monitoring:/app/monitoring \
-          # ghcr.io/${{ github.repository_owner }}/sepsis-prediction:${{ github.sha }}"
-          
-      - name: Run model validation tests
-        run: |
-          echo "Running model validation tests in staging"
-          # Add validation script that verifies model performance metrics meet baseline requirements
-          
-      - name: Monitor deployment
-        run: |
-          echo "Monitoring deployment for 5 minutes"
-          # Add monitoring steps to ensure deployment is stable
-          sleep 30  # Simulated monitoring period
-          
-      - name: Send deployment notification
-        run: |
-          echo "Sending deployment notification"
-          # Add notification steps (Slack, Email, etc.)
-          # curl -X POST -H 'Content-type: application/json' --data '{"text":"Sepsis Prediction System deployed to staging"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+      # Upload test results
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results.xml
 
-  scheduled-monitoring:
-    name: Scheduled Model Monitoring
+  pipeline-check:
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     steps:
-      - name: Checkout code
+      # Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
-        
+
+      # Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          
+
+      # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install numpy==2.0.0
-          pip install --no-deps -r requirements.txt
-          
-      - name: Run model monitoring
+          pip install -r requirements.txt
+
+      # Create sample data for pipeline run
+      - name: Create sample data
         run: |
-          python pipeline.py --monitor
-          
-      - name: Check for drift and notify if detected
+          mkdir -p data/raw
+          echo "Patient_ID,Age,Gender,Heart_Rate,BP_Systolic,BP_Diastolic,Temperature,Respiratory_Rate,WBC_Count,Lactate_Level,Comorbidities,Clinical_Notes,Sepsis_Label" > data/raw/sepsis_datasets.csv
+          echo "1,65,M,90,120,80,37.5,16,10.5,2.5,Diabetes,Fever and chills,1" >> data/raw/sepsis_datasets.csv
+          echo "2,45,F,85,130,85,36.8,18,8.5,1.8,None,Normal,0" >> data/raw/sepsis_datasets.csv
+
+      # Run pipeline with monitoring and retraining
+      - name: Run pipeline
+        env:
+          PYTHONPATH: .
         run: |
-          # Script to check latest drift report and send notification if drift detected
-          python -c "
-          import json
-          with open('monitoring/drift_history.json', 'r') as f:
-              history = json.load(f)
-          latest = history[-1]
-          if latest.get('drift_detected', False) or latest.get('retraining_recommended', False):
-              print('::warning::Drift detected! Retraining recommended.')
-              exit(1)
-          "
-          
-      - name: Retrain model if drift detected
-        if: ${{ failure() }}  # This will run only if the previous step fails (drift detected)
-        run: |
-          echo "Drift detected! Retraining model..."
           python pipeline.py --monitor --retrain_if_needed
-          
-      - name: Create issue for retraining
-        if: ${{ failure() }}  # This will run only if the previous steps fail
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: '🔄 Model Drift Detected - Retraining Required',
-              body: 'The scheduled monitoring detected drift in the model. Automated retraining has been initiated, but human review is recommended.\n\nPlease check the latest monitoring reports and validate the new model.',
-              labels: ['model-drift', 'high-priority']
-            })

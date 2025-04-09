@@ -1,154 +1,249 @@
-import pytest
-import os
 import numpy as np
-import tempfile
+import os
+import json
+from pathlib import Path
+import datetime
 import joblib
-from unittest.mock import patch, MagicMock
+from retrain import ModelRetrainer
+from sklearn.ensemble import RandomForestClassifier
+import pytest
 
-# Import the evaluate module directly - don't duplicate code
-from src.evaluate import ModelEvaluator, evaluate_model
-from src.pipeline import run_pipeline, get_default_config
+class TestDriftDetection:
+    @pytest.fixture
+    def setup_temp_environment(self, tmp_path):
+        """Create temporary directory with test data for isolated testing"""
+        # Use environment variables for base path if available
+        base_path = os.getenv('BASE_PATH', tmp_path)
+        
+        # Create directory structure
+        model_dir = Path(base_path) / "model"
+        data_dir = Path(base_path) / "data" / "processed"
+        monitoring_dir = Path(base_path) / "monitoring"
+        versions_dir = Path(base_path) / "versions"
+        
+        model_dir.mkdir(parents=True, exist_ok=True)
+        data_dir.mkdir(parents=True, exist_ok=True)
+        monitoring_dir.mkdir(parents=True, exist_ok=True)
+        versions_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Setup reference/baseline data
+        n_samples = 1000
+        n_features = 10
+        np.random.seed(42)
+        
+        # Create reference data with clear distribution
+        X_ref = np.random.normal(0, 1, (n_samples, n_features))
+        y_ref = (X_ref[:, 0] + X_ref[:, 1] > 0).astype(int)
+        
+        # Save reference data
+        np.savez(data_dir / "reference_data.npz", X=X_ref, y=y_ref, 
+                 feature_names=np.array([f"feature_{i}" for i in range(n_features)]))
+        
+        # Train and save a simple model
+        model = RandomForestClassifier(n_estimators=10, random_state=42)
+        model.fit(X_ref, y_ref)
+        model_path = model_dir / "test_model.joblib"
+        joblib.dump(model, model_path)
+        
+        # Create test data (initially similar to reference)
+        X_test = np.random.normal(0, 1, (200, n_features))
+        y_test = (X_test[:, 0] + X_test[:, 1] > 0).astype(int)
+        np.savez(data_dir / "test_data.npz", X=X_test, y=y_test, 
+                 feature_names=np.array([f"feature_{i}" for i in range(n_features)]))
+        
+        # Training data for retraining
+        np.savez(data_dir / "train.npz", X=X_ref, y=y_ref, 
+                 feature_names=np.array([f"feature_{i}" for i in range(n_features)]))
+        
+        # Create empty metrics history file
+        with open(monitoring_dir / "metrics_history.json", "w") as f:
+            json.dump([], f)
+            
+        # Create test config
+        config = {
+            'reference_data_path': str(data_dir / "reference_data.npz"),
+            'model_path': str(model_path),
+            'monitor_dir': str(monitoring_dir),
+            'history_file': str(monitoring_dir / "drift_history.json"),
+            'visualizations_dir': str(monitoring_dir / "visualizations"),
+            'versions_dir': str(versions_dir),
+            'drift_thresholds': {
+                'data_drift_threshold': 0.1,
+                'concept_drift_threshold': 0.05,
+                'label_drift_threshold': 0.1,
+                'significant_drift_ratio': 0.3
+            }
+        }
+        
+        return {
+            'tmp_path': Path(base_path),
+            'model_path': model_path,
+            'test_data_path': data_dir / "test_data.npz",
+            'reference_data_path': data_dir / "reference_data.npz",
+            'processed_data_path': data_dir / "train.npz",
+            'config': config,
+            'n_features': n_features
+        }
+    
+    def test_data_drift_detection(self, setup_temp_environment):
+        """Test detection of data drift when feature distributions change"""
+        env = setup_temp_environment
+        
+        # Initialize retrainer with test configuration
+        retrainer = ModelRetrainer(
+            model_path=str(env['model_path']),
+            test_data_path=str(env['test_data_path']),
+            processed_data_path=str(env['processed_data_path']),
+            monitoring_config=env['config']
+        )
+        
+        # Test 1: No drift with similar data distribution
+        drift_results, drift_detected = retrainer.check_for_data_drift()
+        assert not drift_detected, "No drift should be detected with similar distributions"
+        
+        # Test 2: Create data with drift in feature distributions
+        n_samples = 200
+        n_features = env['n_features']
+        
+        # Load original test data
+        orig_data = np.load(env['test_data_path'])
+        X_orig = orig_data['X']
+        y_orig = orig_data['y']
+        feature_names = orig_data['feature_names']
+        
+        # Create drifted data - shift mean of features 0 and 1
+        X_drifted = np.random.normal(0, 1, (n_samples, n_features))
+        X_drifted[:, 0] = np.random.normal(3, 1, n_samples)  # Shift mean of feature 0
+        X_drifted[:, 2] = np.random.normal(-2, 1.5, n_samples)  # Shift mean and variance of feature 2
+        y_drifted = y_orig  # Keep labels the same for data drift test
+        
+        # Save drifted data
+        np.savez(env['test_data_path'], X=X_drifted, y=y_drifted, feature_names=feature_names)
+        
+        # Test with drifted data
+        drift_results, drift_detected = retrainer.check_for_data_drift()
+        
+        # Check detection result
+        assert drift_detected, "Data drift should be detected"
+        assert "drifted_features" in drift_results, "Should report which features drifted"
+        assert len(drift_results["drifted_features"]) > 0, "Should identify drifted features"
+        
+    def test_concept_drift_detection(self, setup_temp_environment):
+        """Test detection of concept drift when relationship between features and labels changes"""
+        env = setup_temp_environment
+        
+        # Initialize retrainer with test configuration
+        retrainer = ModelRetrainer(
+            model_path=str(env['model_path']),
+            test_data_path=str(env['test_data_path']),
+            processed_data_path=str(env['processed_data_path']),
+            monitoring_config=env['config']
+        )
+        
+        # Load original test data
+        orig_data = np.load(env['test_data_path'])
+        X_orig = orig_data['X']
+        feature_names = orig_data['feature_names']
+        
+        # Create concept drift by changing the relationship between features and labels
+        n_samples = X_orig.shape[0]
+        y_new = (X_orig[:, 2] + X_orig[:, 3] > 0).astype(int)
+        
+        # Save data with concept drift
+        np.savez(env['test_data_path'], X=X_orig, y=y_new, feature_names=feature_names)
+        
+        # Test for concept drift
+        drift_results, drift_detected = retrainer.check_for_data_drift()
+        
+        # Check detection results
+        assert drift_detected, "Concept drift should be detected"
+        assert drift_results.get("concept_drift_detected", False), "Concept drift flag should be True"
+        
+    def test_label_drift_detection(self, setup_temp_environment):
+        """Test detection of label drift when label distribution changes"""
+        env = setup_temp_environment
+        
+        # Initialize retrainer with test configuration
+        retrainer = ModelRetrainer(
+            model_path=str(env['model_path']),
+            test_data_path=str(env['test_data_path']),
+            processed_data_path=str(env['processed_data_path']),
+            monitoring_config=env['config']
+        )
+        
+        # Load original test data
+        orig_data = np.load(env['test_data_path'])
+        X_orig = orig_data['X']
+        feature_names = orig_data['feature_names']
+        
+        # Create label drift by changing the distribution of labels
+        n_samples = X_orig.shape[0]
+        np.random.seed(42)
+        y_skewed = np.random.binomial(1, 0.95, n_samples)  # 95% are class 1
+        
+        # Save data with label drift
+        np.savez(env['test_data_path'], X=X_orig, y=y_skewed, feature_names=feature_names)
+        
+        # Test for label drift
+        drift_results, drift_detected = retrainer.check_for_data_drift()
+        
+        # Check detection results
+        assert drift_detected, "Label drift should be detected"
+        assert drift_results.get("label_drift_detected", False), "Label drift flag should be True"
+        
+    def test_retraining_with_drift(self, setup_temp_environment):
+        """Test full retraining workflow in presence of drift"""
+        env = setup_temp_environment
+        
+        # Initialize retrainer with test configuration
+        retrainer = ModelRetrainer(
+            model_path=str(env['model_path']),
+            test_data_path=str(env['test_data_path']),
+            processed_data_path=str(env['processed_data_path']),
+            monitoring_config=env['config']
+        )
+        
+        # Create drifted data
+        orig_data = np.load(env['test_data_path'])
+        X_orig = orig_data['X']
+        feature_names = orig_data['feature_names']
+        n_samples = X_orig.shape[0]
+        
+        # Create combined drift scenario
+        X_drifted = X_orig.copy()
+        X_drifted[:, 0] = np.random.normal(2, 1, n_samples)  # Shift feature 0
+        y_drifted = (X_drifted[:, 0] - X_drifted[:, 1] > 0).astype(int)  # Change concept
+        
+        # Save drifted data to test file
+        np.savez(env['test_data_path'], X=X_drifted, y=y_drifted, feature_names=feature_names)
+        
+        # Save similar data to training file for retraining
+        n_train = 1000
+        X_train = np.random.normal(0, 1, (n_train, env['n_features']))
+        X_train[:, 0] = np.random.normal(2, 1, n_train)  # Match shifted feature
+        y_train = (X_train[:, 0] - X_train[:, 1] > 0).astype(int)  # Match new concept
+        
+        np.savez(env['processed_data_path'], X=X_train, y=y_train, 
+                 feature_names=np.array([f"feature_{i}" for i in range(env['n_features'])]))
+        
+        # Set up initial metrics for comparison
+        initial_metrics = {
+            "f1": 0.65,
+            "roc_auc": 0.68,
+            "accuracy": 0.70
+        }
+        retrainer.metrics_history = [{
+            "timestamp": datetime.datetime.now().isoformat(),
+            "metrics": initial_metrics
+        }]
+        
+        # Run retraining workflow
+        result = retrainer.run_retraining_workflow()
+        
+        # Check results
+        assert "actions_taken" in result, "Should report actions taken"
+        assert "model_retraining" in result["actions_taken"], "Should have performed retraining"
+        assert result["conclusion"] == "Retraining successful", "Should conclude with successful retraining"
 
-# Create fixture for test data
-@pytest.fixture
-def sample_test_data():
-    X_test = np.random.rand(100, 10)
-    y_test = np.random.randint(0, 2, 100)
-    feature_names = [f"feature_{i}" for i in range(10)]
-    
-    # Create a temporary file to save the test data
-    with tempfile.NamedTemporaryFile(suffix='.npz', delete=False) as f:
-        np.savez(f.name, X=X_test, y=y_test, feature_names=feature_names)
-        test_data_path = f.name
-    
-    return test_data_path
-
-# Create fixture for test model
-@pytest.fixture
-def sample_model():
-    # Mock a simple model with predict and predict_proba methods
-    model = MagicMock()
-    model.predict.return_value = np.random.randint(0, 2, 100)
-    model.predict_proba.return_value = np.random.rand(100, 2)
-    model.n_estimators = 100
-    
-    # Create a temporary file to save the model
-    with tempfile.NamedTemporaryFile(suffix='.pkl', delete=False) as f:
-        joblib.dump(model, f.name)
-        model_path = f.name
-    
-    return model_path
-
-# Test the ModelEvaluator class
-def test_model_evaluator_load_artifacts(sample_model, sample_test_data):
-    evaluator = ModelEvaluator(sample_model, sample_test_data)
-    evaluator.load_artifacts()
-    
-    # Check that data was loaded correctly
-    assert evaluator.X_test is not None
-    assert evaluator.y_test is not None
-    assert evaluator.model is not None
-    assert len(evaluator.feature_names) == evaluator.X_test.shape[1]
-
-# Test the evaluate method with mocked MLflow
-@patch('mlflow.start_run')
-@patch('mlflow.log_params')
-@patch('mlflow.log_metrics')
-@patch('mlflow.log_figure')
-def test_model_evaluator_evaluate(mock_log_figure, mock_log_metrics, 
-                                 mock_log_params, mock_start_run,
-                                 sample_model, sample_test_data):
-    # Setup mock for mlflow.start_run context manager
-    mock_start_run.return_value.__enter__.return_value = MagicMock()
-    
-    evaluator = ModelEvaluator(sample_model, sample_test_data)
-    evaluator.load_artifacts()
-    
-    # Run the evaluation
-    metrics = evaluator.evaluate()
-    
-    # Verify that MLflow was called correctly
-    mock_start_run.assert_called_once()
-    mock_log_params.assert_called_once()
-    mock_log_metrics.assert_called_once()
-    assert mock_log_figure.call_count >= 1
-    
-    # Verify that metrics were returned
-    assert 'accuracy' in metrics
-    assert 'precision' in metrics
-    assert 'recall' in metrics
-    assert 'f1' in metrics
-    assert 'roc_auc' in metrics
-
-# Test the evaluate_model function
-@patch('src.evaluate.ModelEvaluator')
-def test_evaluate_model(mock_evaluator_class, sample_model, sample_test_data):
-    # Setup the mock
-    mock_evaluator = MagicMock()
-    mock_evaluator.evaluate.return_value = {
-        'accuracy': 0.85,
-        'precision': 0.8,
-        'recall': 0.75,
-        'f1': 0.77,
-        'roc_auc': 0.9
-    }
-    mock_evaluator_class.return_value = mock_evaluator
-    
-    # Call the function
-    metrics = evaluate_model(sample_model, sample_test_data)
-    
-    # Verify that ModelEvaluator was used correctly
-    mock_evaluator_class.assert_called_once_with(sample_model, sample_test_data)
-    mock_evaluator.load_artifacts.assert_called_once()
-    mock_evaluator.evaluate.assert_called_once()
-    
-    # Check the returned metrics
-    assert metrics == mock_evaluator.evaluate.return_value
-
-# Test the pipeline with mocked components
-@patch('src.pipeline.CSVDataIngestor')
-@patch('src.pipeline.ClinicalPreprocessor')
-@patch('src.pipeline.train_model')
-@patch('src.pipeline.evaluate_model')
-def test_run_pipeline(mock_evaluate, mock_train, mock_preprocessor, 
-                     mock_ingestor):
-    # Setup mocks
-    mock_ingestor.return_value.ingest_csv.return_value = {
-        'status': 'success',
-        'raw_data': 'data/raw/data.csv'
-    }
-    mock_preprocessor.return_value.preprocess.return_value = 'data/processed/data.npz'
-    mock_train.return_value = ('model/model.pkl', 'data/processed/test_data.npz')
-    mock_evaluate.return_value = {
-        'accuracy': 0.85,
-        'precision': 0.8,
-        'recall': 0.75,
-        'f1': 0.77,
-        'roc_auc': 0.9
-    }
-    
-    # Run the pipeline
-    result = run_pipeline(input_file='data/raw/test.csv')
-    
-    # Verify the expected calls
-    mock_ingestor.assert_called_once()
-    mock_ingestor.return_value.ingest_csv.assert_called_once_with('data/raw/test.csv')
-    mock_preprocessor.assert_called_once()
-    mock_preprocessor.return_value.preprocess.assert_called_once()
-    mock_train.assert_called_once()
-    mock_evaluate.assert_called_once()
-    
-    # Check the pipeline result
-    assert result['model_path'] == 'model/model.pkl'
-    assert result['test_data_path'] == 'data/processed/test_data.npz'
-    assert result['eval_results'] == mock_evaluate.return_value
-
-# Clean up test files
-def teardown_module(module):
-    # Clean up any temporary files created during tests
-    for file in os.listdir(tempfile.gettempdir()):
-        if file.endswith('.npz') or file.endswith('.pkl'):
-            try:
-                os.remove(os.path.join(tempfile.gettempdir(), file))
-            except:
-                pass
+if __name__ == "__main__":
+    pytest.main(["-v", __file__])

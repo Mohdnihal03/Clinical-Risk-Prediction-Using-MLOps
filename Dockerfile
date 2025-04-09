@@ -2,14 +2,15 @@
 FROM python:3.10
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV STREAMLIT_SERVER_PORT=8501
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     libgomp1 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Create and set working directory
@@ -32,10 +33,11 @@ RUN mkdir -p /app/data/raw \
     /app/mlruns \
     /app/src/frontend
 
-
-# Health check
+# Health check for Streamlit
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8501/_stcore/health
+    CMD curl -f http://localhost:8501/_stcore/health || exit 1
 
-# Command to run both (using a start script)
-CMD ["sh", "-c", "streamlit run src/frontend/app.py & python pipeline.py --monitor --retrain_if_needed"]
+# Command to run both Streamlit and the pipeline
+# Since pipeline.py uses default parameters (monitor=True, retrain_if_needed=True),
+# we don't need additional arguments
+CMD ["sh", "-c", "streamlit run src/frontend/app.py & python pipeline.py"]
