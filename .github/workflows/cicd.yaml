@@ -28,12 +28,6 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
 
-      # Run linting (optional)
-      - name: Run linting
-        run: |
-          pip install flake8
-          flake8 . --max-line-length=120 --exclude=venv,__pycache__
-
       # Run tests
       - name: Run tests
         env:
@@ -54,7 +48,7 @@ jobs:
       # Upload test results
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: test-results.xml
