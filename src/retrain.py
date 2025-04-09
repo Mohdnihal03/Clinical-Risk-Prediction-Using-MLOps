@@ -77,6 +77,7 @@ class ModelRetrainer:
 
         # Ensure directories exist
         self.model_path.parent.mkdir(exist_ok=True, parents=True)
+        self.processed_data_path.parent.mkdir(exist_ok=True,parents=True)
         self.test_data_path.parent.mkdir(exist_ok=True, parents=True)
         self.metrics_history_path.parent.mkdir(exist_ok=True, parents=True)
         Path(self.monitoring_config['visualizations_dir']).mkdir(exist_ok=True, parents=True)

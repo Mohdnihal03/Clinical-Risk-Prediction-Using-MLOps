@@ -1,5 +1,5 @@
 # Use the official Python image
-FROM python:3.10-slim
+FROM python:3.10
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -17,7 +17,8 @@ WORKDIR /app
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir numpy==2.0.0
+RUN pip install --no-cache-dir --no-deps -r requirements.txt
 
 # Copy application code
 COPY . .

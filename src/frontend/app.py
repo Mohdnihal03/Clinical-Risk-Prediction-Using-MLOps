@@ -100,7 +100,7 @@ def display_metrics():
     """Display model evaluation metrics"""
     X_test, y_test, _ = load_test_data()
     model, _ = load_model_and_preprocessor()
-    
+     
     if X_test is None or model is None:
         st.warning("Cannot display metrics without test data and model")
         return
@@ -148,8 +148,9 @@ def display_metrics():
 
 def save_patient_case(data, prediction, probability):
     """Save patient case to history"""
+    import datetime
     new_case = {
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         **data.iloc[0].to_dict(),
         "prediction": prediction,
         "probability": probability
@@ -400,6 +401,20 @@ def main():
 
 def prediction_page():
     st.title("Sepsis Risk Assessment")
+    if st.session_state.get("is_admin", True):  # You'd need to implement admin auth
+        if st.sidebar.button("Admin: Retrain Model"):
+            with st.spinner("Retraining model..."):
+                try:
+                    from retrain import run_automated_retraining
+                    result = run_automated_retraining(force_retrain=True)
+                    
+                    if "error" in result:
+                        st.error(f"Retraining failed: {result['error']}")
+                    else:
+                        st.success("Model retrained successfully!")
+                        st.session_state.model, st.session_state.preprocessor = load_model_and_preprocessor()
+                except Exception as e:
+                    st.error(f"Error during retraining: {str(e)}")
     patient_data = create_patient_form()
     
     if patient_data is not None:
@@ -415,11 +430,6 @@ def prediction_page():
                 risk_level = display_prediction_result(prediction, probability)
                 save_patient_case(patient_data, prediction, probability)
                 
-                # SHAP Explanation
-                # st.header("Prediction Explanation")
-                # X_test, _, feature_names = load_test_data()
-                # shap_html = create_shap_force_plot(model, processed_data, feature_names)
-                # html(shap_html, height=300)
                 
                 # Clinical Recommendations
                 st.header("Clinical Guidance")

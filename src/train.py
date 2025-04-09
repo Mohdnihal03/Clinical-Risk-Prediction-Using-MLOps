@@ -114,7 +114,9 @@ class ModelTrainer:
         self.model_dir = Path(model_dir)
         self.model_dir.mkdir(exist_ok=True, parents=True)
         self.test_data_path = Path("data/processed/test_data.npz")
+        self.train_data_path = Path("data/processed/train.npz")
         self.test_data_path.parent.mkdir(exist_ok=True, parents=True)
+        self.train_data_path.parent.mkdir(exist_ok=True, parents=True)
         
     def load_processed_data(self, processed_path: str):
         """Load data from preprocessing output"""
@@ -147,6 +149,7 @@ class ModelTrainer:
             )
             
             # Save test data
+            np.savez(self.train_data_path, X=X_train,y=y_train)
             np.savez(self.test_data_path, X=X_test, y=y_test)
             logger.info(f"Saved test data to {self.test_data_path}")
             
