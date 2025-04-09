@@ -1,273 +1,154 @@
-# # src/evaluate.py
-# import logging
-# import mlflow
-# import numpy as np
-# import joblib
-# from pathlib import Path
-# from sklearn.metrics import (
-#     accuracy_score, precision_score, recall_score, 
-#     f1_score, roc_auc_score, confusion_matrix
-# )
-# import matplotlib.pyplot as plt
-# import shap
-# import os
-
-# # Initialize logging
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
-
-# # Improved MLflow initialization for Windows
-# try:
-#     # Convert Windows path to proper file URI
-#     mlruns_path = Path("mlruns").absolute()
-#     tracking_uri = f"file:///{mlruns_path.as_posix()}"
-    
-#     # Ensure directory exists
-#     os.makedirs(mlruns_path, exist_ok=True)
-    
-#     mlflow.set_tracking_uri(tracking_uri)
-    
-#     # Create experiment if it doesn't exist
-#     if not mlflow.get_experiment_by_name("sepsis_prediction"):
-#         mlflow.create_experiment("sepsis_prediction", artifact_location=tracking_uri)
-#     mlflow.set_experiment("sepsis_prediction")
-    
-#     logger.info(f"MLflow tracking URI: {mlflow.get_tracking_uri()}")
-#     logger.info(f"MLflow experiment: {mlflow.get_experiment_by_name('sepsis_prediction')}")
-# except Exception as e:
-#     logger.error(f"MLflow initialization failed: {str(e)}")
-#     raise
-
-# class ModelEvaluator:
-#     def __init__(self, model_path: str, test_data_path: str):
-#         self.model_path = Path(model_path)
-#         self.test_data_path = Path(test_data_path)
-#         self.model = None
-#         self.X_test = None
-#         self.y_test = None
-
-#     def load_artifacts(self):
-#         """Load model and test data"""
-#         try:
-#             self.model = joblib.load(self.model_path)
-#             data = np.load(self.test_data_path)
-#             self.X_test = data['X']
-#             self.y_test = data['y']
-#             logger.info(f"Loaded test data with shape {self.X_test.shape}")
-#         except Exception as e:
-#             logger.error(f"Failed to load artifacts: {str(e)}")
-#             raise
-
-#     def evaluate(self):
-#         """Run full evaluation workflow"""
-#         logger.info("Starting MLflow evaluation run...")
-#         try:
-#             with mlflow.start_run(run_name="sepsis_evaluation"):
-#                 # Log parameters
-#                 mlflow.log_params({
-#                     "model_type": "XGBoost",
-#                     "n_estimators": getattr(self.model, 'n_estimators', 'unknown'),
-#                     "model_path": str(self.model_path),
-#                     "test_data_path": str(self.test_data_path)
-#                 })
-                
-#                 # Make predictions
-#                 y_pred = self.model.predict(self.X_test)
-#                 y_proba = self.model.predict_proba(self.X_test)[:, 1]
-                
-#                 # Calculate metrics
-#                 metrics = {
-#                     "accuracy": accuracy_score(self.y_test, y_pred),
-#                     "precision": precision_score(self.y_test, y_pred),
-#                     "recall": recall_score(self.y_test, y_pred),
-#                     "f1": f1_score(self.y_test, y_pred),
-#                     "roc_auc": roc_auc_score(self.y_test, y_proba)
-#                 }
-#                 mlflow.log_metrics(metrics)
-                
-#                 # Log confusion matrix
-#                 fig, ax = plt.subplots()
-#                 conf_matrix = confusion_matrix(self.y_test, y_pred)
-#                 ax.matshow(conf_matrix, cmap=plt.cm.Blues, alpha=0.3)
-#                 for i in range(conf_matrix.shape[0]):
-#                     for j in range(conf_matrix.shape[1]):
-#                         ax.text(x=j, y=i, s=conf_matrix[i, j], va='center', ha='center')
-#                 plt.title("Confusion Matrix")
-#                 mlflow.log_figure(fig, "confusion_matrix.png")
-#                 plt.close()
-                
-#                 # Log SHAP plot
-#                 try:
-#                     explainer = shap.TreeExplainer(self.model)
-#                     shap_values = explainer.shap_values(self.X_test)
-#                     plt.figure()
-#                     shap.summary_plot(shap_values, self.X_test, show=False)
-#                     plt.tight_layout()
-#                     mlflow.log_figure(plt.gcf(), "shap_summary.png")
-#                     plt.close()
-#                 except Exception as e:
-#                     logger.warning(f"SHAP visualization failed: {str(e)}")
-                
-#                 logger.info(f"Evaluation metrics: {metrics}")
-#                 return metrics
-                
-#         except Exception as e:
-#             logger.error(f"Evaluation failed: {str(e)}", exc_info=True)
-#             raise
-
-# def evaluate_model(model_path: str, test_data_path: str):
-#     evaluator = ModelEvaluator(model_path, test_data_path)
-#     evaluator.load_artifacts()
-#     return evaluator.evaluate()
-
-import logging
-import mlflow
-import numpy as np
-import joblib
-from pathlib import Path
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, 
-    f1_score, roc_auc_score, confusion_matrix
-)
-import matplotlib.pyplot as plt
-import shap
+import pytest
 import os
-import pandas as pd
+import numpy as np
+import tempfile
+import joblib
+from unittest.mock import patch, MagicMock
 
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Import the evaluate module directly - don't duplicate code
+from src.evaluate import ModelEvaluator, evaluate_model
+from src.pipeline import run_pipeline, get_default_config
 
-# MLflow initialization with SQLite backend
-try:
-    # Set SQLite as the tracking URI
-    tracking_uri = "sqlite:///mlruns.db"
-    mlflow.set_tracking_uri(tracking_uri)
+# Create fixture for test data
+@pytest.fixture
+def sample_test_data():
+    X_test = np.random.rand(100, 10)
+    y_test = np.random.randint(0, 2, 100)
+    feature_names = [f"feature_{i}" for i in range(10)]
     
-    # Create experiment if it doesn't exist
-    if not mlflow.get_experiment_by_name("sepsis_prediction"):
-        # For SQLite backend, artifact location should be a filesystem path
-        artifact_location = Path("mlruns").absolute().as_posix()
-        mlflow.create_experiment(
-            "sepsis_prediction",
-            artifact_location=f"file:///{artifact_location}"
-        )
+    # Create a temporary file to save the test data
+    with tempfile.NamedTemporaryFile(suffix='.npz', delete=False) as f:
+        np.savez(f.name, X=X_test, y=y_test, feature_names=feature_names)
+        test_data_path = f.name
     
-    mlflow.set_experiment("sepsis_prediction")
+    return test_data_path
+
+# Create fixture for test model
+@pytest.fixture
+def sample_model():
+    # Mock a simple model with predict and predict_proba methods
+    model = MagicMock()
+    model.predict.return_value = np.random.randint(0, 2, 100)
+    model.predict_proba.return_value = np.random.rand(100, 2)
+    model.n_estimators = 100
     
-    # Ensure mlruns directory exists for artifacts
-    mlruns_path = Path("mlruns").absolute()
-    os.makedirs(mlruns_path, exist_ok=True)
+    # Create a temporary file to save the model
+    with tempfile.NamedTemporaryFile(suffix='.pkl', delete=False) as f:
+        joblib.dump(model, f.name)
+        model_path = f.name
     
-    logger.info(f"MLflow initialized with tracking URI: {tracking_uri}")
-    logger.info(f"Artifacts will be stored at: {mlruns_path}")
-except Exception as e:
-    logger.error(f"MLflow initialization failed: {str(e)}")
-    raise
+    return model_path
 
-class ModelEvaluator:
-    def __init__(self, model_path: str, test_data_path: str):
-        self.model_path = Path(model_path)
-        self.test_data_path = Path(test_data_path)
-        self.model = None
-        self.X_test = None
-        self.y_test = None
-        self.feature_names = None
-
-    def load_artifacts(self):
-        """Load model and test data"""
-        try:
-            self.model = joblib.load(self.model_path)
-            data = np.load(self.test_data_path)
-            self.X_test = data['X']
-            self.y_test = data['y']
-            
-            # Try to load feature names if available
-            if 'feature_names' in data:
-                self.feature_names = list(data['feature_names'])
-            else:
-                self.feature_names = [f"Feature_{i}" for i in range(self.X_test.shape[1])]
-                
-            logger.info(f"Loaded test data with {self.X_test.shape[0]} samples")
-        except Exception as e:
-            logger.error(f"Failed to load artifacts: {str(e)}")
-            raise
-
-    def _create_shap_plots(self):
-        try:
-            import shap
-            explainer = shap.TreeExplainer(self.model)
-            shap_values = explainer.shap_values(self.X_test)
-            
-            # Handle multi-class SHAP values (take first class if binary)
-            if isinstance(shap_values, list):
-                shap_values = shap_values[1]  # For binary classification, take positive class
-            
-            # Create SHAP summary plot
-            plt.figure()
-            shap.summary_plot(shap_values, self.X_test, feature_names=self.feature_names, show=False)
-            summary_path = os.path.join(self.output_dir, "shap_summary.png")
-            plt.savefig(summary_path)
-            plt.close()
-            
-            # Create SHAP values DataFrame for feature importance
-            shap_df = pd.DataFrame(shap_values, columns=self.feature_names)
-            return shap_df
-            
-        except Exception as e:
-            logger.warning(f"SHAP visualization failed: {str(e)}")
-            return None
-
-    def evaluate(self):
-        """Run evaluation workflow"""
-        try:
-            with mlflow.start_run(run_name="sepsis_evaluation"):
-                # Log parameters
-                mlflow.log_params({
-                    "model_type": "XGBoost",
-                    "n_estimators": getattr(self.model, 'n_estimators', 'unknown')
-                })
-                
-                # Make predictions
-                y_pred = self.model.predict(self.X_test)
-                y_proba = self.model.predict_proba(self.X_test)[:, 1]
-                
-                # Calculate metrics
-                metrics = {
-                    "accuracy": round(accuracy_score(self.y_test, y_pred), 3),
-                    "precision": round(precision_score(self.y_test, y_pred), 3),
-                    "recall": round(recall_score(self.y_test, y_pred), 3),
-                    "f1": round(f1_score(self.y_test, y_pred), 3),
-                    "roc_auc": round(roc_auc_score(self.y_test, y_proba), 3)
-                }
-                mlflow.log_metrics(metrics)
-                
-                # Confusion matrix
-                fig, ax = plt.subplots(figsize=(8, 6))
-                conf_matrix = confusion_matrix(self.y_test, y_pred)
-                conf_matrix_perc = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
-                
-                ax.matshow(conf_matrix_perc, cmap=plt.cm.Blues, alpha=0.3)
-                for i in range(conf_matrix.shape[0]):
-                    for j in range(conf_matrix.shape[1]):
-                        ax.text(x=j, y=i, 
-                               s=f"{conf_matrix[i, j]}\n({conf_matrix_perc[i, j]:.1%})", 
-                               va='center', ha='center')
-                plt.title("Confusion Matrix")
-                mlflow.log_figure(fig, "confusion_matrix.png")
-                plt.close()
-                
-                # SHAP plots
-                self._create_shap_plots()
-                
-                logger.info(f"Evaluation completed with metrics: {metrics}")
-                return metrics
-                
-        except Exception as e:
-            logger.error(f"Evaluation failed: {str(e)}", exc_info=True)
-            raise
-
-def evaluate_model(model_path: str, test_data_path: str):
-    evaluator = ModelEvaluator(model_path, test_data_path)
+# Test the ModelEvaluator class
+def test_model_evaluator_load_artifacts(sample_model, sample_test_data):
+    evaluator = ModelEvaluator(sample_model, sample_test_data)
     evaluator.load_artifacts()
-    return evaluator.evaluate()
+    
+    # Check that data was loaded correctly
+    assert evaluator.X_test is not None
+    assert evaluator.y_test is not None
+    assert evaluator.model is not None
+    assert len(evaluator.feature_names) == evaluator.X_test.shape[1]
+
+# Test the evaluate method with mocked MLflow
+@patch('mlflow.start_run')
+@patch('mlflow.log_params')
+@patch('mlflow.log_metrics')
+@patch('mlflow.log_figure')
+def test_model_evaluator_evaluate(mock_log_figure, mock_log_metrics, 
+                                 mock_log_params, mock_start_run,
+                                 sample_model, sample_test_data):
+    # Setup mock for mlflow.start_run context manager
+    mock_start_run.return_value.__enter__.return_value = MagicMock()
+    
+    evaluator = ModelEvaluator(sample_model, sample_test_data)
+    evaluator.load_artifacts()
+    
+    # Run the evaluation
+    metrics = evaluator.evaluate()
+    
+    # Verify that MLflow was called correctly
+    mock_start_run.assert_called_once()
+    mock_log_params.assert_called_once()
+    mock_log_metrics.assert_called_once()
+    assert mock_log_figure.call_count >= 1
+    
+    # Verify that metrics were returned
+    assert 'accuracy' in metrics
+    assert 'precision' in metrics
+    assert 'recall' in metrics
+    assert 'f1' in metrics
+    assert 'roc_auc' in metrics
+
+# Test the evaluate_model function
+@patch('src.evaluate.ModelEvaluator')
+def test_evaluate_model(mock_evaluator_class, sample_model, sample_test_data):
+    # Setup the mock
+    mock_evaluator = MagicMock()
+    mock_evaluator.evaluate.return_value = {
+        'accuracy': 0.85,
+        'precision': 0.8,
+        'recall': 0.75,
+        'f1': 0.77,
+        'roc_auc': 0.9
+    }
+    mock_evaluator_class.return_value = mock_evaluator
+    
+    # Call the function
+    metrics = evaluate_model(sample_model, sample_test_data)
+    
+    # Verify that ModelEvaluator was used correctly
+    mock_evaluator_class.assert_called_once_with(sample_model, sample_test_data)
+    mock_evaluator.load_artifacts.assert_called_once()
+    mock_evaluator.evaluate.assert_called_once()
+    
+    # Check the returned metrics
+    assert metrics == mock_evaluator.evaluate.return_value
+
+# Test the pipeline with mocked components
+@patch('src.pipeline.CSVDataIngestor')
+@patch('src.pipeline.ClinicalPreprocessor')
+@patch('src.pipeline.train_model')
+@patch('src.pipeline.evaluate_model')
+def test_run_pipeline(mock_evaluate, mock_train, mock_preprocessor, 
+                     mock_ingestor):
+    # Setup mocks
+    mock_ingestor.return_value.ingest_csv.return_value = {
+        'status': 'success',
+        'raw_data': 'data/raw/data.csv'
+    }
+    mock_preprocessor.return_value.preprocess.return_value = 'data/processed/data.npz'
+    mock_train.return_value = ('model/model.pkl', 'data/processed/test_data.npz')
+    mock_evaluate.return_value = {
+        'accuracy': 0.85,
+        'precision': 0.8,
+        'recall': 0.75,
+        'f1': 0.77,
+        'roc_auc': 0.9
+    }
+    
+    # Run the pipeline
+    result = run_pipeline(input_file='data/raw/test.csv')
+    
+    # Verify the expected calls
+    mock_ingestor.assert_called_once()
+    mock_ingestor.return_value.ingest_csv.assert_called_once_with('data/raw/test.csv')
+    mock_preprocessor.assert_called_once()
+    mock_preprocessor.return_value.preprocess.assert_called_once()
+    mock_train.assert_called_once()
+    mock_evaluate.assert_called_once()
+    
+    # Check the pipeline result
+    assert result['model_path'] == 'model/model.pkl'
+    assert result['test_data_path'] == 'data/processed/test_data.npz'
+    assert result['eval_results'] == mock_evaluate.return_value
+
+# Clean up test files
+def teardown_module(module):
+    # Clean up any temporary files created during tests
+    for file in os.listdir(tempfile.gettempdir()):
+        if file.endswith('.npz') or file.endswith('.pkl'):
+            try:
+                os.remove(os.path.join(tempfile.gettempdir(), file))
+            except:
+                pass
