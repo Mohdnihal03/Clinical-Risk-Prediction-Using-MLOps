@@ -37,7 +37,4 @@ RUN mkdir -p /app/data/raw \
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8501/_stcore/health || exit 1
 
-# Command to run both Streamlit and the pipeline
-# Since pipeline.py uses default parameters (monitor=True, retrain_if_needed=True),
-# we don't need additional arguments
-CMD ["sh", "-c", "streamlit run src/frontend/app.py & python pipeline.py"]
+CMD ["bash", "-c", "streamlit run src/frontend/app.py & python src/pipeline.py && wait"]

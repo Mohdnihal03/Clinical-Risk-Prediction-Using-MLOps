@@ -65,6 +65,21 @@ if "patient_history" not in st.session_state:
             "prediction", "probability"
         ])
 
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url(logo.png);
+                background-repeat: no-repeat;
+                background-size: 80%;
+                background-position: 20px 20px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 def load_model_and_preprocessor():
     """Load model and preprocessor with error handling"""
     try:
@@ -400,84 +415,88 @@ def main():
     pages[page]()
 
 def prediction_page():
-    st.title("Sepsis Risk Assessment")
-    if st.session_state.get("is_admin", True):  # You'd need to implement admin auth
-        if st.sidebar.button("Admin: Retrain Model"):
-            with st.spinner("Retraining model..."):
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        st.image("logo.png", width=400)
+    with col2:
+        st.title("Sepsis Risk Assessment")
+        if st.session_state.get("is_admin", True):  # You'd need to implement admin auth
+            if st.sidebar.button("Admin: Retrain Model"):
+                with st.spinner("Retraining model..."):
+                    try:
+                        from retrain import run_automated_retraining
+                        result = run_automated_retraining(force_retrain=True)
+                        
+                        if "error" in result:
+                            st.error(f"Retraining failed: {result['error']}")
+                        else:
+                            st.success("Model retrained successfully!")
+                            st.session_state.model, st.session_state.preprocessor = load_model_and_preprocessor()
+                    except Exception as e:
+                        st.error(f"Error during retraining: {str(e)}")
+        patient_data = create_patient_form()
+        
+        if patient_data is not None:
+            model, preprocessor = load_model_and_preprocessor()
+            if model and preprocessor:
                 try:
-                    from retrain import run_automated_retraining
-                    result = run_automated_retraining(force_retrain=True)
+                    # Preprocess and predict
+                    processed_data = preprocessor.transform(patient_data)
+                    probability = model.predict_proba(processed_data)[0][1]
+                    prediction = int(probability >= 0.5)
                     
-                    if "error" in result:
-                        st.error(f"Retraining failed: {result['error']}")
+                    # Display results
+                    risk_level = display_prediction_result(prediction, probability)
+                    save_patient_case(patient_data, prediction, probability)
+                    
+                    
+                    # Clinical Recommendations
+                    st.header("Clinical Guidance")
+                    if risk_level == "High Risk":
+                        st.markdown(f"""
+                        <div class="high-risk">
+                            <h4>🚨 Immediate Actions Required:</h4>
+                            <ul>
+                                <li>Obtain blood cultures immediately</li>
+                                <li>Administer broad-spectrum antibiotics within 1 hour</li>
+                                <li>Initiate fluid resuscitation</li>
+                                <li>Continuous vital sign monitoring</li>
+                            </ul>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif risk_level == "Medium Risk":
+                        st.markdown(f"""
+                        <div class="medium-risk">
+                            <h4>⚠️ Recommended Actions:</h4>
+                            <ul>
+                                <li>Repeat lactate measurement in 2 hours</li>
+                                <li>Consider blood cultures</li>
+                                <li>Reassess in 1 hour</li>
+                                <li>Monitor urine output</li>
+                            </ul>
+                        </div>
+                        """, unsafe_allow_html=True)
                     else:
-                        st.success("Model retrained successfully!")
-                        st.session_state.model, st.session_state.preprocessor = load_model_and_preprocessor()
+                        st.markdown(f"""
+                        <div class="low-risk">
+                            <h4>✅ Monitoring Recommendations:</h4>
+                            <ul>
+                                <li>Continue routine monitoring</li>
+                                <li>Reassess if condition changes</li>
+                                <li>Educate patient on warning signs</li>
+                            </ul>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
                 except Exception as e:
-                    st.error(f"Error during retraining: {str(e)}")
-    patient_data = create_patient_form()
-    
-    if patient_data is not None:
-        model, preprocessor = load_model_and_preprocessor()
-        if model and preprocessor:
-            try:
-                # Preprocess and predict
-                processed_data = preprocessor.transform(patient_data)
-                probability = model.predict_proba(processed_data)[0][1]
-                prediction = int(probability >= 0.5)
-                
-                # Display results
-                risk_level = display_prediction_result(prediction, probability)
-                save_patient_case(patient_data, prediction, probability)
-                
-                
-                # Clinical Recommendations
-                st.header("Clinical Guidance")
-                if risk_level == "High Risk":
-                    st.markdown(f"""
-                    <div class="high-risk">
-                        <h4>🚨 Immediate Actions Required:</h4>
-                        <ul>
-                            <li>Obtain blood cultures immediately</li>
-                            <li>Administer broad-spectrum antibiotics within 1 hour</li>
-                            <li>Initiate fluid resuscitation</li>
-                            <li>Continuous vital sign monitoring</li>
-                        </ul>
-                    </div>
-                    """, unsafe_allow_html=True)
-                elif risk_level == "Medium Risk":
-                    st.markdown(f"""
-                    <div class="medium-risk">
-                        <h4>⚠️ Recommended Actions:</h4>
-                        <ul>
-                            <li>Repeat lactate measurement in 2 hours</li>
-                            <li>Consider blood cultures</li>
-                            <li>Reassess in 1 hour</li>
-                            <li>Monitor urine output</li>
-                        </ul>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div class="low-risk">
-                        <h4>✅ Monitoring Recommendations:</h4>
-                        <ul>
-                            <li>Continue routine monitoring</li>
-                            <li>Reassess if condition changes</li>
-                            <li>Educate patient on warning signs</li>
-                        </ul>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-            except Exception as e:
-                st.error(f"Prediction error: {str(e)}")
+                    st.error(f"Prediction error: {str(e)}")
 
 from pathlib import Path  # Make sure this import is at the top
 
 def load_metrics_history():
     """Load metrics history with proper timestamp parsing"""
     try:
-        metrics_file = Path(r"C:\Users\nihall\Desktop\mlops-clinical-risk-prediction\monitoring\metrics_history.json")
+        metrics_file = Path(r"model\metrics_history.json")
         if not metrics_file.exists():
             st.warning(f"Metrics history file not found at {metrics_file}")
             return None
@@ -694,12 +713,18 @@ def performance_page():
                     st.write(analysis.get("analysis", ""))
                     
                     cols = st.columns(2)
-                    cols[0].metric("Retrain Recommended", 
-                                 "Yes" if analysis.get("retrain_recommended") else "No",
-                                 color="red" if analysis.get("retrain_recommended") else "green")
-                    cols[1].metric("Confidence Level", 
-                                 f"{analysis.get('confidence', 0)*100:.1f}%")
-                    
+                    with cols[0]:
+                        colored_metric(
+                            "Retrain Recommended",
+                            "Yes" if analysis.get("retrain_recommended") else "No",
+                            color=COLOR_SCHEME["high"] if analysis.get("retrain_recommended") else COLOR_SCHEME["low"]
+                        )
+                    with cols[1]:
+                        colored_metric(
+                            "Confidence Level", 
+                            f"{analysis.get('confidence', 0)*100:.1f}%",
+                            color=COLOR_SCHEME["medium"]
+                        )
                     st.subheader("Recommended Actions")
                     for imp in analysis.get("improvements", []):
                         st.write(f"✅ {imp}")

@@ -218,7 +218,82 @@ class TestDriftDetection:
         print(f"Drift Detected: {drift_detected}")
         print(f"Label Drift Detected: {drift_results.get('label_drift_detected', False)}")
         print(f"Label Distribution: {drift_results.get('label_distribution', {})}")
-    
+        
+    def test_metrics_degradation_with_drift(self, setup_temp_environment):
+        """Test performance degradation across all drift types"""
+        env = setup_temp_environment
+        
+        # Initialize retrainer with test configuration
+        retrainer = ModelRetrainer(
+            model_path=str(env['model_path']),
+            test_data_path=str(env['test_data_path']),
+            processed_data_path=str(env['processed_data_path']),
+            monitoring_config=env['config']
+        )
+        
+        # 1. Get baseline metrics with no drift
+        orig_data = np.load(env['test_data_path'])
+        X_orig = orig_data['X']
+        y_orig = orig_data['y']
+        feature_names = orig_data['feature_names']
+        
+        baseline_metrics = retrainer.evaluate_current_model()
+        print("\nBaseline metrics (no drift):")
+        print(f"F1 Score: {baseline_metrics.get('f1', 0):.4f}")
+        print(f"Accuracy: {baseline_metrics.get('accuracy', 0):.4f}")
+        
+        # 2. Test data drift metrics degradation
+        n_samples = X_orig.shape[0]
+        n_features = env['n_features']
+        
+        # Create data drift
+        X_data_drift = X_orig.copy()
+        X_data_drift[:, 0] = np.random.normal(3, 1, n_samples)  # Shift feature 0
+        np.savez(env['test_data_path'], X=X_data_drift, y=y_orig, feature_names=feature_names)
+        
+        # Check metrics after data drift
+        data_drift_results, data_drift_detected = retrainer.check_for_data_drift()
+        data_drift_metrics = retrainer.evaluate_current_model()
+        
+        print("\nData Drift Metrics:")
+        print(f"Drift detected: {data_drift_detected}")
+        print(f"F1 Score: {data_drift_metrics.get('f1', 0):.4f} (Change: {data_drift_metrics.get('f1', 0) - baseline_metrics.get('f1', 0):.4f})")
+        print(f"Accuracy: {data_drift_metrics.get('accuracy', 0):.4f} (Change: {data_drift_metrics.get('accuracy', 0) - baseline_metrics.get('accuracy', 0):.4f})")
+        
+        # 3. Test concept drift metrics degradation
+        # Create concept drift by changing relationship between features and target
+        y_concept_drift = (X_orig[:, 2] + X_orig[:, 3] > 0).astype(int)
+        np.savez(env['test_data_path'], X=X_orig, y=y_concept_drift, feature_names=feature_names)
+        
+        # Check metrics after concept drift
+        concept_drift_results, concept_drift_detected = retrainer.check_for_data_drift()
+        concept_drift_metrics = retrainer.evaluate_current_model()
+        
+        print("\nConcept Drift Metrics:")
+        print(f"Drift detected: {concept_drift_detected}")
+        print(f"F1 Score: {concept_drift_metrics.get('f1', 0):.4f} (Change: {concept_drift_metrics.get('f1', 0) - baseline_metrics.get('f1', 0):.4f})")
+        print(f"Accuracy: {concept_drift_metrics.get('accuracy', 0):.4f} (Change: {concept_drift_metrics.get('accuracy', 0) - baseline_metrics.get('accuracy', 0):.4f})")
+        
+        # 4. Test label drift metrics degradation
+        # Create label drift with imbalanced distribution
+        y_label_drift = np.random.binomial(1, 0.95, n_samples)  # 95% class 1
+        np.savez(env['test_data_path'], X=X_orig, y=y_label_drift, feature_names=feature_names)
+        
+        # Check metrics after label drift
+        label_drift_results, label_drift_detected = retrainer.check_for_data_drift()
+        label_drift_metrics = retrainer.evaluate_current_model()
+        
+        print("\nLabel Drift Metrics:")
+        print(f"Drift detected: {label_drift_detected}")
+        print(f"F1 Score: {label_drift_metrics.get('f1', 0):.4f} (Change: {label_drift_metrics.get('f1', 0) - baseline_metrics.get('f1', 0):.4f})")
+        print(f"Accuracy: {label_drift_metrics.get('accuracy', 0):.4f} (Change: {label_drift_metrics.get('accuracy', 0) - baseline_metrics.get('accuracy', 0):.4f})")
+        
+        # Add assertions to verify significant degradation
+        assert data_drift_metrics.get('f1', 1.0) < baseline_metrics.get('f1', 1.0), "F1 should degrade with data drift"
+        assert concept_drift_metrics.get('accuracy', 1.0) < baseline_metrics.get('accuracy', 1.0), "Accuracy should degrade with concept drift"
+        # Label drift might not always hurt metrics but should be detected
+        assert label_drift_detected, "Label drift should be detected"
+
     def test_retraining_with_drift(self, setup_temp_environment):
         """Test full retraining workflow in presence of drift"""
         env = setup_temp_environment
@@ -290,6 +365,7 @@ class TestDriftDetection:
             print("\nNew Model Metrics:")
             for metric, value in result["retraining_report"]["metrics"].items():
                 print(f"  {metric}: {value:.4f}")
+
 
 
 if __name__ == "__main__":

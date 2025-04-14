@@ -24,19 +24,20 @@ class DriftDetector:
     def __init__(self, config=None):
         # Default configuration with all required keys
         self.default_config = {
-            'reference_data_path': 'data/processed/reference_data.npz',
-            'model_path': 'model/sepsis_xgboost_model.joblib',
-            'drift_thresholds': {
-                'data_drift_threshold': 0.1,
-                'concept_drift_threshold': 0.05,
-                'label_drift_threshold': 0.1,
-                'evidently_drift_threshold': 0.2,
-                'significant_drift_ratio': 0.3
-            },
-            'monitor_dir': 'monitoring',
-            'history_file': 'monitoring/drift_history.json',
-            'visualizations_dir': 'monitoring/visualizations'
-        }
+        'reference_data_path': 'data/processed/reference_data.npz',
+        'model_path': 'model/sepsis_xgboost_model.joblib',
+        'drift_thresholds': {
+            'data_drift_threshold': 0.1,
+            'concept_drift_threshold': 0.05,
+            'label_drift_threshold': 0.1,
+            'evidently_drift_threshold': 0.2,
+            'significant_drift_ratio': 0.3,
+            'data_quality_threshold': 0.15  # Added this line
+        },
+        'monitor_dir': 'monitoring',
+        'history_file': 'monitoring/drift_history.json',
+        'visualizations_dir': 'monitoring/visualizations'
+    }
         
         # Merge configurations
         self.config = {**self.default_config, **(config or {})}
@@ -201,7 +202,8 @@ class DriftDetector:
                 'retraining_recommended': False,
                 'data_drift': {'detected': False, 'methods': {}},
                 'concept_drift': {'detected': False, 'metrics': {}},
-                'label_drift': {'detected': False, 'metrics': {}}
+                'label_drift': {'detected': False, 'metrics': {}},
+                'data_quality_drift': {'detected': False, 'metrics': {}}  # Added this line
             }
             
             # Handle case where no reference data exists
@@ -231,6 +233,7 @@ class DriftDetector:
             data_drift_results, data_drift_detected = self._detect_data_drift(X_new)
             concept_drift_results, concept_drift_detected = self._detect_concept_drift(X_new, y_new)
             label_drift_results, label_drift_detected = self._detect_label_drift(y_new)
+            quality_drift_results, quality_drift_detected = self._detect_data_quality_drift(X_new)  # Added this line
             
             # Update results
             results.update({
@@ -262,19 +265,28 @@ class DriftDetector:
                     'detected': label_drift_detected,
                     'metrics': label_drift_results,
                     'threshold': self.config['drift_thresholds']['label_drift_threshold']
+                },
+                'data_quality_drift': {  # Added this block
+                    'detected': quality_drift_detected,
+                    'metrics': quality_drift_results,
+                    'threshold': self.config['drift_thresholds'].get('data_quality_threshold', 0.15)
                 }
             })
             
-            # Determine overall results
+            # Determine overall results - updated to include quality drift
             results['drift_detected'] = any([
                 results['data_drift']['detected'],
                 results['concept_drift']['detected'],
-                results['label_drift']['detected']
+                results['label_drift']['detected'],
+                results['data_quality_drift']['detected']  # Added this line
             ])
             
+            # Updated retraining recommendation logic to include quality drift
             results['retraining_recommended'] = (
                 results['concept_drift']['detected'] or
-                (results['data_drift']['detected'] and results['label_drift']['detected'])
+                (results['data_drift']['detected'] and results['label_drift']['detected']) or
+                (results['data_quality_drift']['detected'] and 
+                results['data_quality_drift']['metrics'].get('dataset_metrics', {}).get('avg_missing_value_diff', 0) > 0.2)
             )
             
             self._save_drift_history(results)
@@ -331,6 +343,168 @@ class DriftDetector:
         except Exception as e:
             logger.error(f"Concept drift detection failed: {str(e)}", exc_info=True)
             return {}, False
+        
+
+    def _detect_data_quality_drift(self, X_new):
+        """
+        Detect data quality drift by comparing statistical properties and data quality metrics
+        between reference and new data.
+        """
+        if self.X_ref is None:
+            logger.warning("No reference data for data quality drift detection")
+            return {}, False
+            
+        try:
+            quality_metrics = {}
+            quality_drift_detected = False
+            
+            # Ensure we don't exceed feature dimensions
+            n_features = min(X_new.shape[1], len(self.feature_names), self.X_ref.shape[1])
+            
+            # 1. Check for missing values
+            ref_missing_ratio = np.isnan(self.X_ref).mean(axis=0)[:n_features]
+            new_missing_ratio = np.isnan(X_new).mean(axis=0)[:n_features]
+            missing_diff = np.abs(ref_missing_ratio - new_missing_ratio)
+            
+            # 2. Statistical properties (mean, std, min, max, skewness)
+            ref_mean = np.nanmean(self.X_ref, axis=0)[:n_features]
+            new_mean = np.nanmean(X_new, axis=0)[:n_features]
+            mean_diff = np.abs(ref_mean - new_mean)
+            
+            ref_std = np.nanstd(self.X_ref, axis=0)[:n_features]
+            new_std = np.nanstd(X_new, axis=0)[:n_features]
+            std_diff = np.abs(ref_std - new_std)
+            
+            # Calculate min and max differences
+            ref_min = np.nanmin(self.X_ref, axis=0)[:n_features]
+            new_min = np.nanmin(X_new, axis=0)[:n_features]
+            min_diff = np.abs(ref_min - new_min)
+            
+            ref_max = np.nanmax(self.X_ref, axis=0)[:n_features]
+            new_max = np.nanmax(X_new, axis=0)[:n_features]
+            max_diff = np.abs(ref_max - new_max)
+            
+            # 3. Calculate skewness differences
+            def safe_skewness(x):
+                if np.all(np.isnan(x)):
+                    return 0
+                x_no_nan = x[~np.isnan(x)]
+                if len(x_no_nan) <= 1:
+                    return 0
+                return ((x_no_nan - np.mean(x_no_nan)) ** 3).mean() / (np.std(x_no_nan) ** 3)
+            
+            ref_skew = np.array([safe_skewness(self.X_ref[:, i]) for i in range(n_features)])
+            new_skew = np.array([safe_skewness(X_new[:, i]) for i in range(n_features)])
+            skew_diff = np.abs(ref_skew - new_skew)
+            
+            # 4. Check for outliers using IQR method
+            def calc_outlier_ratio(data, axis=0):
+                q1 = np.nanpercentile(data, 25, axis=axis)
+                q3 = np.nanpercentile(data, 75, axis=axis)
+                iqr = q3 - q1
+                lower_bound = q1 - 1.5 * iqr
+                upper_bound = q3 + 1.5 * iqr
+                
+                if axis == 0:  # Per feature
+                    outliers = np.zeros(data.shape[1])
+                    for i in range(data.shape[1]):
+                        feature_data = data[:, i]
+                        valid_data = feature_data[~np.isnan(feature_data)]
+                        if len(valid_data) > 0:
+                            outliers[i] = np.sum((valid_data < lower_bound[i]) | 
+                                            (valid_data > upper_bound[i])) / len(valid_data)
+                    return outliers
+                return None
+            
+            ref_outlier_ratio = calc_outlier_ratio(self.X_ref)[:n_features]
+            new_outlier_ratio = calc_outlier_ratio(X_new)[:n_features]
+            outlier_diff = np.abs(ref_outlier_ratio - new_outlier_ratio)
+            
+            # 5. Calculate quality score per feature
+            quality_scores = {}
+            drifted_features = []
+            drift_threshold = self.config['drift_thresholds'].get('data_quality_threshold', 0.15)
+            
+            # Compile scores for each feature
+            for i in range(n_features):
+                feature_name = self.feature_names[i]
+                
+                # Composite quality score (weighted average of the different metrics)
+                quality_score = (
+                    0.3 * missing_diff[i] + 
+                    0.15 * (mean_diff[i] / max(ref_std[i], 1e-10)) +  # Normalize by std dev
+                    0.15 * (std_diff[i] / max(ref_std[i], 1e-10)) +
+                    0.1 * min_diff[i] / max(abs(ref_min[i]), 1e-10) +
+                    0.1 * max_diff[i] / max(abs(ref_max[i]), 1e-10) +
+                    0.1 * skew_diff[i] + 
+                    0.1 * outlier_diff[i]
+                )
+                
+                quality_scores[feature_name] = float(quality_score)  # Convert to Python float for JSON serialization
+                
+                if quality_score > drift_threshold:
+                    drifted_features.append(feature_name)
+            
+            # Determine if quality drift is detected based on proportion of drifted features
+            quality_drift_detected = len(drifted_features) > n_features * self.config['drift_thresholds'].get(
+                'significant_drift_ratio', 0.3)
+            
+            # Detailed metrics for reporting
+            quality_metrics = {
+                'quality_scores': quality_scores,
+                'drifted_features': drifted_features,
+                'feature_metrics': {
+                    f"Feature_{i}": {
+                        'missing_value_diff': float(missing_diff[i]),
+                        'mean_diff_normalized': float(mean_diff[i] / max(ref_std[i], 1e-10)),
+                        'std_diff_normalized': float(std_diff[i] / max(ref_std[i], 1e-10)),
+                        'skewness_diff': float(skew_diff[i]),
+                        'outlier_ratio_diff': float(outlier_diff[i])
+                    } for i in range(min(5, n_features))  # Limit to top 5 features for report size
+                },
+                'dataset_metrics': {
+                    'avg_missing_value_diff': float(np.mean(missing_diff)),
+                    'avg_std_diff': float(np.mean(std_diff / np.maximum(ref_std, 1e-10))),
+                    'avg_outlier_diff': float(np.mean(outlier_diff))
+                }
+            }
+            
+            # Add visualization for data quality drift
+            self._visualize_data_quality_drift(
+                quality_scores, 
+                drift_threshold, 
+                os.path.join(self.config['visualizations_dir'], 
+                        f"quality_drift_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            )
+            
+            return quality_metrics, quality_drift_detected
+            
+        except Exception as e:
+            logger.error(f"Data quality drift detection failed: {str(e)}", exc_info=True)
+            return {}, False
+
+    def _visualize_data_quality_drift(self, quality_scores, threshold, filepath):
+        """Create visualization for data quality drift"""
+        try:
+            plt.figure(figsize=(12, 6))
+            features = list(quality_scores.keys())
+            scores = list(quality_scores.values())
+            
+            # Sort by score for better visualization
+            sorted_indices = np.argsort(scores)[::-1]
+            features = [features[i] for i in sorted_indices[:15]]  # Top 15 features
+            scores = [scores[i] for i in sorted_indices[:15]]
+            
+            plt.barh(features, scores)
+            plt.axvline(x=threshold, color='red', linestyle='--', label='Drift Threshold')
+            plt.xlabel('Data Quality Drift Score')
+            plt.title('Data Quality Drift Analysis')
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(filepath)
+            plt.close()
+        except Exception as e:
+            logger.error(f"Failed to create data quality drift visualization: {str(e)}")
 
     def _detect_label_drift(self, y_new):
         """Detect label distribution drift"""

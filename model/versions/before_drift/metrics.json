@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-04-09T18:49:48.782461",
+  "timestamp": "2025-04-14T11:41:19.645249",
   "metrics": {
-    "accuracy": 0.964,
-    "precision": 0.95,
-    "recall": 0.934,
-    "f1": 0.942,
-    "roc_auc": 0.99
+    "accuracy": 0.985,
+    "precision": 1.0,
+    "recall": 0.984,
+    "f1": 0.992,
+    "roc_auc": 1.0
   },
   "model_path": "model\\sepsis_xgboost_model.joblib"
 }

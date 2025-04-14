@@ -1,0 +1,77 @@
+[
+  {
+    "timestamp": "2025-04-10 14:21:23",
+    "data_file": "test_data.npz",
+    "drift_detected": false,
+    "retraining_recommended": "False",
+    "data_drift": {
+      "detected": false,
+      "methods": {
+        "ks_test": {
+          "detected": false,
+          "top_features": {
+            "None": 0.0
+          },
+          "threshold": 0.1
+        },
+        "evidently": {
+          "detected": false,
+          "metrics": {
+            "n_features": 1,
+            "n_drifted": 0,
+            "share_drifted": 0.0,
+            "dataset_drift": false
+          },
+          "threshold": 0.2
+        }
+      }
+    },
+    "model_usage_drift": {
+      "detected": false,
+      "metrics": {
+        "status": "Insufficient data"
+      },
+      "threshold": 0.15
+    },
+    "data_quality_drift": {
+      "detected": false,
+      "metrics": {
+        "status": "Insufficient data quality history"
+      },
+      "threshold": 0.2
+    },
+    "attack_drift": {
+      "detected": "False",
+      "metrics": {
+        "anomaly_scores": {
+          "mean": 0.3757338539869681,
+          "max": 0.4441623855250131,
+          "percentile_95": 0.4157400656837106
+        },
+        "mahalanobis_distances": {
+          "mean": 9.759005101384103,
+          "max": 13.892628556365766,
+          "percentile_95": 13.175402400278916
+        },
+        "anomaly_detected": "False",
+        "mahalanobis_detected": "False"
+      },
+      "threshold": 0.99
+    },
+    "label_drift": {
+      "detected": "False",
+      "metrics": {
+        "reference_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "new_distribution": [
+          0.6871794871794872,
+          0.3128205128205128
+        ],
+        "distribution_diff": 0.0
+      },
+      "threshold": 0.1
+    }
+  }
+]
